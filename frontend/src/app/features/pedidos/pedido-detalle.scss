@@ -1,0 +1,115 @@
+@use '../../styles/tokens' as t;
+@use '../../styles/estados';
+
+.migas {
+  display: flex;
+  gap: t.$esp-2;
+  margin-bottom: t.$esp-4;
+  font-size: t.$texto-sm;
+  color: t.$carbon-500;
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: t.$esp-3;
+  margin-bottom: t.$esp-4;
+
+  h1 {
+    margin-bottom: t.$esp-1;
+    font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+  }
+}
+
+.cabecera__fecha {
+  margin: 0;
+  color: t.$carbon-500;
+  font-size: t.$texto-sm;
+}
+
+.aviso__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: t.$esp-2;
+  margin-top: t.$esp-3;
+}
+
+.detalle {
+  display: grid;
+  gap: t.$esp-4;
+  align-items: start;
+
+  @include t.escritorio {
+    grid-template-columns: 1fr 20rem;
+  }
+}
+
+.bloque {
+  padding: t.$esp-5;
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: t.$esp-3;
+  padding: t.$esp-3 0;
+  border-bottom: 1px solid t.$carbon-100;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.item__nombre {
+  display: block;
+  font-weight: 600;
+}
+
+.item__detalle {
+  font-size: t.$texto-sm;
+  color: t.$carbon-500;
+}
+
+.fila {
+  display: flex;
+  justify-content: space-between;
+  padding: t.$esp-1 0;
+  font-size: t.$texto-sm;
+  color: t.$carbon-700;
+}
+
+.fila--total {
+  margin-top: t.$esp-2;
+  padding-top: t.$esp-3;
+  border-top: 1px solid t.$carbon-100;
+  font-size: t.$texto-lg;
+  color: t.$carbon-900;
+}
+
+.entrega {
+  margin: t.$esp-5 0 t.$esp-2;
+  font-size: t.$texto-base;
+}
+
+.entrega__texto {
+  margin: 0;
+  color: t.$carbon-700;
+}
+
+.entrega__notas {
+  margin: t.$esp-2 0 0;
+  font-size: t.$texto-sm;
+  color: t.$carbon-500;
+}

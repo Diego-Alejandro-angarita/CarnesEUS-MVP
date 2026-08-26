@@ -1,0 +1,48 @@
+<!--
+  Pantalla de bienvenida del esqueleto.
+
+  Existe para confirmar que el entorno quedo bien montado. En cuanto haya una
+  ruta real, este bloque se borra y queda solo el <router-outlet />.
+-->
+<main class="bienvenida">
+  <h1>Entorno listo</h1>
+  <p>
+    Angular, Django y PostgreSQL estan corriendo. Este proyecto no tiene ninguna
+    historia de usuario implementada: es el punto de partida del equipo.
+  </p>
+
+  @switch (conexion()) {
+    @case ('comprobando') {
+      <p class="estado estado--neutro">Comprobando la conexion con el backend...</p>
+    }
+    @case ('ok') {
+      <p class="estado estado--ok">Backend y base de datos responden correctamente.</p>
+    }
+    @case ('error') {
+      <p class="estado estado--error">
+        No hay respuesta de <code>/api/salud/</code>. Revisa que el servicio
+        <code>backend</code> este arriba y que el proxy apunte a el.
+      </p>
+    }
+  }
+
+  <h2>Primeros pasos</h2>
+  <ol>
+    <li>
+      Crea la app de Django de tu historia:
+      <code>python manage.py startapp mi_app apps/mi_app</code> y registrala en
+      <code>LOCAL_APPS</code>.
+    </li>
+    <li>Expon sus rutas en <code>config/urls.py</code>.</li>
+    <li>
+      Crea la pantalla en <code>src/app/features/</code> y agregala a
+      <code>app.routes.ts</code>.
+    </li>
+  </ol>
+
+  <p>
+    Documentacion de la API: <a href="/api/docs/">/api/docs/</a>
+  </p>
+</main>
+
+<router-outlet />

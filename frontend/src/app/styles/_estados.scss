@@ -1,0 +1,43 @@
+@use 'tokens' as t;
+
+// Distintivo de estado del pedido, compartido por "Mis pedidos", el detalle y
+// el panel del personal. Un solo lugar define que color tiene cada estado.
+.estado {
+  display: inline-block;
+  padding: t.$esp-1 t.$esp-3;
+  border-radius: 999px;
+  font-size: t.$texto-xs;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  background: t.$carbon-100;
+  color: t.$carbon-700;
+  white-space: nowrap;
+
+  &[data-estado='PENDIENTE_PAGO'] {
+    background: t.$ambar-100;
+    color: t.$ambar-600;
+  }
+
+  &[data-estado='PAGADO'],
+  &[data-estado='EN_PREPARACION'] {
+    background: t.$rojo-100;
+    color: t.$rojo-700;
+  }
+
+  &[data-estado='ENVIADO'] {
+    background: #e4edfb;
+    color: #1f4e9c;
+  }
+
+  &[data-estado='ENTREGADO'] {
+    background: t.$verde-100;
+    color: t.$verde-600;
+  }
+
+  &[data-estado='CANCELADO'] {
+    background: t.$carbon-100;
+    color: t.$carbon-500;
+    text-decoration: line-through;
+  }
+}

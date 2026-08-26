@@ -1,0 +1,141 @@
+@use '../../styles/tokens' as t;
+@use '../../styles/estados';
+
+.pestanas {
+  display: flex;
+  gap: t.$esp-1;
+  margin-bottom: t.$esp-4;
+  border-bottom: 2px solid t.$carbon-100;
+}
+
+.pestana {
+  padding: t.$esp-3 t.$esp-4;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: t.$carbon-500;
+  cursor: pointer;
+
+  &:hover {
+    color: t.$carbon-900;
+  }
+}
+
+.pestana--activa {
+  color: t.$rojo-700;
+  border-bottom-color: t.$rojo-700;
+}
+
+.barra-acciones {
+  margin-bottom: t.$esp-4;
+}
+
+// La tabla no se rompe en movil: se desplaza dentro de su contenedor.
+.tabla-envoltura {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: t.$texto-sm;
+
+  th,
+  td {
+    padding: t.$esp-3;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid t.$carbon-100;
+    white-space: nowrap;
+  }
+
+  th {
+    font-size: t.$texto-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: t.$carbon-500;
+    background: t.$crema;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.celda__meta {
+  display: block;
+  margin-top: t.$esp-1;
+  font-size: t.$texto-xs;
+  color: t.$carbon-500;
+}
+
+.celda__direccion {
+  white-space: normal;
+  max-width: 16rem;
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.selector {
+  padding: t.$esp-2;
+  min-height: 40px;
+  font: inherit;
+  font-size: t.$texto-sm;
+  border: 1px solid t.$carbon-300;
+  border-radius: t.$radio-sm;
+  background: t.$blanco;
+}
+
+.interruptor {
+  min-width: 3.2rem;
+  padding: t.$esp-2 t.$esp-3;
+  border: 1px solid t.$carbon-300;
+  border-radius: 999px;
+  background: t.$carbon-100;
+  color: t.$carbon-500;
+  font: inherit;
+  font-size: t.$texto-xs;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.interruptor--activo {
+  background: t.$verde-100;
+  border-color: t.$verde-600;
+  color: t.$verde-600;
+}
+
+.formulario {
+  padding: t.$esp-5;
+  margin-bottom: t.$esp-4;
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.formulario__rejilla {
+  display: grid;
+  gap: 0 t.$esp-4;
+
+  @include t.tablet {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.formulario__ancho {
+  @include t.tablet {
+    grid-column: 1 / -1;
+  }
+}

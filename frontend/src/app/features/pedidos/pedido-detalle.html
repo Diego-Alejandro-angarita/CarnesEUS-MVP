@@ -1,0 +1,85 @@
+@if (cargando()) {
+  <p class="cargando">Cargando...</p>
+} @else if (!pedido()) {
+  <p class="vacio">{{ error() || 'No encontramos este pedido.' }}</p>
+  <p><a routerLink="/pedidos">Volver a mis pedidos</a></p>
+} @else {
+  <nav class="migas" aria-label="Ruta">
+    <a routerLink="/pedidos">Mis pedidos</a>
+    <span aria-hidden="true">/</span>
+    <span>{{ pedido()!.numero }}</span>
+  </nav>
+
+  <header class="cabecera">
+    <div>
+      <h1>{{ pedido()!.numero }}</h1>
+      <p class="cabecera__fecha">{{ pedido()!.creado_en | date: 'd MMMM y, h:mm a' }}</p>
+    </div>
+    <span class="estado" [attr.data-estado]="pedido()!.estado">{{ pedido()!.estado_display }}</span>
+  </header>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (pedido()!.estado === 'PENDIENTE_PAGO') {
+    <div class="aviso">
+      <p>
+        Este pedido todavia no esta pagado.
+        @if (pedido()!.estado_pago === 'RECHAZADO') {
+          El ultimo intento fue rechazado; puedes intentarlo de nuevo.
+        }
+      </p>
+      <div class="aviso__acciones">
+        <a class="boton" routerLink="/checkout">Pagar ahora</a>
+        <button
+          type="button"
+          class="boton boton--secundario"
+          [disabled]="reintentando()"
+          (click)="verificarPago()"
+        >
+          {{ reintentando() ? 'Consultando...' : 'Ya pague, verificar' }}
+        </button>
+      </div>
+    </div>
+  } @else if (pedido()!.estado === 'PAGADO' || pedido()!.estado === 'EN_PREPARACION') {
+    <p class="exito">Pago confirmado. Ya estamos preparando tu pedido.</p>
+  }
+
+  <div class="detalle">
+    <section class="tarjeta bloque">
+      <h2>Productos</h2>
+      <ul class="items">
+        @for (item of pedido()!.items; track item.id) {
+          <li class="item">
+            <div>
+              <span class="item__nombre">{{ item.nombre_producto }}</span>
+              <span class="item__detalle">
+                {{ item.cantidad }} × {{ item.precio_unitario | precioCop }}
+              </span>
+            </div>
+            <strong>{{ item.subtotal | precioCop }}</strong>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <aside class="tarjeta bloque">
+      <h2>Resumen</h2>
+
+      <div class="fila"><span>Subtotal</span><span>{{ pedido()!.subtotal | precioCop }}</span></div>
+      @if (pedido()!.descuento !== '0.00') {
+        <div class="fila"><span>Descuento</span><span>−{{ pedido()!.descuento | precioCop }}</span></div>
+      }
+      <div class="fila"><span>Domicilio</span><span>{{ pedido()!.costo_domicilio | precioCop }}</span></div>
+      <div class="fila fila--total"><span>Total</span><strong>{{ pedido()!.total | precioCop }}</strong></div>
+
+      <h3 class="entrega">Entrega</h3>
+      <p class="entrega__texto">{{ pedido()!.direccion_texto }}</p>
+
+      @if (pedido()!.notas) {
+        <p class="entrega__notas">Notas: {{ pedido()!.notas }}</p>
+      }
+    </aside>
+  </div>
+}

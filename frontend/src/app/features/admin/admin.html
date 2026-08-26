@@ -1,0 +1,194 @@
+<h1>Panel de la carniceria</h1>
+
+<div class="pestanas" role="tablist">
+  <button
+    type="button"
+    role="tab"
+    class="pestana"
+    [class.pestana--activa]="pestana() === 'pedidos'"
+    [attr.aria-selected]="pestana() === 'pedidos'"
+    (click)="pestana.set('pedidos')"
+  >
+    Pedidos ({{ pedidos().length }})
+  </button>
+  <button
+    type="button"
+    role="tab"
+    class="pestana"
+    [class.pestana--activa]="pestana() === 'productos'"
+    [attr.aria-selected]="pestana() === 'productos'"
+    (click)="pestana.set('productos')"
+  >
+    Productos ({{ productos().length }})
+  </button>
+</div>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (cargando()) {
+  <p class="cargando">Cargando el panel...</p>
+} @else if (pestana() === 'pedidos') {
+  @if (pedidos().length === 0) {
+    <p class="vacio">Todavia no hay pedidos.</p>
+  } @else {
+    <div class="tabla-envoltura tarjeta">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Entrega</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Cambiar a</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (pedido of pedidos(); track pedido.id) {
+            <tr>
+              <td>
+                <span class="mono">{{ pedido.numero }}</span>
+                <span class="celda__meta">{{ pedido.creado_en | date: 'd MMM, h:mm a' }}</span>
+              </td>
+              <td>
+                {{ pedido.cliente_nombre }}
+                <span class="celda__meta">{{ pedido.cliente_email }}</span>
+              </td>
+              <td class="celda__direccion">{{ pedido.direccion_texto }}</td>
+              <td class="mono">{{ pedido.total | precioCop }}</td>
+              <td>
+                <span class="estado" [attr.data-estado]="pedido.estado">
+                  {{ pedido.estado_display }}
+                </span>
+              </td>
+              <td>
+                @if (pedido.estado === 'PENDIENTE_PAGO') {
+                  <span class="celda__meta">Esperando el pago</span>
+                } @else {
+                  <select
+                    class="selector"
+                    [disabled]="ocupado() === 'pedido-' + pedido.id"
+                    [value]="pedido.estado"
+                    (change)="cambiarEstado(pedido, $any($event.target).value)"
+                  >
+                    @for (estado of estadosGestionables; track estado) {
+                      <option [value]="estado">{{ estado }}</option>
+                    }
+                  </select>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+} @else {
+  <div class="barra-acciones">
+    <button type="button" class="boton" (click)="mostrarFormulario = !mostrarFormulario">
+      {{ mostrarFormulario ? 'Cancelar' : 'Agregar producto' }}
+    </button>
+  </div>
+
+  @if (mostrarFormulario) {
+    <form class="formulario tarjeta" (ngSubmit)="crearProducto()" #form="ngForm">
+      <h2>Nuevo producto</h2>
+
+      <div class="formulario__rejilla">
+        <div class="campo">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" required [(ngModel)]="nuevo.nombre" />
+        </div>
+
+        <div class="campo">
+          <label for="categoria">Categoria</label>
+          <select id="categoria" name="categoria" required [(ngModel)]="nuevo.categoria">
+            <option [ngValue]="null" disabled>Elige una</option>
+            @for (categoria of categorias(); track categoria.id) {
+              <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="precio">Precio (COP)</label>
+          <input id="precio" name="precio" type="number" min="1" required [(ngModel)]="nuevo.precio" />
+        </div>
+
+        <div class="campo">
+          <label for="unidad">Unidad</label>
+          <select id="unidad" name="unidad" [(ngModel)]="nuevo.unidad_medida">
+            <option value="KG">Kilogramo</option>
+            <option value="UNIDAD">Unidad</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="stock">Stock</label>
+          <input id="stock" name="stock" type="number" min="0" step="0.5" required [(ngModel)]="nuevo.stock" />
+        </div>
+
+        <div class="campo formulario__ancho">
+          <label for="descripcion">Descripcion</label>
+          <input id="descripcion" name="descripcion" [(ngModel)]="nuevo.descripcion" />
+        </div>
+      </div>
+
+      <button
+        class="boton"
+        type="submit"
+        [disabled]="form.invalid || ocupado() === 'nuevo-producto'"
+      >
+        Guardar producto
+      </button>
+    </form>
+  }
+
+  <div class="tabla-envoltura tarjeta">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoria</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Disponible</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (producto of productos(); track producto.id) {
+          <tr>
+            <td>{{ producto.nombre }}</td>
+            <td>{{ producto.categoria_nombre }}</td>
+            <td class="mono">{{ producto.precio | precioCop }}</td>
+            <td class="mono">{{ producto.stock }} {{ producto.unidad_medida }}</td>
+            <td>
+              <button
+                type="button"
+                class="interruptor"
+                [class.interruptor--activo]="producto.disponible"
+                [disabled]="ocupado() === 'producto-' + producto.id"
+                (click)="cambiarDisponibilidad(producto)"
+              >
+                {{ producto.disponible ? 'Si' : 'No' }}
+              </button>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="boton boton--peligro"
+                [disabled]="ocupado() === 'producto-' + producto.id"
+                (click)="eliminarProducto(producto)"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

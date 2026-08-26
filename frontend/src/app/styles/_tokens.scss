@@ -1,0 +1,67 @@
+// Tokens de diseno de CarnesEUS.
+// Un solo lugar para colores, tipografia y espaciado: cambiar la identidad
+// visual no deberia obligar a tocar cada componente.
+
+// --- Color ---------------------------------------------------------------
+// Paleta de carniceria: rojo profundo, crema y carbon.
+$rojo-900: #6b1418;
+$rojo-700: #9e1b1f;
+$rojo-500: #c62b2b;
+$rojo-100: #fbeaea;
+
+$carbon-900: #1c1a19;
+$carbon-700: #3d3835;
+$carbon-500: #6d6560;
+$carbon-300: #b9b2ac;
+$carbon-100: #e8e3de;
+
+$crema: #faf7f4;
+$blanco: #ffffff;
+
+$verde-600: #2f7d4f;
+$verde-100: #e6f4ec;
+$ambar-600: #a86617;
+$ambar-100: #fdf1e0;
+
+// --- Tipografia ----------------------------------------------------------
+$fuente: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+  Arial, sans-serif;
+
+$texto-xs: 0.75rem;
+$texto-sm: 0.875rem;
+$texto-base: 1rem;
+$texto-lg: 1.125rem;
+$texto-xl: 1.375rem;
+$texto-2xl: 1.75rem;
+
+// --- Espaciado y formas --------------------------------------------------
+$esp-1: 0.25rem;
+$esp-2: 0.5rem;
+$esp-3: 0.75rem;
+$esp-4: 1rem;
+$esp-5: 1.5rem;
+$esp-6: 2rem;
+$esp-8: 3rem;
+
+$radio-sm: 6px;
+$radio: 10px;
+$radio-lg: 16px;
+
+$sombra: 0 1px 2px rgba(28, 26, 25, 0.06), 0 2px 8px rgba(28, 26, 25, 0.06);
+$sombra-alta: 0 4px 16px rgba(28, 26, 25, 0.12);
+
+// --- Puntos de quiebre (mobile-first: se disena para movil y se amplia) ---
+$bp-tablet: 640px;
+$bp-escritorio: 1024px;
+
+@mixin tablet {
+  @media (min-width: $bp-tablet) {
+    @content;
+  }
+}
+
+@mixin escritorio {
+  @media (min-width: $bp-escritorio) {
+    @content;
+  }
+}

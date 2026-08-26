@@ -1,0 +1,70 @@
+# Segundo entorno: el mismo stack que el proyecto principal, pero vacio.
+#
+# El nombre de proyecto, los contenedores, el volumen y los puertos son
+# distintos a los de ../docker-compose.yml a proposito: los dos entornos
+# pueden estar levantados al mismo tiempo sin pisarse.
+name: starter
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: starter-db
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      # 5434 en el host: el 5432 suele estar tomado por un PostgreSQL local y
+      # el 5433 lo usa el otro entorno. Dentro de compose sigue siendo 5432.
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # El backend espera a que Postgres acepte conexiones de verdad, no solo
+      # a que el contenedor exista.
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: starter-backend
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    ports:
+      # 8002 en el host; el 8000 y el 8001 ya estan ocupados. Dentro del
+      # contenedor sigue siendo 8000.
+      - "8002:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Dentro de la red de compose el host de la base es "db", no localhost.
+      DATABASE_URL: postgres://app:app@db:5432/app
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: starter-frontend
+    volumes:
+      - ./frontend:/app
+      # Anonimo: conserva los node_modules de la imagen y evita que el
+      # directorio del host los tape.
+      - /app/node_modules
+    environment:
+      # Dentro de compose, "localhost" seria el propio contenedor del frontend.
+      # El proxy tiene que apuntar al servicio backend por su nombre de red.
+      BACKEND_URL: http://backend:8000
+    ports:
+      - "4201:4200"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -1,0 +1,101 @@
+<section class="portada">
+  <h1>Carne fresca, del mostrador a tu casa</h1>
+  <p>Cortes seleccionados con entrega a domicilio en el Valle de Aburra.</p>
+</section>
+
+<section class="filtros tarjeta" aria-label="Buscar y filtrar productos">
+  <div class="campo filtros__busqueda">
+    <label for="busqueda">Buscar</label>
+    <input
+      id="busqueda"
+      type="search"
+      placeholder="Lomo, costilla, chorizo..."
+      [(ngModel)]="busqueda"
+      (keyup.enter)="buscar()"
+    />
+  </div>
+
+  <div class="campo">
+    <label for="categoria">Categoria</label>
+    <select id="categoria" [(ngModel)]="categoriaSlug" (change)="buscar()">
+      <option value="">Todas</option>
+      @for (categoria of categorias(); track categoria.id) {
+        <option [value]="categoria.slug">{{ categoria.nombre }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="campo">
+    <label for="orden">Ordenar por</label>
+    <select id="orden" [(ngModel)]="orden" (change)="buscar()">
+      <option value="nombre">Nombre</option>
+      <option value="precio">Precio: menor primero</option>
+      <option value="-precio">Precio: mayor primero</option>
+    </select>
+  </div>
+
+  <div class="filtros__acciones">
+    <button type="button" class="boton" (click)="buscar()">Buscar</button>
+    <button type="button" class="boton boton--secundario" (click)="limpiarFiltros()">Limpiar</button>
+  </div>
+</section>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (cargando()) {
+  <p class="cargando">Cargando el catalogo...</p>
+} @else if (productos().length === 0) {
+  <p class="vacio">No encontramos productos con esos filtros.</p>
+} @else {
+  <ul class="rejilla">
+    @for (producto of productos(); track producto.id) {
+      <li class="producto tarjeta">
+        <a class="producto__enlace" [routerLink]="['/producto', producto.slug]">
+          <div class="producto__imagen">
+            @if (producto.imagen) {
+              <img [src]="producto.imagen" [alt]="producto.nombre" loading="lazy" />
+            } @else {
+              <span class="producto__marcador" aria-hidden="true">🥩</span>
+            }
+          </div>
+
+          <div class="producto__cuerpo">
+            <span class="producto__categoria">{{ producto.categoria_nombre }}</span>
+            <h2 class="producto__nombre">{{ producto.nombre }}</h2>
+            <p class="producto__precio">
+              {{ producto.precio | precioCop }}
+              <span class="producto__unidad">/ {{ producto.unidad_medida_display }}</span>
+            </p>
+          </div>
+        </a>
+
+        <div class="producto__pie">
+          @if (!producto.hay_existencias) {
+            <span class="producto__agotado">Agotado</span>
+          } @else if (auth.estaAutenticado()) {
+            <button
+              type="button"
+              class="boton producto__boton"
+              [disabled]="agregando() === producto.id"
+              (click)="agregar(producto)"
+            >
+              @if (agregado() === producto.id) {
+                Agregado ✓
+              } @else if (agregando() === producto.id) {
+                Agregando...
+              } @else {
+                Agregar al carrito
+              }
+            </button>
+          } @else {
+            <a class="boton boton--secundario producto__boton" routerLink="/login">
+              Entra para comprar
+            </a>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+}

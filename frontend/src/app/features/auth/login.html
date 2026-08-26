@@ -1,0 +1,48 @@
+<div class="auth">
+  <div class="auth__tarjeta tarjeta">
+    <h1>Iniciar sesion</h1>
+    <p class="auth__intro">Entra para hacer tu pedido de carne fresca.</p>
+
+    @if (sesionExpirada()) {
+      <p class="aviso">Tu sesion expiro. Vuelve a entrar para continuar.</p>
+    }
+
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+
+    <form (ngSubmit)="enviar()" #formulario="ngForm">
+      <div class="campo">
+        <label for="email">Correo electronico</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          [(ngModel)]="email"
+        />
+      </div>
+
+      <div class="campo">
+        <label for="password">Contrasena</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+          [(ngModel)]="password"
+        />
+      </div>
+
+      <button class="boton auth__boton" type="submit" [disabled]="enviando() || formulario.invalid">
+        {{ enviando() ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <p class="auth__pie">
+      ¿No tienes cuenta? <a routerLink="/registro">Crea una aqui</a>
+    </p>
+  </div>
+</div>

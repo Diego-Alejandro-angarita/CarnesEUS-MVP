@@ -1,0 +1,112 @@
+@use '../../styles/tokens' as t;
+
+.carrito {
+  display: grid;
+  gap: t.$esp-5;
+  align-items: start;
+
+  @include t.escritorio {
+    grid-template-columns: 1fr 20rem;
+  }
+}
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: t.$esp-3;
+}
+
+.linea {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: t.$esp-3;
+  padding: t.$esp-4;
+  align-items: center;
+
+  @include t.tablet {
+    grid-template-columns: 1fr auto auto auto;
+  }
+}
+
+.linea__nombre {
+  font-weight: 600;
+  color: t.$carbon-900;
+}
+
+.linea__precio {
+  margin: t.$esp-1 0 0;
+  font-size: t.$texto-sm;
+  color: t.$carbon-500;
+}
+
+.linea__cantidad {
+  display: flex;
+  align-items: center;
+  gap: t.$esp-2;
+}
+
+.paso {
+  width: 44px;
+  height: 44px;
+  border: 1px solid t.$carbon-300;
+  border-radius: t.$radio-sm;
+  background: t.$blanco;
+  font-size: t.$texto-lg;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: t.$carbon-100;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.paso__valor {
+  min-width: 4rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.linea__subtotal {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.linea__quitar {
+  justify-self: end;
+}
+
+.resumen {
+  padding: t.$esp-5;
+  position: sticky;
+  top: 6rem;
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.resumen__fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: t.$esp-3;
+  border-bottom: 1px solid t.$carbon-100;
+  font-size: t.$texto-lg;
+}
+
+.resumen__nota {
+  margin: t.$esp-3 0 t.$esp-4;
+  font-size: t.$texto-sm;
+  color: t.$carbon-500;
+}
+
+.resumen__boton {
+  width: 100%;
+  margin-bottom: t.$esp-2;
+}

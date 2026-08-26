@@ -1,0 +1,193 @@
+@use 'app/styles/tokens' as t;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  // 16px base; el usuario puede subirlo desde el navegador y todo escala.
+  font-size: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: t.$fuente;
+  font-size: t.$texto-base;
+  line-height: 1.55;
+  color: t.$carbon-900;
+  background: t.$crema;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 t.$esp-3;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: t.$texto-2xl;
+}
+h2 {
+  font-size: t.$texto-xl;
+}
+h3 {
+  font-size: t.$texto-lg;
+}
+
+a {
+  color: t.$rojo-700;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+// Foco siempre visible: la wiki pide buen contraste y navegabilidad.
+:focus-visible {
+  outline: 3px solid t.$rojo-500;
+  outline-offset: 2px;
+}
+
+// --- Utilidades compartidas ---------------------------------------------
+.contenedor {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 t.$esp-4;
+}
+
+.tarjeta {
+  background: t.$blanco;
+  border: 1px solid t.$carbon-100;
+  border-radius: t.$radio;
+  box-shadow: t.$sombra;
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: t.$esp-2;
+  padding: t.$esp-3 t.$esp-5;
+  border: 1px solid transparent;
+  border-radius: t.$radio-sm;
+  background: t.$rojo-700;
+  color: t.$blanco;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  // 44px de alto minimo: objetivo tactil comodo en movil.
+  min-height: 44px;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: t.$rojo-900;
+  }
+  &:disabled {
+    background: t.$carbon-300;
+    cursor: not-allowed;
+  }
+}
+
+.boton--secundario {
+  background: t.$blanco;
+  color: t.$carbon-900;
+  border-color: t.$carbon-300;
+
+  &:hover:not(:disabled) {
+    background: t.$carbon-100;
+  }
+}
+
+.boton--peligro {
+  background: transparent;
+  color: t.$rojo-700;
+  border-color: t.$carbon-100;
+
+  &:hover:not(:disabled) {
+    background: t.$rojo-100;
+  }
+}
+
+.campo {
+  display: block;
+  margin-bottom: t.$esp-4;
+
+  label {
+    display: block;
+    margin-bottom: t.$esp-1;
+    font-size: t.$texto-sm;
+    font-weight: 600;
+    color: t.$carbon-700;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: t.$esp-3;
+    min-height: 44px;
+    font: inherit;
+    color: t.$carbon-900;
+    background: t.$blanco;
+    border: 1px solid t.$carbon-300;
+    border-radius: t.$radio-sm;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: t.$rojo-500;
+  }
+}
+
+.error {
+  padding: t.$esp-3;
+  margin-bottom: t.$esp-4;
+  background: t.$rojo-100;
+  border: 1px solid t.$rojo-500;
+  border-radius: t.$radio-sm;
+  color: t.$rojo-900;
+  font-size: t.$texto-sm;
+}
+
+.aviso {
+  padding: t.$esp-3;
+  margin-bottom: t.$esp-4;
+  background: t.$ambar-100;
+  border: 1px solid t.$ambar-600;
+  border-radius: t.$radio-sm;
+  color: t.$ambar-600;
+  font-size: t.$texto-sm;
+}
+
+.exito {
+  padding: t.$esp-3;
+  margin-bottom: t.$esp-4;
+  background: t.$verde-100;
+  border: 1px solid t.$verde-600;
+  border-radius: t.$radio-sm;
+  color: t.$verde-600;
+  font-size: t.$texto-sm;
+}
+
+.vacio {
+  padding: t.$esp-8 t.$esp-4;
+  text-align: center;
+  color: t.$carbon-500;
+}
+
+.cargando {
+  padding: t.$esp-6;
+  text-align: center;
+  color: t.$carbon-500;
+}

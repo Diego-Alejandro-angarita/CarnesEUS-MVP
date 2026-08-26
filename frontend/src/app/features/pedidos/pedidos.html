@@ -1,0 +1,36 @@
+<h1>Mis pedidos</h1>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (cargando()) {
+  <p class="cargando">Cargando...</p>
+} @else if (pedidos().length === 0) {
+  <div class="vacio">
+    <p>Todavia no has hecho ningun pedido.</p>
+    <a class="boton" routerLink="/">Ir a la tienda</a>
+  </div>
+} @else {
+  <ul class="lista">
+    @for (pedido of pedidos(); track pedido.id) {
+      <li class="pedido tarjeta">
+        <a class="pedido__enlace" [routerLink]="['/pedidos', pedido.id]">
+          <div class="pedido__cabecera">
+            <span class="pedido__numero">{{ pedido.numero }}</span>
+            <span class="estado" [attr.data-estado]="pedido.estado">
+              {{ pedido.estado_display }}
+            </span>
+          </div>
+
+          <p class="pedido__meta">
+            {{ pedido.creado_en | date: 'd MMM y, h:mm a' }} ·
+            {{ pedido.items.length }} producto(s)
+          </p>
+
+          <p class="pedido__total">{{ pedido.total | precioCop }}</p>
+        </a>
+      </li>
+    }
+  </ul>
+}

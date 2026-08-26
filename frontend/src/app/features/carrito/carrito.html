@@ -1,0 +1,90 @@
+<h1>Tu carrito</h1>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+@if (cargando()) {
+  <p class="cargando">Cargando...</p>
+} @else if (!carrito() || carrito()!.items.length === 0) {
+  <div class="vacio">
+    <p>Tu carrito esta vacio.</p>
+    <a class="boton" routerLink="/">Ir a la tienda</a>
+  </div>
+} @else {
+  <div class="carrito">
+    <ul class="lista">
+      @for (item of carrito()!.items; track item.id) {
+        <li class="linea tarjeta">
+          <div class="linea__info">
+            <a class="linea__nombre" [routerLink]="['/producto', item.producto_detalle.slug]">
+              {{ item.producto_detalle.nombre }}
+            </a>
+            <p class="linea__precio">
+              {{ item.producto_detalle.precio | precioCop }}
+              / {{ item.producto_detalle.unidad_medida_display }}
+            </p>
+          </div>
+
+          <div class="linea__cantidad">
+            <button
+              type="button"
+              class="paso"
+              aria-label="Quitar medio"
+              [disabled]="ocupado() === item.id"
+              (click)="cambiar(item, -0.5)"
+            >
+              −
+            </button>
+            <span class="paso__valor">{{ item.cantidad }}</span>
+            <button
+              type="button"
+              class="paso"
+              aria-label="Agregar medio"
+              [disabled]="ocupado() === item.id"
+              (click)="cambiar(item, 0.5)"
+            >
+              +
+            </button>
+          </div>
+
+          <div class="linea__subtotal">{{ item.subtotal | precioCop }}</div>
+
+          <button
+            type="button"
+            class="boton boton--peligro linea__quitar"
+            [disabled]="ocupado() === item.id"
+            (click)="quitar(item)"
+          >
+            Quitar
+          </button>
+        </li>
+      }
+    </ul>
+
+    <aside class="resumen tarjeta">
+      <h2>Resumen</h2>
+
+      <div class="resumen__fila">
+        <span>Subtotal</span>
+        <strong>{{ carrito()!.subtotal | precioCop }}</strong>
+      </div>
+
+      <p class="resumen__nota">
+        El costo del domicilio se calcula en el siguiente paso, al elegir la
+        direccion de entrega.
+      </p>
+
+      <a class="boton resumen__boton" routerLink="/checkout">Continuar al pago</a>
+
+      <button
+        type="button"
+        class="boton boton--secundario resumen__boton"
+        [disabled]="ocupado() === -1"
+        (click)="vaciar()"
+      >
+        Vaciar carrito
+      </button>
+    </aside>
+  </div>
+}

@@ -1,0 +1,50 @@
+<header class="encabezado">
+  <div class="contenedor encabezado__barra">
+    <a routerLink="/" class="marca">
+      <span class="marca__icono" aria-hidden="true">🥩</span>
+      <span class="marca__texto">CarnesEUS</span>
+    </a>
+
+    <nav class="nav" aria-label="Navegacion principal">
+      <a routerLink="/" routerLinkActive="nav__enlace--activo" [routerLinkActiveOptions]="{ exact: true }" class="nav__enlace">
+        Tienda
+      </a>
+
+      @if (auth.estaAutenticado()) {
+        <a routerLink="/pedidos" routerLinkActive="nav__enlace--activo" class="nav__enlace">
+          Mis pedidos
+        </a>
+
+        @if (auth.esStaff()) {
+          <a routerLink="/admin" routerLinkActive="nav__enlace--activo" class="nav__enlace nav__enlace--panel">
+            Panel
+          </a>
+        }
+
+        <a routerLink="/carrito" routerLinkActive="nav__enlace--activo" class="nav__enlace nav__carrito">
+          Carrito
+          @if (carrito.cantidadItems() > 0) {
+            <span class="insignia" aria-label="productos en el carrito">{{ carrito.cantidadItems() }}</span>
+          }
+        </a>
+
+        <button type="button" class="nav__salir" (click)="cerrarSesion()">Salir</button>
+      } @else {
+        <a routerLink="/login" class="nav__enlace">Iniciar sesion</a>
+        <a routerLink="/registro" class="nav__enlace nav__enlace--destacado">Crear cuenta</a>
+      }
+    </nav>
+  </div>
+</header>
+
+<main class="contenido">
+  <div class="contenedor">
+    <router-outlet />
+  </div>
+</main>
+
+<footer class="pie">
+  <div class="contenedor">
+    <p>CarnesEUS &middot; {{ anio }} &middot; Carne fresca a domicilio en el Valle de Aburra</p>
+  </div>
+</footer>

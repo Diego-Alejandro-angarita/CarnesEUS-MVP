@@ -1,0 +1,52 @@
+@use '../../styles/tokens' as t;
+@use '../../styles/estados';
+
+.lista {
+  display: grid;
+  gap: t.$esp-3;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pedido {
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: t.$sombra-alta;
+  }
+}
+
+.pedido__enlace {
+  display: block;
+  padding: t.$esp-4;
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.pedido__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: t.$esp-3;
+}
+
+.pedido__numero {
+  font-weight: 700;
+  font-family: ui-monospace, 'Cascadia Code', 'Courier New', monospace;
+}
+
+.pedido__meta {
+  margin: t.$esp-2 0 0;
+  font-size: t.$texto-sm;
+  color: t.$carbon-500;
+}
+
+.pedido__total {
+  margin: t.$esp-2 0 0;
+  font-size: t.$texto-lg;
+  font-weight: 700;
+}

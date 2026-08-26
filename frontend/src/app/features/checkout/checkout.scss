@@ -1,0 +1,91 @@
+@use '../../styles/tokens' as t;
+
+.checkout {
+  display: grid;
+  gap: t.$esp-5;
+  align-items: start;
+
+  @include t.escritorio {
+    grid-template-columns: 1fr 22rem;
+  }
+}
+
+.checkout__datos {
+  display: grid;
+  gap: t.$esp-4;
+}
+
+.bloque {
+  padding: t.$esp-5;
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.bloque__formulario {
+  margin-top: t.$esp-4;
+  padding-top: t.$esp-4;
+  border-top: 1px solid t.$carbon-100;
+}
+
+.resumen {
+  padding: t.$esp-5;
+  position: sticky;
+  top: 6rem;
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.resumen__items {
+  margin: 0 0 t.$esp-4;
+  padding: 0 0 t.$esp-3;
+  list-style: none;
+  border-bottom: 1px solid t.$carbon-100;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: t.$esp-3;
+    padding: t.$esp-1 0;
+    font-size: t.$texto-sm;
+  }
+}
+
+.resumen__fila {
+  display: flex;
+  justify-content: space-between;
+  padding: t.$esp-1 0;
+  font-size: t.$texto-sm;
+  color: t.$carbon-700;
+}
+
+.resumen__fila--total {
+  margin-top: t.$esp-2;
+  padding-top: t.$esp-3;
+  border-top: 1px solid t.$carbon-100;
+  font-size: t.$texto-lg;
+  color: t.$carbon-900;
+}
+
+.resumen__boton {
+  width: 100%;
+  margin-top: t.$esp-4;
+}
+
+.resumen__nota {
+  margin: t.$esp-3 0 0;
+  font-size: t.$texto-sm;
+  color: t.$carbon-500;
+}
+
+.resumen__seguridad {
+  margin: t.$esp-4 0 0;
+  padding-top: t.$esp-3;
+  border-top: 1px solid t.$carbon-100;
+  font-size: t.$texto-xs;
+  color: t.$carbon-500;
+  line-height: 1.5;
+}

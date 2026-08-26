@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend (Django)
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: carneseus
+          POSTGRES_USER: carneseus
+          POSTGRES_PASSWORD: carneseus
+        ports:
+          - 5432:5432
+        # Sin esto los tests arrancan antes de que Postgres acepte conexiones.
+        options: >-
+          --health-cmd "pg_isready -U carneseus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DJANGO_SECRET_KEY: llave-solo-para-ci
+      DATABASE_URL: postgres://carneseus:carneseus@localhost:5432/carneseus
+      # Valores ficticios: las pruebas de pagos no llaman a Wompi, usan
+      # respuestas simuladas.
+      WOMPI_PUBLIC_KEY: pub_test_ci
+      WOMPI_PRIVATE_KEY: prv_test_ci
+      WOMPI_EVENTS_SECRET: test_events_ci
+      WOMPI_INTEGRITY_SECRET: test_integrity_ci
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: backend/requirements/*.txt
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Verificar que no falten migraciones
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Revision de seguridad para produccion
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          DJANGO_ALLOWED_HOSTS: carneseus.co
+          DJANGO_SECRET_KEY: llave-larga-y-aleatoria-solo-para-la-revision-de-ci-1234567890
+        run: python manage.py check --deploy --fail-level WARNING
+
+      - name: Pruebas
+        run: pytest
+
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Pruebas
+        run: npm test -- --watch=false
