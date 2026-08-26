@@ -3,9 +3,11 @@ Configuracion comun a todos los entornos.
 
 Nada sensible se escribe aqui: las llaves y credenciales salen de variables de
 entorno (archivo .env en desarrollo, variables reales en produccion).
+
+Este es el esqueleto del proyecto. No hay ninguna historia de usuario
+implementada: las apps de dominio las crea el equipo dentro de apps/.
 """
 
-from decimal import Decimal
 from pathlib import Path
 
 import environ
@@ -21,12 +23,6 @@ env = environ.Env(
     CORS_ALLOWED_ORIGINS=(list, []),
     CSRF_TRUSTED_ORIGINS=(list, []),
     FRONTEND_URL=(str, "http://localhost:4200"),
-    COSTO_DOMICILIO=(str, "8000"),
-    WOMPI_BASE_URL=(str, "https://sandbox.wompi.co/v1"),
-    WOMPI_PUBLIC_KEY=(str, ""),
-    WOMPI_PRIVATE_KEY=(str, ""),
-    WOMPI_EVENTS_SECRET=(str, ""),
-    WOMPI_INTEGRITY_SECRET=(str, ""),
 )
 
 environ.Env.read_env(BASE_DIR / ".env")
@@ -55,13 +51,12 @@ THIRD_PARTY_APPS = [
 ]
 
 # Monolito modular: un despliegue, pero con fronteras claras entre modulos.
+# Cada historia de usuario se implementa en una app propia dentro de apps/ y
+# se registra aqui. Por ejemplo:
+#     "apps.accounts",
+#     "apps.catalog",
 LOCAL_APPS = [
     "apps.common",
-    "apps.accounts",
-    "apps.catalog",
-    "apps.orders",
-    "apps.payments",
-    "apps.notifications",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -105,8 +100,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # --------------------------------------------------------------------------
 # Autenticacion
 # --------------------------------------------------------------------------
-# Definido ANTES de la primera migracion: cambiarlo despues es doloroso.
-AUTH_USER_MODEL = "accounts.Usuario"
+# ATENCION: si el equipo va a usar un modelo de usuario propio (login por
+# correo, roles, etc.), hay que crearlo y descomentar la linea de abajo ANTES
+# de correr la primera migracion. Cambiarlo despues obliga a borrar la base:
+#     docker compose down -v
+#
+# AUTH_USER_MODEL = "accounts.Usuario"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -115,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Requisito no funcional de la wiki: sesiones con expiracion.
+# Sesiones con expiracion (requisito no funcional de la wiki).
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 dias
 SESSION_SAVE_EVERY_REQUEST = True
 
@@ -130,8 +129,8 @@ CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 # --------------------------------------------------------------------------
 # CORS
 # --------------------------------------------------------------------------
-# En desarrollo Angular hace proxy de /api hacia :8000, asi que todo es del
-# mismo origen y CORS no interviene. Esto solo hace falta si algun dia el
+# En desarrollo Angular hace proxy de /api hacia el backend, asi que todo es
+# del mismo origen y CORS no interviene. Esto solo hace falta si algun dia el
 # frontend vive en otro dominio.
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
@@ -179,34 +178,16 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "CarnesEUS API",
-    "DESCRIPTION": "API del e-commerce de carniceria CarnesEUS.",
+    "DESCRIPTION": (
+        "API del e-commerce de carniceria CarnesEUS. Las historias de usuario "
+        "se implementan sobre este esqueleto."
+    ),
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
 }
 
-# --------------------------------------------------------------------------
-# Reglas de negocio
-# --------------------------------------------------------------------------
 FRONTEND_URL = env("FRONTEND_URL")
-COSTO_DOMICILIO = Decimal(env("COSTO_DOMICILIO"))
-
-# FR-15: la cobertura la decide el backend, no el cliente. Si llegara del
-# formulario, cualquiera podria pedir domicilio fuera del area de reparto.
-ZONAS_COBERTURA = env.list(
-    "ZONAS_COBERTURA",
-    default=["Medellin", "Envigado", "Itagui", "Sabaneta", "Bello", "La Estrella"],
-)
-
-# --------------------------------------------------------------------------
-# Wompi (pasarela de pagos)
-# --------------------------------------------------------------------------
-WOMPI_BASE_URL = env("WOMPI_BASE_URL").rstrip("/")
-WOMPI_PUBLIC_KEY = env("WOMPI_PUBLIC_KEY")
-WOMPI_PRIVATE_KEY = env("WOMPI_PRIVATE_KEY")
-WOMPI_EVENTS_SECRET = env("WOMPI_EVENTS_SECRET")
-WOMPI_INTEGRITY_SECRET = env("WOMPI_INTEGRITY_SECRET")
-WOMPI_MONEDA = "COP"
 
 LOGGING = {
     "version": 1,
@@ -218,8 +199,4 @@ LOGGING = {
         "console": {"class": "logging.StreamHandler", "formatter": "simple"},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
-    "loggers": {
-        # Los pagos siempre se registran: sin esto, depurar un webhook es adivinar.
-        "apps.payments": {"handlers": ["console"], "level": "INFO", "propagate": False},
-    },
 }

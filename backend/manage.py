@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Utilidad de linea de comandos de Django para CarnesEUS."""
+"""Utilidad de linea de comandos de Django."""
 
 import os
 import sys

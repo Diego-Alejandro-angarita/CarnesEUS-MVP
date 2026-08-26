@@ -33,4 +33,4 @@ EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-responder@carneseus.co")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-responder@example.com")

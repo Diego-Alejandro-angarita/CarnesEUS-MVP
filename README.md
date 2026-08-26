@@ -3,10 +3,13 @@
 E-commerce para carnicería: catálogo de cortes, carrito, checkout con pago en
 línea y panel de gestión para el personal.
 
+> **Estado:** el entorno está montado y funcionando, pero **no hay ninguna
+> historia de usuario implementada todavía**. Este repositorio es el punto de
+> partida para que el equipo construya el MVP.
+
 - **Backend:** Django 5.2 LTS + Django REST Framework (monolito modular)
 - **Frontend:** Angular 21 (standalone, signals, zoneless)
 - **Base de datos:** PostgreSQL 16
-- **Pagos:** [Wompi](https://wompi.co) (Bancolombia) — Widget embebido + webhook
 - **Documentación del Sprint 0:** [wiki del proyecto](https://github.com/Diego-Alejandro-angarita/CarnesEUS-MVP/wiki)
 
 ---
@@ -28,37 +31,181 @@ correr los servicios a mano.
 
 ```bash
 cp backend/.env.example backend/.env
-docker compose up
 ```
 
-- Tienda: <http://localhost:4200>
+```bash
+docker compose up --build
+```
+
+- Aplicación: <http://localhost:4200>
 - API: <http://localhost:8001/api/>
 - Documentación de la API: <http://localhost:8001/api/docs/>
 - Admin de Django: <http://localhost:8001/admin/>
 
-Después, en otra terminal, carga los datos de ejemplo:
-
-```bash
-docker compose exec backend python manage.py seed_demo
-```
-
-Eso deja dos cuentas listas:
-
-| Cuenta | Contraseña | Rol |
-|---|---|---|
-| `cliente@carneseus.co` | `demo12345` | Cliente |
-| `staff@carneseus.co` | `demo12345` | Personal de la carnicería |
+La pantalla de inicio comprueba sola que las tres piezas están conectadas: llama
+a `/api/salud/` a través del proxy y muestra el resultado.
 
 > **Puertos:** el backend se publica en el **8001** y Postgres en el **5433**,
 > no en los puertos habituales. El 8000 y el 5432 suelen estar ocupados por
 > otras aplicaciones y por instalaciones locales de PostgreSQL. Dentro de
 > Docker siguen siendo 8000 y 5432; solo cambia lo que se expone al host.
 
+Para crear un usuario del admin:
+
+```bash
+docker compose exec backend python manage.py createsuperuser
+```
+
 ---
 
-## Arranque manual (sin Docker para la app)
+## Antes de la primera historia: el modelo de usuario
 
-Igual necesitas la base de datos:
+Si el equipo va a usar un usuario propio (login por correo, roles, campos
+extra), hay que definirlo **antes de la primera migración**. Django solo permite
+fijar `AUTH_USER_MODEL` con la base limpia; cambiarlo después, con datos encima,
+es un dolor de cabeza evitable.
+
+1. Crear la app `apps/accounts` con el modelo `Usuario`.
+2. Descomentar `AUTH_USER_MODEL = "accounts.Usuario"` en
+   [`config/settings/base.py`](backend/config/settings/base.py).
+3. Si ya se corrió `docker compose up` (que migra al arrancar), borrar la base:
+
+```bash
+docker compose down -v
+```
+
+---
+
+## Cómo agregar una historia de usuario
+
+### Backend
+
+```bash
+docker compose exec backend python manage.py startapp catalog apps/catalog
+```
+
+1. En `apps/catalog/apps.py`, poner `name = "apps.catalog"` y un `label`.
+2. Registrar `"apps.catalog"` en `LOCAL_APPS` de `config/settings/base.py`.
+3. Escribir modelos, serializers, vistas y `urls.py` de la app.
+4. Incluir sus rutas en `config/urls.py` (hay ejemplos comentados).
+5. Generar la migración:
+
+```bash
+docker compose exec backend python manage.py makemigrations
+```
+
+### Frontend
+
+1. Crear el componente en `src/app/features/<historia>/`.
+2. Agregar la ruta en `src/app/app.routes.ts` con `loadComponent` (hay un
+   ejemplo comentado).
+3. Los servicios HTTP van en `src/app/core/services/`, los guards en
+   `src/app/core/guards/` y lo reutilizable en `src/app/shared/`.
+
+Cuando exista la primera pantalla real, borrar la bienvenida de `app.html` y
+dejar solo `<router-outlet />`.
+
+---
+
+## Estructura
+
+```
+backend/
+├─ config/
+│  ├─ settings/         base.py · dev.py · prod.py
+│  └─ urls.py           rutas de la API
+├─ apps/
+│  └─ common/           TimeStampedModel, paginación, endpoint de salud
+└─ tests/               prueba de humo
+
+frontend/src/app/
+├─ core/                servicios, guards, interceptores, modelos
+├─ shared/              pipes y piezas reutilizables
+├─ features/            una carpeta por historia de usuario
+└─ styles/              tokens de diseño
+```
+
+Las carpetas de dominio están vacías a propósito. El monolito modular es el que
+define *Arquitectura* en la
+[wiki](https://github.com/Diego-Alejandro-angarita/CarnesEUS-MVP/wiki): un solo
+despliegue, con fronteras claras entre módulos.
+
+---
+
+## Qué trae ya montado
+
+Nada de dominio; solo la infraestructura que cuesta configurar:
+
+| Pieza | Dónde |
+|---|---|
+| Ajustes por entorno (`base`/`dev`/`prod`) | `backend/config/settings/` |
+| Conexión a Postgres por `DATABASE_URL` | `backend/config/settings/base.py` |
+| DRF con paginación, filtros y sesión por cookie | `REST_FRAMEWORK` en `base.py` |
+| Documentación automática de la API | `/api/docs/` (drf-spectacular) |
+| Endpoint de comprobación | `backend/apps/common/views.py` |
+| `TimeStampedModel` y paginación estándar | `backend/apps/common/` |
+| Cabeceras de seguridad y HTTPS para producción | `backend/config/settings/prod.py` |
+| Proxy de `/api` y `/media` hacia Django | `frontend/proxy.conf.mjs` |
+| CSRF de Angular ajustado a Django | `frontend/src/app/app.config.ts` |
+| Locale `es-CO` | `frontend/src/app/app.config.ts` |
+| pytest + ruff / vitest | `backend/pyproject.toml`, `frontend/package.json` |
+| Integración continua | `.github/workflows/ci.yml` |
+
+### Sesión con cookies y CSRF
+
+Angular usa por defecto la cookie `XSRF-TOKEN` y el header `X-XSRF-TOKEN`;
+Django espera `csrftoken` y `X-CSRFToken`. El ajuste está en `app.config.ts`,
+para dejar el backend con su configuración estándar.
+
+En desarrollo el servidor de Angular hace *proxy* de `/api` hacia el backend
+([`proxy.conf.mjs`](frontend/proxy.conf.mjs)), así que para el navegador todo es
+un solo origen: no hay CORS de por medio y las cookies de sesión viajan solas.
+
+---
+
+## Pruebas
+
+```bash
+docker compose exec backend pytest
+```
+
+```bash
+docker compose exec frontend npm test
+```
+
+El backend trae una prueba de humo (`tests/test_salud.py`) y el frontend tres
+sobre el componente raíz. Son el andamio para las pruebas reales.
+
+Lint del backend:
+
+```bash
+docker compose exec backend ruff check .
+```
+
+---
+
+## Si el editor marca «Cannot find module '@angular/router'»
+
+El contenedor guarda sus `node_modules` en un volumen anónimo, invisible desde
+Windows. Al clonar, `frontend/node_modules` queda vacío en el disco, así que VS
+Code no encuentra ningún paquete aunque la aplicación compile bien dentro del
+contenedor.
+
+Se arregla instalando las dependencias también en la máquina, solo para que el
+editor las vea:
+
+```bash
+cd frontend && npm ci
+```
+
+No interfiere con el contenedor: la copia del volumen es la que se usa al
+ejecutar.
+
+---
+
+## Ejecutar sin Docker
+
+La base de datos igual hace falta:
 
 ```bash
 docker compose up -d db
@@ -67,198 +214,13 @@ docker compose up -d db
 ### Backend
 
 ```bash
-cd backend
-python -m venv .venv
-.venv/Scripts/activate      # En Linux o macOS: source .venv/bin/activate
-pip install -r requirements/dev.txt
-cp .env.example .env
-python manage.py migrate
-python manage.py seed_demo
-python manage.py runserver 8001
+cd backend && python -m venv .venv && .venv/Scripts/activate && pip install -r requirements/dev.txt && cp .env.example .env && python manage.py migrate && python manage.py runserver 8001
 ```
+
+En Linux o macOS, `source .venv/bin/activate`.
 
 ### Frontend
 
 ```bash
-cd frontend
-npm install
-npm start
+cd frontend && npm install && npm start
 ```
-
-El servidor de Angular hace *proxy* de `/api` hacia el backend
-([`proxy.conf.mjs`](frontend/proxy.conf.mjs)), así que para el navegador todo
-es un solo origen: no hay CORS de por medio y las cookies de sesión viajan solas.
-
----
-
-## Configurar los pagos con Wompi
-
-El código de pagos está completo, pero necesita llaves para funcionar. Sin
-ellas, el checkout responde con un mensaje explícito en vez de fallar de forma
-confusa.
-
-1. Regístrate en [comercios.wompi.co](https://comercios.wompi.co).
-2. En **Mi cuenta** copia las cuatro llaves de *sandbox* y pégalas en
-   `backend/.env`:
-
-   ```
-   WOMPI_BASE_URL=https://sandbox.wompi.co/v1
-   WOMPI_PUBLIC_KEY=pub_test_...
-   WOMPI_PRIVATE_KEY=prv_test_...
-   WOMPI_EVENTS_SECRET=test_events_...
-   WOMPI_INTEGRITY_SECRET=test_integrity_...
-   ```
-
-3. Reinicia el backend y haz una compra de prueba.
-
-### Tarjetas de prueba
-
-| Tarjeta | Resultado |
-|---|---|
-| `4242 4242 4242 4242` | Aprobada |
-| `4111 1111 1111 1111` | Rechazada |
-| Cualquier otra | Error |
-
-Cualquier fecha futura y cualquier CVC de 3 dígitos sirven.
-
-### El webhook en desarrollo
-
-**Wompi no puede alcanzar `localhost`**, así que en tu máquina el webhook nunca
-llega. Hay dos formas de trabajar:
-
-**Opción A — verificación activa (por defecto, no requiere configurar nada).**
-Al cerrarse el Widget, el frontend llama a
-`POST /api/pedidos/{id}/verificar-pago/` y el backend le pregunta a Wompi el
-estado real de la transacción. El pedido se actualiza igual que con el webhook.
-En la pantalla del pedido hay un botón **"Ya pagué, verificar"** para repetir la
-consulta.
-
-**Opción B — webhook real, con un túnel.**
-
-```bash
-cloudflared tunnel --url http://localhost:8001
-```
-
-Toma la URL pública que imprime y regístrala en el panel de Wompi como
-`https://TU-TUNEL/api/webhooks/wompi/`.
-
-### Producción
-
-Cambia `WOMPI_BASE_URL` a `https://production.wompi.co/v1` y usa las llaves con
-prefijo `pub_prod_`, `prv_prod_`, `prod_events_` y `prod_integrity_`.
-
----
-
-## Estructura
-
-```
-backend/
-├─ config/settings/     base.py · dev.py · prod.py
-├─ apps/
-│  ├─ common/           modelo base, permisos, paginación
-│  ├─ accounts/         Usuario, Direccion
-│  ├─ catalog/          Categoria, Producto, Promocion
-│  ├─ orders/           Carrito, ItemCarrito, Pedido, ItemPedido
-│  ├─ payments/         Pago, WompiEvent, firmas, webhook
-│  └─ notifications/    avisos por correo (mínimo por ahora)
-└─ tests/
-
-frontend/src/app/
-├─ core/                servicios, guards, interceptores, modelos
-├─ shared/              pipes y piezas reutilizables
-├─ features/            auth · catalogo · carrito · checkout · pedidos · admin
-└─ styles/              tokens de diseño
-```
-
-Los cinco módulos de Django son los que define *Arquitectura* en la
-[wiki](https://github.com/Diego-Alejandro-angarita/CarnesEUS-MVP/wiki): un solo
-despliegue, con fronteras claras entre módulos.
-
-Además, [`starter/`](starter/README.md) es el mismo stack (PostgreSQL + Django +
-Angular) **sin ninguna historia de usuario implementada**, para construirlas
-desde cero. Usa los puertos 4201, 8002 y 5434, así que puede correr al mismo
-tiempo que el proyecto principal.
-
----
-
-## Cómo funcionan las decisiones que más confunden
-
-### Sesión con cookies y CSRF
-
-No se usan tokens JWT. Django guarda la sesión en una cookie `sessionid`
-**HttpOnly** (JavaScript no puede leerla) y protege las escrituras con una
-cookie `csrftoken` que Angular **sí** lee y reenvía como header.
-
-Angular usa por defecto `XSRF-TOKEN` / `X-XSRF-TOKEN`, mientras Django espera
-`csrftoken` / `X-CSRFToken`. El ajuste se hace del lado de Angular, en
-[`app.config.ts`](frontend/src/app/app.config.ts), para dejar el backend con su
-configuración estándar.
-
-Al arrancar, la aplicación llama a `GET /api/auth/csrf/` para tener la cookie
-antes del primer POST.
-
-### El flujo de pago
-
-1. `POST /api/pedidos/` — el carrito se convierte en pedido y **los precios
-   quedan congelados**. Si mañana sube el precio del lomo, los pedidos viejos no
-   cambian.
-2. `POST /api/pedidos/{id}/checkout/` — el backend registra un intento de pago y
-   devuelve los datos firmados para el Widget.
-3. Angular abre el Widget de Wompi. **La tarjeta nunca pasa por nuestro código.**
-4. `POST /api/webhooks/wompi/` — Wompi confirma. El backend valida el checksum,
-   marca el pedido como pagado y descuenta el stock.
-5. `POST /api/pedidos/{id}/verificar-pago/` — respaldo que consulta a Wompi
-   directamente.
-
-Lo que el Widget devuelve en el navegador **no se toma como prueba de pago**:
-cualquiera puede invocar ese callback desde la consola. La verdad la tiene el
-servidor.
-
-### Por qué un pedido puede tener varios pagos
-
-Si a un cliente le rechazan la tarjeta y reintenta, Wompi exige una referencia
-nueva. Cada intento se guarda como su propio registro `Pago`. Así, el evento
-tardío de un intento rechazado no puede pisar el estado de otro que sí fue
-aprobado.
-
-### Los montos van en centavos
-
-Wompi trabaja en centavos: `$9.500 COP` se envían como `950000`. La conversión
-vive en un único helper (`a_centavos`) para que multiplicar por 100 no ande
-repartido por el código.
-
----
-
-## Pruebas y calidad
-
-```bash
-cd backend && pytest              # 74 pruebas
-cd backend && ruff check .        # lint
-cd frontend && npm test -- --watch=false
-cd frontend && npm run build
-```
-
-Las pruebas del backend cubren, entre otras cosas, las dos piezas
-criptográficas de Wompi (firma de integridad y checksum del webhook) contra los
-vectores de la documentación oficial, la idempotencia ante webhooks repetidos y
-que un webhook manipulado no marque nada como pagado.
-
-[GitHub Actions](.github/workflows/ci.yml) corre todo esto en cada push y pull
-request.
-
----
-
-## Qué falta para el Sprint 1
-
-El entorno y el dominio están listos; estas piezas quedan deliberadamente fuera:
-
-- Aplicar las promociones al total del pedido. El modelo `Promocion` y su
-  administración ya existen y calculan el descuento, pero el checkout todavía no
-  lo resta. **Se dejó así a propósito:** mostrar un precio con descuento y cobrar
-  otro es peor que no tener promociones.
-- El desarrollo visual detallado de las pantallas del mock-up.
-- Notificaciones por correo con plantillas y envío asíncrono
-  (`apps/notifications` es hoy un mínimo funcional).
-- Reportes de ventas.
-- Todo lo que la wiki marcó como V2: reseñas, calificaciones y motor de
-  recomendaciones.

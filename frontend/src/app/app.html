@@ -1,50 +1,49 @@
-<header class="encabezado">
-  <div class="contenedor encabezado__barra">
-    <a routerLink="/" class="marca">
-      <span class="marca__icono" aria-hidden="true">🥩</span>
-      <span class="marca__texto">CarnesEUS</span>
-    </a>
+<!--
+  Pantalla de bienvenida del esqueleto.
 
-    <nav class="nav" aria-label="Navegacion principal">
-      <a routerLink="/" routerLinkActive="nav__enlace--activo" [routerLinkActiveOptions]="{ exact: true }" class="nav__enlace">
-        Tienda
-      </a>
+  Existe para confirmar que el entorno quedo bien montado. En cuanto haya una
+  ruta real, este bloque se borra y queda solo el <router-outlet />.
+-->
+<main class="bienvenida">
+  <h1>CarnesEUS &mdash; entorno listo</h1>
+  <p>
+    Angular, Django y PostgreSQL estan corriendo. El proyecto no tiene ninguna
+    historia de usuario implementada todavia: es el punto de partida para que el
+    equipo construya el MVP.
+  </p>
 
-      @if (auth.estaAutenticado()) {
-        <a routerLink="/pedidos" routerLinkActive="nav__enlace--activo" class="nav__enlace">
-          Mis pedidos
-        </a>
+  @switch (conexion()) {
+    @case ('comprobando') {
+      <p class="estado estado--neutro">Comprobando la conexion con el backend...</p>
+    }
+    @case ('ok') {
+      <p class="estado estado--ok">Backend y base de datos responden correctamente.</p>
+    }
+    @case ('error') {
+      <p class="estado estado--error">
+        No hay respuesta de <code>/api/salud/</code>. Revisa que el servicio
+        <code>backend</code> este arriba y que el proxy apunte a el.
+      </p>
+    }
+  }
 
-        @if (auth.esStaff()) {
-          <a routerLink="/admin" routerLinkActive="nav__enlace--activo" class="nav__enlace nav__enlace--panel">
-            Panel
-          </a>
-        }
+  <h2>Primeros pasos</h2>
+  <ol>
+    <li>
+      Crea la app de Django de tu historia:
+      <code>python manage.py startapp mi_app apps/mi_app</code> y registrala en
+      <code>LOCAL_APPS</code>.
+    </li>
+    <li>Expon sus rutas en <code>config/urls.py</code>.</li>
+    <li>
+      Crea la pantalla en <code>src/app/features/</code> y agregala a
+      <code>app.routes.ts</code>.
+    </li>
+  </ol>
 
-        <a routerLink="/carrito" routerLinkActive="nav__enlace--activo" class="nav__enlace nav__carrito">
-          Carrito
-          @if (carrito.cantidadItems() > 0) {
-            <span class="insignia" aria-label="productos en el carrito">{{ carrito.cantidadItems() }}</span>
-          }
-        </a>
-
-        <button type="button" class="nav__salir" (click)="cerrarSesion()">Salir</button>
-      } @else {
-        <a routerLink="/login" class="nav__enlace">Iniciar sesion</a>
-        <a routerLink="/registro" class="nav__enlace nav__enlace--destacado">Crear cuenta</a>
-      }
-    </nav>
-  </div>
-</header>
-
-<main class="contenido">
-  <div class="contenedor">
-    <router-outlet />
-  </div>
+  <p>
+    Documentacion de la API: <a href="/api/docs/">/api/docs/</a>
+  </p>
 </main>
 
-<footer class="pie">
-  <div class="contenedor">
-    <p>CarnesEUS &middot; {{ anio }} &middot; Carne fresca a domicilio en el Valle de Aburra</p>
-  </div>
-</footer>
+<router-outlet />

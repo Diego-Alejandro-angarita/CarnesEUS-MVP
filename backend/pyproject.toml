@@ -5,10 +5,6 @@ exclude = [".venv", "migrations", "staticfiles"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "DJ"]
-ignore = [
-    # Django exige __str__ en modelos, pero no aporta en algunos casos.
-    "DJ012",
-]
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "config"]

@@ -1,7 +1,6 @@
 import {
   provideHttpClient,
   withFetch,
-  withInterceptors,
   withXsrfConfiguration,
 } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
@@ -9,15 +8,11 @@ import localeEsCo from '@angular/common/locales/es-CO';
 import {
   ApplicationConfig,
   LOCALE_ID,
-  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
-  inject,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
-import { errorInterceptor } from './core/interceptors/error.interceptor';
-import { AuthService } from './core/services/auth.service';
 
 // Fechas y numeros en formato colombiano en toda la aplicacion.
 registerLocaleData(localeEsCo);
@@ -36,9 +31,8 @@ export const appConfig: ApplicationConfig = {
         cookieName: 'csrftoken',
         headerName: 'X-CSRFToken',
       }),
-      withInterceptors([errorInterceptor]),
+      // Los interceptores del equipo (manejo de errores, etc.) van aqui:
+      //   withInterceptors([errorInterceptor]),
     ),
-    // Antes de mostrar nada: obtener la cookie CSRF y saber si hay sesion.
-    provideAppInitializer(() => inject(AuthService).inicializar()),
   ],
 };

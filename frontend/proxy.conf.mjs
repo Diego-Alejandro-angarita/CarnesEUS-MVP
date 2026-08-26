@@ -5,8 +5,8 @@
 //
 // El destino cambia segun donde corra el frontend:
 //   - En la maquina, el backend esta en localhost:8001.
-//   - Dentro de docker compose, "localhost" es el propio contenedor del
-//     frontend; hay que apuntar al servicio "backend" por su nombre de red.
+//   - Dentro de docker compose, 'localhost' es el propio contenedor del
+//     frontend; hay que apuntar al servicio 'backend' por su nombre de red.
 const destino = process.env.BACKEND_URL ?? 'http://localhost:8001';
 
 const comun = { target: destino, secure: false, changeOrigin: false };

@@ -26,24 +26,16 @@ node_modules/
 npm-debug.log*
 
 # ---- Editores / SO ----
-# Se ignora la configuracion personal de VS Code, salvo settings.json: ahi esta
-# el ajuste que obliga al editor a usar el TypeScript del proyecto. Sin el, VS
-# Code analiza con TypeScript 6 e inventa errores en los imports de Angular.
 # Solo la .vscode de la raiz; cada subproyecto decide en su propio .gitignore.
 # Se excluye el CONTENIDO y no la carpeta: git no permite reincluir un archivo
-# si su carpeta entera esta excluida.
+# si su carpeta entera esta excluida. settings.json si viaja: ahi esta el ajuste
+# que obliga al editor a usar el TypeScript del proyecto.
 /.vscode/*
 !/.vscode/settings.json
 .idea/
 *.swp
 .DS_Store
 Thumbs.db
-
-# ---- Segundo entorno (starter) ----
-/starter/backend/media/
-/starter/backend/staticfiles/
-/starter/frontend/dist/
-/starter/frontend/.angular/
 
 # ---- Wiki ----
 # Es un clon del repositorio de wiki que GitHub aloja aparte

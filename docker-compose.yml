@@ -7,10 +7,14 @@ services:
       POSTGRES_USER: carneseus
       POSTGRES_PASSWORD: carneseus
     ports:
+      # 5433 en el host: el 5432 suele estar tomado por un
+      # PostgreSQL instalado localmente. Dentro de compose sigue siendo 5432.
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
+      # El backend espera a que Postgres acepte conexiones de verdad, no solo
+      # a que el contenedor exista.
       test: ["CMD-SHELL", "pg_isready -U carneseus -d carneseus"]
       interval: 5s
       timeout: 5s
