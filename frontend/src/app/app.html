@@ -1,5 +1,14 @@
 <header class="cabecera">
-  <a class="cabecera__marca" routerLink="/productos">CarnesEUS</a>
+  <div class="cabecera__barra">
+    <a class="cabecera__marca" routerLink="/productos">
+      <span class="cabecera__sello" aria-hidden="true">CE</span>
+      CarnesEUs
+    </a>
+  </div>
+  <p class="cabecera__servicio">
+    <span>Envio en 24 horas</span>
+    <span>Lun&ndash;Sab 8:00&ndash;20:00</span>
+  </p>
 </header>
 
 <router-outlet />

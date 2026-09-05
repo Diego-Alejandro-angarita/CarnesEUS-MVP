@@ -1,17 +1,50 @@
 @use './styles/tokens' as t;
 
 .cabecera {
+  border-bottom: 1px solid t.$color-borde-suave;
+  background: t.$color-fondo-alto;
+}
+
+.cabecera__barra {
   display: flex;
   align-items: center;
+  max-width: t.$ancho-maximo;
+  margin: 0 auto;
   padding: 0.875rem t.$espacio;
-  border-bottom: 1px solid t.$color-borde;
-  background: t.$color-fondo;
 }
 
 .cabecera__marca {
-  color: t.$color-marca;
-  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: t.$color-texto;
+  font-family: t.$fuente-display;
+  font-size: 1.375rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cabecera__sello {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: t.$radio-chip;
+  background: t.$color-marca;
+  color: #ffffff;
+  font-family: system-ui, sans-serif;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  text-decoration: none;
+}
+
+.cabecera__servicio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  max-width: t.$ancho-maximo;
+  margin: 0 auto;
+  padding: 0 t.$espacio 0.75rem;
+  color: t.$color-oro;
+  font-size: 0.8125rem;
 }

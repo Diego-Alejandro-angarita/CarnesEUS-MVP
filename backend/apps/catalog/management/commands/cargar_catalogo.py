@@ -7,10 +7,10 @@ from django.utils.text import slugify
 from apps.catalog.models import Categoria, Producto
 
 CATEGORIAS = [
-    ("Res", "8b1e2d"),
-    ("Cerdo", "c46b6b"),
-    ("Pollo", "d9a441"),
-    ("Embutidos", "6b4226"),
+    ("Res", "2a1411"),
+    ("Cerdo", "2b1e18"),
+    ("Pollo", "2e2416"),
+    ("Embutidos", "231a13"),
 ]
 
 PRODUCTOS = [
@@ -93,7 +93,7 @@ class Command(BaseCommand):
                     "presentacion": presentacion,
                     "precio": Decimal(precio),
                     "foto_url": (
-                        f"https://placehold.co/600x400/{colores[categoria]}/ffffff"
+                        f"https://placehold.co/600x400/{colores[categoria]}/d1a13a"
                         f"?text={etiqueta}"
                     ),
                     "disponible": disponible,

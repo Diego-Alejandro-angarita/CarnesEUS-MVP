@@ -21,7 +21,7 @@ describe('App', () => {
     fixture.detectChanges();
 
     const marca = (fixture.nativeElement as HTMLElement).querySelector('.cabecera__marca');
-    expect(marca?.textContent).toContain('CarnesEUS');
+    expect(marca?.textContent).toContain('CarnesEUs');
     expect(marca?.getAttribute('href')).toBe('/productos');
   });
 });

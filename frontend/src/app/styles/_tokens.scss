@@ -1,19 +1,22 @@
-$color-texto: #1a1a1a;
-$color-texto-suave: #5b5b5b;
-$color-fondo: #ffffff;
-$color-superficie: #f6f4f1;
-$color-borde: #ddd8d2;
-$color-marca: #8b1e2d;
-$color-ok: #1b6b3a;
-$color-ok-fondo: #e3f2e8;
-$color-agotado: #8a4b00;
-$color-agotado-fondo: #fdf0dd;
-$color-error: #a3161f;
+$color-fondo: #100e0b;
+$color-fondo-alto: #16130f;
+$color-superficie: #1b1712;
+$color-borde: #2c251b;
+$color-borde-suave: #221d16;
 
-$radio: 0.625rem;
-$radio-pequeno: 999px;
-$sombra:
-  0 1px 2px rgba(0, 0, 0, 0.06),
-  0 4px 12px rgba(0, 0, 0, 0.06);
+$color-texto: #f2e8d5;
+$color-texto-suave: #a89e8d;
+$color-texto-tenue: #776f62;
+
+$color-marca: #9d1f1f;
+$color-marca-clara: #c02a2a;
+$color-oro: #d1a13a;
+$color-oro-claro: #e0b95f;
+$color-error: #e08a8a;
+
+$fuente-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+$radio: 0.5rem;
+$radio-chip: 0.25rem;
 $espacio: 1rem;
-$ancho-maximo: 72rem;
+$ancho-maximo: 75rem;

@@ -1,6 +1,20 @@
+<section class="portada">
+  <div class="portada__interior">
+    <p class="portada__kicker">Carniceria artesanal desde 1978</p>
+    <h1 class="portada__titulo">Carne de <em>verdad.</em></h1>
+    <p class="portada__lead">
+      Seleccion diaria de los mejores proveedores nacionales. Corte a mano, maduracion controlada,
+      entrega en 24 horas.
+    </p>
+  </div>
+</section>
+
 <section class="catalogo">
   <header class="catalogo__cabecera">
-    <h1>Catalogo</h1>
+    <div>
+      <h2 class="catalogo__titulo">Nuestra seleccion</h2>
+      <p class="catalogo__subtitulo">Actualizado cada manana con el genero del dia</p>
+    </div>
     @if (estado() === 'ok' && total() > 0) {
       <p class="catalogo__conteo">{{ total() }} productos</p>
     }
@@ -41,10 +55,11 @@
 
               <div class="tarjeta__cuerpo">
                 <p class="tarjeta__categoria">{{ producto.categoria }}</p>
-                <h2 class="tarjeta__nombre">{{ producto.nombre }}</h2>
-                <p class="tarjeta__presentacion">{{ producto.presentacion }}</p>
+                <h3 class="tarjeta__nombre">{{ producto.nombre }}</h3>
+                <p class="tarjeta__descripcion">{{ producto.descripcion }}</p>
                 <p class="tarjeta__precio">
                   {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                  <span>{{ producto.presentacion }}</span>
                 </p>
               </div>
             </li>
