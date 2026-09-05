@@ -57,6 +57,7 @@ THIRD_PARTY_APPS = [
 #     "apps.catalog",
 LOCAL_APPS = [
     "apps.common",
+    "apps.catalog",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

@@ -71,3 +71,20 @@ En Linux o macOS, `source .venv/bin/activate`.
 ```bash
 cd frontend && npm install && npm start
 ```
+
+---
+
+## Catalogo de productos (FR-00)
+
+Datos de ejemplo para ver el catalogo funcionando:
+
+```bash
+docker compose exec backend python manage.py cargar_catalogo
+```
+
+- Vista de catalogo: <http://localhost:4200/productos>
+- Listado paginado: <http://localhost:8001/api/productos/> (publico, admite
+  `?page=` y `?page_size=`)
+
+Los productos se administran desde el admin de Django, en
+<http://localhost:8001/admin/>.

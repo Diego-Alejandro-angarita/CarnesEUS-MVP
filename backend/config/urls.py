@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.common.views import SaludView
@@ -20,7 +20,7 @@ urlpatterns = [
     ),
     # --- Aqui van las rutas de cada historia de usuario -------------------
     # path("api/auth/", include("apps.accounts.urls")),
-    # path("api/", include("apps.catalog.urls")),
+    path("api/", include("apps.catalog.urls")),
 ]
 
 if settings.DEBUG:

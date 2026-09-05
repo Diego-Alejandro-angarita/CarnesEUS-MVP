@@ -1,0 +1,159 @@
+@use '../../styles/tokens' as t;
+
+.catalogo {
+  max-width: t.$ancho-maximo;
+  margin: 0 auto;
+  padding: t.$espacio;
+}
+
+.catalogo__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem t.$espacio;
+  margin-bottom: t.$espacio;
+}
+
+.catalogo__conteo {
+  margin: 0;
+  color: t.$color-texto-suave;
+}
+
+.aviso {
+  padding: t.$espacio;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-superficie;
+  color: t.$color-texto-suave;
+}
+
+.aviso--error {
+  border-color: t.$color-error;
+  background: #fdeaea;
+  color: t.$color-error;
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: t.$espacio;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-fondo;
+  box-shadow: t.$sombra;
+}
+
+.tarjeta--agotada .tarjeta__foto img {
+  filter: grayscale(1);
+  opacity: 0.65;
+}
+
+.tarjeta__foto {
+  position: relative;
+  background: t.$color-superficie;
+
+  img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+}
+
+.tarjeta__sin-foto {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 3 / 2;
+  margin: 0;
+  color: t.$color-texto-suave;
+}
+
+.insignia {
+  position: absolute;
+  inset: 0.5rem 0.5rem auto auto;
+  padding: 0.15rem 0.6rem;
+  border-radius: t.$radio-pequeno;
+  background: t.$color-ok-fondo;
+  color: t.$color-ok;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.insignia--agotado {
+  background: t.$color-agotado-fondo;
+  color: t.$color-agotado;
+}
+
+.tarjeta__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.875rem;
+}
+
+.tarjeta__categoria {
+  margin: 0;
+  color: t.$color-texto-suave;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tarjeta__nombre {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+
+.tarjeta__presentacion {
+  margin: 0;
+  color: t.$color-texto-suave;
+  font-size: 0.9375rem;
+}
+
+.tarjeta__precio {
+  margin: 0.25rem 0 0;
+  color: t.$color-marca;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: t.$espacio;
+  margin-top: 1.5rem;
+
+  button {
+    padding: 0.5rem 1.25rem;
+    border: 1px solid t.$color-marca;
+    border-radius: t.$radio-pequeno;
+    background: t.$color-marca;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      border-color: t.$color-borde;
+      background: t.$color-superficie;
+      color: t.$color-texto-suave;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.paginacion__estado {
+  margin: 0;
+  color: t.$color-texto-suave;
+}
