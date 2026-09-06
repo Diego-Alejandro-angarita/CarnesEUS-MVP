@@ -37,6 +37,12 @@ export class CatalogoService {
       .get<PaginaProductosApi>('/api/productos/', { params })
       .pipe(map((pagina) => ({ ...pagina, results: pagina.results.map(convertir) })));
   }
+
+  obtener(slug: string): Observable<Producto> {
+    return this.http
+      .get<ProductoApi>(`/api/productos/${slug}/`)
+      .pipe(map(convertir));
+  }
 }
 
 function convertir(producto: ProductoApi): Producto {

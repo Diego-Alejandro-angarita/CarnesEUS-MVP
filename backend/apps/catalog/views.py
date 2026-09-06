@@ -1,5 +1,5 @@
 from drf_spectacular.utils import extend_schema
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny
 
 from .models import Producto
@@ -18,3 +18,15 @@ class ProductoListView(ListAPIView):
     serializer_class = ProductoSerializer
     permission_classes = [AllowAny]
     queryset = Producto.objects.select_related("categoria")
+
+
+@extend_schema(
+    summary="Ficha de un producto",
+    description="Devuelve el detalle completo de un producto a partir de su slug.",
+    responses={200: ProductoSerializer},
+)
+class ProductoDetalleView(RetrieveAPIView):
+    serializer_class = ProductoSerializer
+    permission_classes = [AllowAny]
+    queryset = Producto.objects.select_related("categoria")
+    lookup_field = "slug"
