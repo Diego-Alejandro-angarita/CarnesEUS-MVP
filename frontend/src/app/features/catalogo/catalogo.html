@@ -1,0 +1,85 @@
+<section class="portada">
+  <div class="portada__interior">
+    <p class="portada__kicker">Carniceria artesanal desde 1978</p>
+    <h1 class="portada__titulo">Carne de <em>verdad.</em></h1>
+    <p class="portada__lead">
+      Seleccion diaria de los mejores proveedores nacionales. Corte a mano, maduracion controlada,
+      entrega en 24 horas.
+    </p>
+  </div>
+</section>
+
+<section class="catalogo">
+  <header class="catalogo__cabecera">
+    <div>
+      <h2 class="catalogo__titulo">Nuestra seleccion</h2>
+      <p class="catalogo__subtitulo">Actualizado cada manana con el genero del dia</p>
+    </div>
+    @if (estado() === 'ok' && total() > 0) {
+      <p class="catalogo__conteo">{{ total() }} productos</p>
+    }
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando el catalogo...</p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar el catalogo. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (productos().length === 0) {
+        <p class="aviso">Todavia no hay productos publicados en el catalogo.</p>
+      } @else {
+        <ul class="rejilla">
+          @for (producto of productos(); track producto.id) {
+            <li class="tarjeta" [class.tarjeta--agotada]="!producto.disponible">
+              <div class="tarjeta__foto">
+                @if (producto.foto_url) {
+                  <img
+                    [src]="producto.foto_url"
+                    [alt]="producto.nombre"
+                    width="600"
+                    height="400"
+                    loading="lazy"
+                  />
+                } @else {
+                  <p class="tarjeta__sin-foto">Sin foto</p>
+                }
+                <span class="insignia" [class.insignia--agotado]="!producto.disponible">
+                  {{ producto.disponible ? 'Disponible' : 'Agotado' }}
+                </span>
+              </div>
+
+              <div class="tarjeta__cuerpo">
+                <p class="tarjeta__categoria">{{ producto.categoria }}</p>
+                <h3 class="tarjeta__nombre">{{ producto.nombre }}</h3>
+                <p class="tarjeta__descripcion">{{ producto.descripcion }}</p>
+                <p class="tarjeta__precio">
+                  {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                  <span>{{ producto.presentacion }}</span>
+                </p>
+              </div>
+            </li>
+          }
+        </ul>
+
+        @if (totalPaginas() > 1) {
+          <nav class="paginacion" aria-label="Paginacion del catalogo">
+            <button type="button" [disabled]="!hayAnterior()" (click)="irA(paginaActual() - 1)">
+              Anterior
+            </button>
+            <p class="paginacion__estado" aria-live="polite">
+              Pagina {{ paginaActual() }} de {{ totalPaginas() }}
+            </p>
+            <button type="button" [disabled]="!haySiguiente()" (click)="irA(paginaActual() + 1)">
+              Siguiente
+            </button>
+          </nav>
+        }
+      }
+    }
+  }
+</section>

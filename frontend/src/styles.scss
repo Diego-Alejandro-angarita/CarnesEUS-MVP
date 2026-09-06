@@ -1,8 +1,9 @@
 // Estilos globales.
 //
 // Solo un reset y unos valores base. La identidad visual (tokens de color,
-// tipografia, espaciados) la define el equipo, por ejemplo en
-// src/app/styles/_tokens.scss.
+// tipografia, espaciados) vive en src/app/styles/_tokens.scss.
+
+@use './app/styles/tokens' as t;
 
 *,
 *::before,
@@ -17,11 +18,16 @@ html {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   font-size: 1rem;
   line-height: 1.55;
-  color: #1a1a1a;
-  background: #ffffff;
+  color: t.$color-texto;
+  background: t.$color-fondo;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -29,7 +35,9 @@ h1,
 h2,
 h3 {
   margin: 0 0 0.75rem;
-  line-height: 1.25;
+  font-family: t.$fuente-display;
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 img {
@@ -39,6 +47,6 @@ img {
 
 // Foco siempre visible: requisito de accesibilidad de la wiki.
 :focus-visible {
-  outline: 3px solid #2563eb;
+  outline: 3px solid t.$color-oro;
   outline-offset: 2px;
 }

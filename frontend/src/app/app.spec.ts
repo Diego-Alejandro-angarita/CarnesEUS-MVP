@@ -1,5 +1,3 @@
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
@@ -9,7 +7,7 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideRouter([])],
     }).compileComponents();
   });
 
@@ -18,27 +16,12 @@ describe('App', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('reporta la conexion cuando el backend responde', async () => {
+  it('muestra la marca enlazada al catalogo', () => {
     const fixture = TestBed.createComponent(App);
-    const http = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
 
-    http.expectOne('/api/salud/').flush({ estado: 'ok', base_de_datos: true });
-    await fixture.whenStable();
-
-    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(texto).toContain('responden correctamente');
-  });
-
-  it('avisa cuando el backend no responde', async () => {
-    const fixture = TestBed.createComponent(App);
-    const http = TestBed.inject(HttpTestingController);
-
-    http
-      .expectOne('/api/salud/')
-      .flush('sin backend', { status: 502, statusText: 'Bad Gateway' });
-    await fixture.whenStable();
-
-    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(texto).toContain('No hay respuesta');
+    const marca = (fixture.nativeElement as HTMLElement).querySelector('.cabecera__marca');
+    expect(marca?.textContent).toContain('CarnesEUs');
+    expect(marca?.getAttribute('href')).toBe('/productos');
   });
 });
