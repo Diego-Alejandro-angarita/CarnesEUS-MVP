@@ -91,16 +91,28 @@ Los productos se administran desde el admin de Django, en
 
 ---
 
-## Crear producto (FR-03)
+## Administracion de productos (FR-03, FR-04)
 
-Primera pantalla de la interfaz de administracion: da de alta un producto y
-queda publicado en el catalogo.
+Interfaz para el personal de la carniceria: listado, alta y modificacion de
+productos. Lo que se guarda se ve en el catalogo al momento.
 
-- Formulario: <http://localhost:4200/admin/productos/nuevo>
-- Alta de producto: `POST /api/productos/` (el `slug` se calcula a partir del
-  nombre si no se envia)
-- Categorias para el selector: <http://localhost:8001/api/categorias/>
-  (publico, sin paginar)
+- Listado: <http://localhost:4200/admin/productos>
+- Crear: <http://localhost:4200/admin/productos/nuevo>
+- Modificar: `/admin/productos/<id>/editar` (se llega con el boton *Editar* de
+  cada fila)
+
+Endpoints:
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `POST` | `/api/productos/` | Alta. El `slug` se calcula del nombre si no se envia. |
+| `GET` | `/api/productos/<id>/` | Datos de un producto con la categoria como id. |
+| `PATCH` | `/api/productos/<id>/` | Modificacion. |
+| `GET` | `/api/categorias/` | Categorias para el selector (sin paginar). |
+
+Renombrar un producto **no** le cambia el `slug`: es su direccion publica y
+moverla romperia los enlaces que ya circulan. Para cambiarlo hay que enviarlo
+a proposito.
 
 > **Sin autenticacion todavia.** El `POST` esta abierto porque el inicio de
 > sesion es FR-02 y aun no existe. Queda un `TODO(FR-02)` en

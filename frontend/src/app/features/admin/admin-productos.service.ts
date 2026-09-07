@@ -8,7 +8,7 @@ export interface Categoria {
   slug: string;
 }
 
-/** Lo que viaja al backend al dar de alta un producto (FR-03). */
+/** Lo que viaja al backend al dar de alta (FR-03) o modificar (FR-04) un producto. */
 export interface ProductoNuevo {
   categoria: number;
   nombre: string;
@@ -20,10 +20,11 @@ export interface ProductoNuevo {
 }
 
 /**
- * Respuesta del POST. No es el mismo contrato que el catalogo publico: aqui la
- * categoria vuelve como id mas su nombre, y el slug lo calcula el backend.
+ * Producto tal como lo ve la administracion. No es el mismo contrato que el
+ * catalogo publico: aqui la categoria viaja como id mas su nombre, y el precio
+ * llega como texto decimal.
  */
-export interface ProductoCreado extends Omit<ProductoNuevo, 'precio'> {
+export interface ProductoAdmin extends Omit<ProductoNuevo, 'precio'> {
   id: number;
   slug: string;
   precio: string;
@@ -41,7 +42,15 @@ export class AdminProductosService {
     return this.http.get<Categoria[]>('/api/categorias/');
   }
 
-  crear(producto: ProductoNuevo): Observable<ProductoCreado> {
-    return this.http.post<ProductoCreado>('/api/productos/', producto);
+  crear(producto: ProductoNuevo): Observable<ProductoAdmin> {
+    return this.http.post<ProductoAdmin>('/api/productos/', producto);
+  }
+
+  obtener(id: number): Observable<ProductoAdmin> {
+    return this.http.get<ProductoAdmin>(`/api/productos/${id}/`);
+  }
+
+  actualizar(id: number, producto: ProductoNuevo): Observable<ProductoAdmin> {
+    return this.http.patch<ProductoAdmin>(`/api/productos/${id}/`, producto);
   }
 }

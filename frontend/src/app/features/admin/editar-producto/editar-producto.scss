@@ -1,2 +1,6 @@
 @use '../base';
 @use '../pagina';
+
+.aviso a {
+  color: inherit;
+}

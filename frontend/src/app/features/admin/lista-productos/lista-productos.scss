@@ -1,0 +1,141 @@
+@use '../../../styles/tokens' as t;
+@use '../base';
+@use '../pagina';
+
+.admin--ancha {
+  max-width: t.$ancho-maximo;
+}
+
+.admin__cabecera--fila {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: t.$espacio;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tabla__conteo {
+  margin: 0 0 0.75rem;
+  color: t.$color-texto-tenue;
+  font-size: 0.875rem;
+}
+
+.tabla__marco {
+  overflow-x: auto;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-fondo-alto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  th,
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid t.$color-borde-suave;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  thead th {
+    color: t.$color-texto-tenue;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  tbody tr:hover {
+    background: t.$color-superficie;
+  }
+}
+
+.tabla__nombre {
+  color: t.$color-texto;
+  font-weight: 600;
+}
+
+.tabla__numero {
+  text-align: right;
+  color: t.$color-oro-claro;
+}
+
+.tabla__acciones {
+  text-align: right;
+}
+
+.boton--menudo {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.875rem;
+}
+
+.insignia {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border: 1px solid rgba(209, 161, 58, 0.55);
+  border-radius: t.$radio-chip;
+  background: rgba(14, 12, 9, 0.82);
+  color: t.$color-oro-claro;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.insignia--agotado {
+  border-color: t.$color-marca-clara;
+  background: t.$color-marca;
+  color: #fdeaea;
+}
+
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: t.$espacio;
+  margin-top: 2rem;
+
+  button {
+    padding: 0.5rem 1.25rem;
+    border: 1px solid t.$color-marca;
+    border-radius: t.$radio-chip;
+    background: t.$color-marca;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: t.$color-marca-clara;
+    }
+
+    &:disabled {
+      border-color: t.$color-borde;
+      background: transparent;
+      color: t.$color-texto-tenue;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.paginacion__estado {
+  margin: 0;
+  color: t.$color-texto-suave;
+  font-size: 0.9375rem;
+}
