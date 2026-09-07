@@ -88,3 +88,21 @@ docker compose exec backend python manage.py cargar_catalogo
 
 Los productos se administran desde el admin de Django, en
 <http://localhost:8001/admin/>.
+
+---
+
+## Crear producto (FR-03)
+
+Primera pantalla de la interfaz de administracion: da de alta un producto y
+queda publicado en el catalogo.
+
+- Formulario: <http://localhost:4200/admin/productos/nuevo>
+- Alta de producto: `POST /api/productos/` (el `slug` se calcula a partir del
+  nombre si no se envia)
+- Categorias para el selector: <http://localhost:8001/api/categorias/>
+  (publico, sin paginar)
+
+> **Sin autenticacion todavia.** El `POST` esta abierto porque el inicio de
+> sesion es FR-02 y aun no existe. Queda un `TODO(FR-02)` en
+> `backend/apps/catalog/views.py` para cambiarlo a `IsAdminUser`. No desplegar
+> asi.

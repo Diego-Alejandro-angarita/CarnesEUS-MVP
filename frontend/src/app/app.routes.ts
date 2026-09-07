@@ -7,5 +7,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/catalogo/catalogo').then((m) => m.Catalogo),
     title: 'Catalogo | CarnesEUS',
   },
+  {
+    path: 'admin/productos/nuevo',
+    loadComponent: () =>
+      import('./features/admin/crear-producto/crear-producto').then((m) => m.CrearProducto),
+    title: 'Crear producto | CarnesEUS',
+  },
   { path: '**', redirectTo: 'productos' },
 ];
