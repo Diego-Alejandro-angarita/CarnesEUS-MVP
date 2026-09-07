@@ -34,7 +34,7 @@ class ProductoSerializer(serializers.ModelSerializer):
 
 class ProductoAdminSerializer(serializers.ModelSerializer):
     """
-    Serializer de escritura para FR-03.
+    Serializer de escritura para el alta (FR-03) y la edicion (FR-04).
 
     Va aparte del publico a proposito: el catalogo (FR-00) expone la categoria
     como texto y todo de solo lectura, mientras que aqui la categoria entra por
@@ -66,7 +66,14 @@ class ProductoAdminSerializer(serializers.ModelSerializer):
         return valor
 
     def validate_slug(self, valor):
-        if valor and Producto.objects.filter(slug=valor).exists():
+        if not valor:
+            return valor
+
+        ocupados = Producto.objects.filter(slug=valor)
+        if self.instance is not None:
+            # Al editar, el producto no choca consigo mismo.
+            ocupados = ocupados.exclude(pk=self.instance.pk)
+        if ocupados.exists():
             raise serializers.ValidationError("Ya existe un producto con este slug.")
         return valor
 
@@ -74,6 +81,14 @@ class ProductoAdminSerializer(serializers.ModelSerializer):
         if not datos_validados.get("slug"):
             datos_validados["slug"] = _slug_libre(datos_validados["nombre"])
         return super().create(datos_validados)
+
+    def update(self, instancia, datos_validados):
+        # Renombrar un producto no le cambia el slug: es su direccion publica y
+        # moverla romperia los enlaces que ya circulan. Para cambiarlo hay que
+        # enviarlo a proposito.
+        if not datos_validados.get("slug"):
+            datos_validados.pop("slug", None)
+        return super().update(instancia, datos_validados)
 
 
 def _slug_libre(nombre):

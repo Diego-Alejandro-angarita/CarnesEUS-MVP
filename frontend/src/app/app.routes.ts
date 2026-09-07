@@ -8,10 +8,22 @@ export const routes: Routes = [
     title: 'Catalogo | CarnesEUS',
   },
   {
+    path: 'admin/productos',
+    loadComponent: () =>
+      import('./features/admin/lista-productos/lista-productos').then((m) => m.ListaProductos),
+    title: 'Productos | CarnesEUS',
+  },
+  {
     path: 'admin/productos/nuevo',
     loadComponent: () =>
       import('./features/admin/crear-producto/crear-producto').then((m) => m.CrearProducto),
     title: 'Crear producto | CarnesEUS',
+  },
+  {
+    path: 'admin/productos/:id/editar',
+    loadComponent: () =>
+      import('./features/admin/editar-producto/editar-producto').then((m) => m.EditarProducto),
+    title: 'Modificar producto | CarnesEUS',
   },
   { path: '**', redirectTo: 'productos' },
 ];

@@ -1,5 +1,5 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework.generics import ListAPIView, ListCreateAPIView
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny
 
 from .models import Categoria, Producto
@@ -47,3 +47,35 @@ class CategoriaListView(ListAPIView):
     permission_classes = [AllowAny]
     pagination_class = None
     queryset = Categoria.objects.all()
+
+
+@extend_schema_view(
+    get=extend_schema(
+        summary="Datos de un producto para editarlo",
+        description=(
+            "Devuelve el producto con la categoria como id, que es lo que necesita el "
+            "formulario de administracion para rellenarse."
+        ),
+        responses={200: ProductoAdminSerializer},
+    ),
+    put=extend_schema(
+        summary="Reemplazar un producto",
+        request=ProductoAdminSerializer,
+        responses={200: ProductoAdminSerializer},
+    ),
+    patch=extend_schema(
+        summary="Modificar un producto",
+        description=(
+            "Actualiza los campos enviados. El slug se conserva salvo que se mande uno "
+            "nuevo, para no romper los enlaces del catalogo."
+        ),
+        request=ProductoAdminSerializer,
+        responses={200: ProductoAdminSerializer},
+    ),
+)
+class ProductoAdminDetalleView(RetrieveUpdateAPIView):
+    """Edicion de un producto por id (FR-04)."""
+
+    serializer_class = ProductoAdminSerializer
+    permission_classes = [AllowAny]
+    queryset = Producto.objects.select_related("categoria")
