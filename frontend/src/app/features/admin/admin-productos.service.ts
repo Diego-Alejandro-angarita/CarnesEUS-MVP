@@ -53,4 +53,9 @@ export class AdminProductosService {
   actualizar(id: number, producto: ProductoNuevo): Observable<ProductoAdmin> {
     return this.http.patch<ProductoAdmin>(`/api/productos/${id}/`, producto);
   }
+
+  /** Archiva el producto: sale del catalogo pero la ficha se conserva (FR-05). */
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/productos/${id}/`);
+  }
 }

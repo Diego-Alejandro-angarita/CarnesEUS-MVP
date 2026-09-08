@@ -18,6 +18,10 @@
       </p>
     }
     @case ('ok') {
+      @if (errorEliminar()) {
+        <p class="aviso aviso--error" role="alert">{{ errorEliminar() }}</p>
+      }
+
       @if (productos().length === 0) {
         <p class="aviso">Todavia no hay productos. Crea el primero con el boton de arriba.</p>
       } @else {
@@ -51,12 +55,41 @@
                     </span>
                   </td>
                   <td class="tabla__acciones">
-                    <a
-                      class="boton boton--secundario boton--menudo"
-                      [routerLink]="['/admin/productos', producto.id, 'editar']"
-                    >
-                      Editar<span class="visualmente-oculto"> {{ producto.nombre }}</span>
-                    </a>
+                    @if (confirmando() === producto.id) {
+                      <span class="confirmacion" role="alert">
+                        <span class="confirmacion__texto">Eliminar {{ producto.nombre }}?</span>
+                        <button
+                          type="button"
+                          class="boton boton--menudo"
+                          [disabled]="eliminando() === producto.id"
+                          (click)="eliminar(producto.id)"
+                        >
+                          {{ eliminando() === producto.id ? 'Eliminando...' : 'Confirmar' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="boton boton--secundario boton--menudo"
+                          [disabled]="eliminando() === producto.id"
+                          (click)="cancelar()"
+                        >
+                          Cancelar
+                        </button>
+                      </span>
+                    } @else {
+                      <a
+                        class="boton boton--secundario boton--menudo"
+                        [routerLink]="['/admin/productos', producto.id, 'editar']"
+                      >
+                        Editar<span class="visualmente-oculto"> {{ producto.nombre }}</span>
+                      </a>
+                      <button
+                        type="button"
+                        class="boton boton--peligro boton--menudo"
+                        (click)="pedirConfirmacion(producto.id)"
+                      >
+                        Eliminar<span class="visualmente-oculto"> {{ producto.nombre }}</span>
+                      </button>
+                    }
                   </td>
                 </tr>
               }

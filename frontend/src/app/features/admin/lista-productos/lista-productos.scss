@@ -79,6 +79,35 @@
 
 .tabla__acciones {
   text-align: right;
+  white-space: nowrap;
+
+  > * + * {
+    margin-left: 0.5rem;
+  }
+}
+
+.confirmacion {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confirmacion__texto {
+  color: t.$color-error;
+  font-size: 0.875rem;
+}
+
+.boton--peligro {
+  border-color: rgba(224, 138, 138, 0.5);
+  background: transparent;
+  color: t.$color-error;
+
+  &:hover:not(:disabled) {
+    border-color: t.$color-error;
+    background: rgba(157, 31, 31, 0.25);
+    color: t.$color-error;
+  }
 }
 
 .boton--menudo {

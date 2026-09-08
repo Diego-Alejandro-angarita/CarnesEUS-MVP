@@ -97,6 +97,7 @@ class Command(BaseCommand):
                         f"?text={etiqueta}"
                     ),
                     "disponible": disponible,
+                    "archivado": False,
                 },
             )
 
