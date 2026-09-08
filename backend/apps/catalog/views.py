@@ -1,5 +1,9 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import (
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 from rest_framework.permissions import AllowAny
 
 from .models import Categoria, Producto
@@ -29,7 +33,7 @@ class ProductoListView(ListCreateAPIView):
     # TODO(FR-02): restringir el POST a IsAdminUser cuando exista el inicio de
     # sesion. Hoy la creacion queda abierta porque todavia no hay autenticacion.
     permission_classes = [AllowAny]
-    queryset = Producto.objects.select_related("categoria")
+    queryset = Producto.objects.visibles().select_related("categoria")
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -72,10 +76,23 @@ class CategoriaListView(ListAPIView):
         request=ProductoAdminSerializer,
         responses={200: ProductoAdminSerializer},
     ),
+    delete=extend_schema(
+        summary="Eliminar un producto",
+        description=(
+            "Archiva el producto: desaparece del catalogo y de la administracion, pero "
+            "la ficha se conserva para lo que ya la referencie. Se puede recuperar desde "
+            "el admin de Django."
+        ),
+        responses={204: None},
+    ),
 )
-class ProductoAdminDetalleView(RetrieveUpdateAPIView):
-    """Edicion de un producto por id (FR-04)."""
+class ProductoAdminDetalleView(RetrieveUpdateDestroyAPIView):
+    """Edicion (FR-04) y eliminacion (FR-05) de un producto por id."""
 
     serializer_class = ProductoAdminSerializer
     permission_classes = [AllowAny]
-    queryset = Producto.objects.select_related("categoria")
+    queryset = Producto.objects.visibles().select_related("categoria")
+
+    def perform_destroy(self, instance):
+        instance.archivado = True
+        instance.save(update_fields=["archivado", "actualizado_en"])

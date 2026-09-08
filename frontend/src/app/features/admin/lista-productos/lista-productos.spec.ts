@@ -56,6 +56,10 @@ describe('ListaProductos', () => {
     return elemento(fixture).textContent ?? '';
   }
 
+  function pulsar(fixture: ComponentFixture<ListaProductos>, selector: string) {
+    elemento(fixture).querySelector<HTMLButtonElement>(selector)!.click();
+  }
+
   async function conProductos(resultados: unknown[], extra: Record<string, unknown> = {}) {
     const { fixture, http } = crear();
     http.expectOne((r) => r.url === '/api/productos/').flush(pagina(resultados, extra));
@@ -130,5 +134,94 @@ describe('ListaProductos', () => {
     fixture.detectChanges();
 
     expect(texto(fixture)).toContain('No pudimos cargar los productos');
+  });
+  it('ofrece eliminar cada producto', async () => {
+    const { fixture } = await conProductos([producto()]);
+
+    const boton = elemento(fixture).querySelector('.boton--peligro');
+    expect(boton?.textContent).toContain('Eliminar');
+  });
+
+  it('pide confirmacion antes de eliminar nada', async () => {
+    const { fixture, http } = await conProductos([producto()]);
+
+    pulsar(fixture, '.boton--peligro');
+    await fixture.whenStable();
+
+    http.expectNone((r) => r.method === 'DELETE');
+    expect(texto(fixture)).toContain('Eliminar Lomo fino?');
+    expect(elemento(fixture).querySelector('.boton--peligro')).toBeNull();
+  });
+
+  it('cancelar deja el producto en su sitio', async () => {
+    const { fixture, http } = await conProductos([producto()]);
+
+    pulsar(fixture, '.boton--peligro');
+    await fixture.whenStable();
+    pulsar(fixture, '.confirmacion .boton--secundario');
+    await fixture.whenStable();
+
+    http.expectNone((r) => r.method === 'DELETE');
+    expect(elemento(fixture).querySelector('.boton--peligro')).toBeTruthy();
+    expect(texto(fixture)).not.toContain('Eliminar Lomo fino?');
+  });
+
+  it('al confirmar envia el DELETE y recarga el listado', async () => {
+    const { fixture, http } = await conProductos([producto({ id: 42 })]);
+
+    pulsar(fixture, '.boton--peligro');
+    await fixture.whenStable();
+    pulsar(fixture, '.confirmacion .boton:not(.boton--secundario)');
+    await fixture.whenStable();
+
+    const borrado = http.expectOne('/api/productos/42/');
+    expect(borrado.request.method).toBe('DELETE');
+    borrado.flush(null, { status: 204, statusText: 'No Content' });
+    await fixture.whenStable();
+
+    http.expectOne((r) => r.url === '/api/productos/' && r.method === 'GET').flush(pagina([]));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('Todavia no hay productos');
+  });
+
+  it('avisa cuando el backend no puede eliminar', async () => {
+    const { fixture, http } = await conProductos([producto({ id: 42 })]);
+
+    pulsar(fixture, '.boton--peligro');
+    await fixture.whenStable();
+    pulsar(fixture, '.confirmacion .boton:not(.boton--secundario)');
+    await fixture.whenStable();
+
+    http
+      .expectOne('/api/productos/42/')
+      .flush('sin backend', { status: 502, statusText: 'Bad Gateway' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('No pudimos eliminar el producto');
+  });
+  it('retrocede de pagina al eliminar el ultimo producto que quedaba en ella', async () => {
+    const fixture = TestBed.createComponent(ListaProductos);
+    fixture.componentRef.setInput('page', 2);
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+
+    http
+      .expectOne((r) => r.url === '/api/productos/')
+      .flush(pagina([producto({ id: 42 })], { count: 13, previous: '/api/productos/' }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    pulsar(fixture, '.boton--peligro');
+    await fixture.whenStable();
+    pulsar(fixture, '.confirmacion .boton:not(.boton--secundario)');
+    await fixture.whenStable();
+    http.expectOne('/api/productos/42/').flush(null, { status: 204, statusText: 'No Content' });
+    await fixture.whenStable();
+
+    // No recarga la pagina 2, que ya no existe: navega a la anterior.
+    http.expectNone((r) => r.url === '/api/productos/' && r.method === 'GET');
   });
 });
