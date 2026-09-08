@@ -18,8 +18,8 @@
       </p>
     }
     @case ('ok') {
-      @if (errorEliminar()) {
-        <p class="aviso aviso--error" role="alert">{{ errorEliminar() }}</p>
+      @if (errorAccion()) {
+        <p class="aviso aviso--error" role="alert">{{ errorAccion() }}</p>
       }
 
       @if (productos().length === 0) {
@@ -50,9 +50,19 @@
                     {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
                   </td>
                   <td>
-                    <span class="insignia" [class.insignia--agotado]="!producto.disponible">
+                    <button
+                      type="button"
+                      class="insignia insignia--boton"
+                      [class.insignia--agotado]="!producto.disponible"
+                      [disabled]="cambiando() === producto.id"
+                      (click)="alternarDisponibilidad(producto.id, producto.disponible)"
+                    >
                       {{ producto.disponible ? 'Disponible' : 'Agotado' }}
-                    </span>
+                      <span class="visualmente-oculto">
+                        &mdash; marcar {{ producto.nombre }} como
+                        {{ producto.disponible ? 'agotado' : 'disponible' }}
+                      </span>
+                    </button>
                   </td>
                   <td class="tabla__acciones">
                     @if (confirmando() === producto.id) {

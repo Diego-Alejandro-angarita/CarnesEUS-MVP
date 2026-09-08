@@ -91,7 +91,7 @@ Los productos se administran desde el admin de Django, en
 
 ---
 
-## Administracion de productos (FR-03, FR-04, FR-05)
+## Administracion de productos (FR-03, FR-04, FR-05, FR-09)
 
 Interfaz para el personal de la carniceria: listado, alta, modificacion y
 eliminacion de productos. Lo que se guarda se ve en el catalogo al momento.
@@ -100,6 +100,8 @@ eliminacion de productos. Lo que se guarda se ve en el catalogo al momento.
 - Crear: <http://localhost:4200/admin/productos/nuevo>
 - Modificar: `/admin/productos/<id>/editar` (boton *Editar* de cada fila)
 - Eliminar: boton *Eliminar* de cada fila, con confirmacion en la propia fila
+- Cambiar disponibilidad: la etiqueta *Disponible* / *Agotado* de cada fila es
+  un boton; al pulsarla el producto cambia de estado sin abrir el formulario
 
 Endpoints:
 
@@ -108,12 +110,21 @@ Endpoints:
 | `POST` | `/api/productos/` | Alta. El `slug` se calcula del nombre si no se envia. |
 | `GET` | `/api/productos/<id>/` | Datos de un producto con la categoria como id. |
 | `PATCH` | `/api/productos/<id>/` | Modificacion. |
+| `PATCH` | `/api/productos/<id>/` | Tambien sirve para solo `{"disponible": ...}`. |
 | `DELETE` | `/api/productos/<id>/` | Eliminacion (archiva, ver abajo). |
 | `GET` | `/api/categorias/` | Categorias para el selector (sin paginar). |
 
 Renombrar un producto **no** le cambia el `slug`: es su direccion publica y
 moverla romperia los enlaces que ya circulan. Para cambiarlo hay que enviarlo
 a proposito.
+
+### Agotado no es eliminado
+
+Son dos cosas distintas y conviene no confundirlas:
+
+- **`disponible`** dice si hay existencias hoy. Un producto agotado **sigue en
+  el catalogo**, marcado y ordenado al final. Es reversible con un clic.
+- **`archivado`** saca el producto del catalogo por completo (ver abajo).
 
 ### Eliminar archiva, no borra
 

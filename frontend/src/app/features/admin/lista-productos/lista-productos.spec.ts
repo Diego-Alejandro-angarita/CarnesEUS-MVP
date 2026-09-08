@@ -94,6 +94,69 @@ describe('ListaProductos', () => {
     expect(elemento(fixture).querySelector('.insignia--agotado')).toBeTruthy();
   });
 
+  it('el estado es un boton que dice que hara al pulsarlo', async () => {
+    const { fixture } = await conProductos([producto()]);
+
+    const boton = elemento(fixture).querySelector<HTMLButtonElement>('.insignia--boton')!;
+    expect(boton.tagName).toBe('BUTTON');
+    expect(boton.textContent).toContain('Disponible');
+    expect(boton.textContent).toContain('marcar Lomo fino como agotado');
+  });
+
+  it('agota el producto sin salir del listado', async () => {
+    const { fixture, http } = await conProductos([producto({ id: 42 })]);
+
+    pulsar(fixture, '.insignia--boton');
+    await fixture.whenStable();
+
+    const peticion = http.expectOne('/api/productos/42/');
+    expect(peticion.request.method).toBe('PATCH');
+    expect(peticion.request.body).toEqual({ disponible: false });
+
+    peticion.flush({ ...producto({ id: 42 }), disponible: false });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(elemento(fixture).querySelector('.insignia--agotado')).toBeTruthy();
+    expect(texto(fixture)).toContain('Agotado');
+  });
+
+  it('repone un producto agotado', async () => {
+    const { fixture, http } = await conProductos([producto({ id: 42, disponible: false })]);
+
+    pulsar(fixture, '.insignia--boton');
+    await fixture.whenStable();
+
+    expect(http.expectOne('/api/productos/42/').request.body).toEqual({ disponible: true });
+  });
+
+  it('no recarga el listado al cambiar la disponibilidad', async () => {
+    const { fixture, http } = await conProductos([producto({ id: 42 })]);
+
+    pulsar(fixture, '.insignia--boton');
+    await fixture.whenStable();
+    http.expectOne('/api/productos/42/').flush({ ...producto({ id: 42 }), disponible: false });
+    await fixture.whenStable();
+
+    // La fila se actualiza en su sitio: recargar la moveria de posicion.
+    http.expectNone((r) => r.url === '/api/productos/' && r.method === 'GET');
+  });
+
+  it('avisa cuando no se puede cambiar la disponibilidad', async () => {
+    const { fixture, http } = await conProductos([producto({ id: 42 })]);
+
+    pulsar(fixture, '.insignia--boton');
+    await fixture.whenStable();
+    http
+      .expectOne('/api/productos/42/')
+      .flush('sin backend', { status: 502, statusText: 'Bad Gateway' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('No pudimos cambiar la disponibilidad');
+    expect(texto(fixture)).toContain('Disponible');
+  });
+
   it('cada fila enlaza a la pantalla de edicion de ese producto', async () => {
     const { fixture } = await conProductos([producto({ id: 42 })]);
 
