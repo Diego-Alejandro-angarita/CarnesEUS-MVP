@@ -54,6 +54,11 @@ export class AdminProductosService {
     return this.http.patch<ProductoAdmin>(`/api/productos/${id}/`, producto);
   }
 
+  /** Pone o quita el producto del catalogo sin abrir el formulario (FR-09). */
+  cambiarDisponibilidad(id: number, disponible: boolean): Observable<ProductoAdmin> {
+    return this.http.patch<ProductoAdmin>(`/api/productos/${id}/`, { disponible });
+  }
+
   /** Archiva el producto: sale del catalogo pero la ficha se conserva (FR-05). */
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`/api/productos/${id}/`);

@@ -9,9 +9,9 @@ import { AdminProductosService } from '../admin-productos.service';
 type EstadoListado = 'cargando' | 'ok' | 'error';
 
 /**
- * Listado de administracion: la puerta de entrada para modificar (FR-04) y
- * eliminar (FR-05) un producto. Reutiliza el mismo endpoint paginado que el
- * catalogo publico.
+ * Listado de administracion: la puerta de entrada para modificar (FR-04),
+ * eliminar (FR-05) y cambiar la disponibilidad (FR-09) de un producto.
+ * Reutiliza el mismo endpoint paginado que el catalogo publico.
  */
 @Component({
   selector: 'app-lista-productos',
@@ -32,7 +32,10 @@ export class ListaProductos {
   /** Id del producto que espera confirmacion para eliminarse. */
   protected readonly confirmando = signal<number | null>(null);
   protected readonly eliminando = signal<number | null>(null);
-  protected readonly errorEliminar = signal('');
+  /** Id del producto cuyo cambio de disponibilidad esta en curso. */
+  protected readonly cambiando = signal<number | null>(null);
+  /** Un solo aviso para lo que falle sobre una fila. */
+  protected readonly errorAccion = signal('');
 
   protected readonly paginaActual = computed(() => {
     const numero = this.page();
@@ -59,8 +62,36 @@ export class ListaProductos {
   }
 
   protected pedirConfirmacion(id: number): void {
-    this.errorEliminar.set('');
+    this.errorAccion.set('');
     this.confirmando.set(id);
+  }
+
+  /**
+   * Pone o quita el producto del catalogo. La fila se queda donde esta: el
+   * orden solo se recalcula al recargar, y mover la fila bajo el cursor
+   * despues de un clic desorienta.
+   */
+  protected async alternarDisponibilidad(id: number, disponible: boolean): Promise<void> {
+    this.errorAccion.set('');
+    this.cambiando.set(id);
+
+    try {
+      const producto = await firstValueFrom(this.admin.cambiarDisponibilidad(id, !disponible));
+      this.pagina.update((pagina) =>
+        pagina
+          ? {
+              ...pagina,
+              results: pagina.results.map((item) =>
+                item.id === id ? { ...item, disponible: producto.disponible } : item,
+              ),
+            }
+          : pagina,
+      );
+    } catch {
+      this.errorAccion.set('No pudimos cambiar la disponibilidad. Intentalo de nuevo.');
+    } finally {
+      this.cambiando.set(null);
+    }
   }
 
   protected cancelar(): void {
@@ -68,7 +99,7 @@ export class ListaProductos {
   }
 
   protected async eliminar(id: number): Promise<void> {
-    this.errorEliminar.set('');
+    this.errorAccion.set('');
     this.eliminando.set(id);
 
     try {
@@ -82,7 +113,7 @@ export class ListaProductos {
         await this.cargar(this.paginaActual());
       }
     } catch {
-      this.errorEliminar.set('No pudimos eliminar el producto. Intentalo de nuevo.');
+      this.errorAccion.set('No pudimos eliminar el producto. Intentalo de nuevo.');
     } finally {
       this.eliminando.set(null);
     }
