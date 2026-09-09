@@ -57,6 +57,7 @@ THIRD_PARTY_APPS = [
 #     "apps.catalog",
 LOCAL_APPS = [
     "apps.common",
+    "apps.accounts",
     "apps.catalog",
 ]
 
@@ -106,7 +107,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # de correr la primera migracion. Cambiarlo despues obliga a borrar la base:
 #     docker compose down -v
 #
-# AUTH_USER_MODEL = "accounts.Usuario"
+AUTH_USER_MODEL = "accounts.Usuario"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
