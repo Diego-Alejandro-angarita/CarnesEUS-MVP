@@ -2,6 +2,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.generics import (
     ListAPIView,
     ListCreateAPIView,
+    RetrieveAPIView,
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.permissions import AllowAny
@@ -51,6 +52,22 @@ class CategoriaListView(ListAPIView):
     permission_classes = [AllowAny]
     pagination_class = None
     queryset = Categoria.objects.all()
+
+
+@extend_schema(
+    summary="Ficha de un producto",
+    description="Devuelve el detalle completo de un producto a partir de su slug.",
+    responses={200: ProductoSerializer},
+)
+class ProductoDetalleView(RetrieveAPIView):
+    """Ficha publica (FR-16), buscada por slug."""
+
+    serializer_class = ProductoSerializer
+    permission_classes = [AllowAny]
+    # Sin .visibles(): un producto archivado desaparece del catalogo pero su
+    # ficha sigue respondiendo, para no romper enlaces que ya circulan.
+    queryset = Producto.objects.select_related("categoria")
+    lookup_field = "slug"
 
 
 @extend_schema_view(

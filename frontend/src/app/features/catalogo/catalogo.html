@@ -36,32 +36,34 @@
         <ul class="rejilla">
           @for (producto of productos(); track producto.id) {
             <li class="tarjeta" [class.tarjeta--agotada]="!producto.disponible">
-              <div class="tarjeta__foto">
-                @if (producto.foto_url) {
-                  <img
-                    [src]="producto.foto_url"
-                    [alt]="producto.nombre"
-                    width="600"
-                    height="400"
-                    loading="lazy"
-                  />
-                } @else {
-                  <p class="tarjeta__sin-foto">Sin foto</p>
-                }
-                <span class="insignia" [class.insignia--agotado]="!producto.disponible">
-                  {{ producto.disponible ? 'Disponible' : 'Agotado' }}
-                </span>
-              </div>
+              <a class="tarjeta__enlace" [routerLink]="['/productos', producto.slug]">
+                <div class="tarjeta__foto">
+                  @if (producto.foto_url) {
+                    <img
+                      [src]="producto.foto_url"
+                      [alt]="producto.nombre"
+                      width="600"
+                      height="400"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <p class="tarjeta__sin-foto">Sin foto</p>
+                  }
+                  <span class="insignia" [class.insignia--agotado]="!producto.disponible">
+                    {{ producto.disponible ? 'Disponible' : 'Agotado' }}
+                  </span>
+                </div>
 
-              <div class="tarjeta__cuerpo">
-                <p class="tarjeta__categoria">{{ producto.categoria }}</p>
-                <h3 class="tarjeta__nombre">{{ producto.nombre }}</h3>
-                <p class="tarjeta__descripcion">{{ producto.descripcion }}</p>
-                <p class="tarjeta__precio">
-                  {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
-                  <span>{{ producto.presentacion }}</span>
-                </p>
-              </div>
+                <div class="tarjeta__cuerpo">
+                  <p class="tarjeta__categoria">{{ producto.categoria }}</p>
+                  <h3 class="tarjeta__nombre">{{ producto.nombre }}</h3>
+                  <p class="tarjeta__descripcion">{{ producto.descripcion }}</p>
+                  <p class="tarjeta__precio">
+                    {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                    <span>{{ producto.presentacion }}</span>
+                  </p>
+                </div>
+              </a>
             </li>
           }
         </ul>

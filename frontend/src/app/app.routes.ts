@@ -25,5 +25,11 @@ export const routes: Routes = [
       import('./features/admin/editar-producto/editar-producto').then((m) => m.EditarProducto),
     title: 'Modificar producto | CarnesEUS',
   },
+  {
+    path: 'productos/:slug',
+    loadComponent: () =>
+      import('./features/ficha-producto/ficha-producto').then((m) => m.FichaProducto),
+    title: 'Producto | CarnesEUS',
+  },
   { path: '**', redirectTo: 'productos' },
 ];
