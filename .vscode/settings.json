@@ -1,0 +1,15 @@
+{
+  // VS Code trae su propio TypeScript y, si ademas esta activa la extension
+  // "TypeScript (Native Preview)", analiza el proyecto con TypeScript 6. Ese
+  // compilador no resuelve igual los paquetes de Angular 21 y reporta errores
+  // fantasma como "Cannot find module '@angular/router'".
+  //
+  // Aqui se le indica que use el TypeScript del proyecto (5.9.x), el mismo con
+  // el que compilan `ng build` y `ng test`.
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // Desactiva el analizador nativo en preview para este repositorio.
+  "typescript.experimental.useTsgo": false,
+  "typescript-go.enabled": false
+}
