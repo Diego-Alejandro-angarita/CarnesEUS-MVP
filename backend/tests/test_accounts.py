@@ -73,3 +73,41 @@ def test_registro_rechaza_contrasena_debil(api):
 
     assert respuesta.status_code == 400
     assert "password" in respuesta.data
+
+
+@pytest.mark.django_db
+def test_login_con_credenciales_correctas_establece_sesion(api):
+    Usuario.objects.create_user(email="ana@example.com", password="UnaClaveSegura123")
+
+    respuesta = api.post(
+        "/api/auth/login/",
+        {"email": "ana@example.com", "password": "UnaClaveSegura123"},
+    )
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["email"] == "ana@example.com"
+    assert respuesta.wsgi_request.user.is_authenticated
+
+
+@pytest.mark.django_db
+def test_login_con_contrasena_incorrecta_devuelve_error_generico(api):
+    Usuario.objects.create_user(email="ana@example.com", password="UnaClaveSegura123")
+
+    respuesta = api.post(
+        "/api/auth/login/",
+        {"email": "ana@example.com", "password": "otra-contrasena"},
+    )
+
+    assert respuesta.status_code == 400
+    assert respuesta.data["non_field_errors"] == ["Correo o contrasena incorrectos."]
+
+
+@pytest.mark.django_db
+def test_login_con_correo_inexistente_devuelve_el_mismo_error_generico(api):
+    respuesta = api.post(
+        "/api/auth/login/",
+        {"email": "no-existe@example.com", "password": "UnaClaveSegura123"},
+    )
+
+    assert respuesta.status_code == 400
+    assert respuesta.data["non_field_errors"] == ["Correo o contrasena incorrectos."]

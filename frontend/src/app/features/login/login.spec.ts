@@ -1,73 +1,65 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 
-import { Registro } from './registro';
+import { Login } from './login';
 
-describe('Registro', () => {
+describe('Login', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Registro],
+      imports: [Login],
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
   });
 
   it('se construye', () => {
-    const fixture = TestBed.createComponent(Registro);
+    const fixture = TestBed.createComponent(Login);
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('muestra un mensaje de exito cuando la API crea la cuenta', () => {
-    const fixture = TestBed.createComponent(Registro);
+  it('redirige al catalogo cuando las credenciales son correctas', () => {
+    const fixture = TestBed.createComponent(Login);
     const componente = fixture.componentInstance;
     const http = TestBed.inject(HttpTestingController);
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigateByUrl');
 
     componente['formulario'].setValue({
-      first_name: 'Ana',
-      last_name: 'Gomez',
       email: 'ana@example.com',
-      telefono: '',
       password: 'UnaClaveSegura123',
-      password_confirmacion: 'UnaClaveSegura123',
     });
     componente['enviar']();
 
-    http.expectOne('/api/auth/registro/').flush({
+    http.expectOne('/api/auth/login/').flush({
       id: 1,
       first_name: 'Ana',
       last_name: 'Gomez',
       email: 'ana@example.com',
       telefono: '',
     });
-    fixture.detectChanges();
 
-    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(texto).toContain('Cuenta creada correctamente');
+    expect(navegar).toHaveBeenCalledWith('/productos');
   });
 
-  it('muestra el error que devuelve la API cuando falla', () => {
-    const fixture = TestBed.createComponent(Registro);
+  it('muestra un error generico cuando las credenciales son incorrectas', () => {
+    const fixture = TestBed.createComponent(Login);
     const componente = fixture.componentInstance;
     const http = TestBed.inject(HttpTestingController);
 
     componente['formulario'].setValue({
-      first_name: 'Ana',
-      last_name: 'Gomez',
       email: 'ana@example.com',
-      telefono: '',
-      password: 'UnaClaveSegura123',
-      password_confirmacion: 'UnaClaveSegura123',
+      password: 'contrasena-mala',
     });
     componente['enviar']();
 
-    http.expectOne('/api/auth/registro/').flush(
-      { email: ['Ya existe una cuenta con este correo.'] },
+    http.expectOne('/api/auth/login/').flush(
+      { non_field_errors: ['Correo o contrasena incorrectos.'] },
       { status: 400, statusText: 'Bad Request' },
     );
     fixture.detectChanges();
 
     const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(texto).toContain('Ya existe una cuenta con este correo.');
+    expect(texto).toContain('Correo o contrasena incorrectos.');
   });
 });
