@@ -1,22 +1,23 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 
 import { LoginService } from '../../core/services/login.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly loginService = inject(LoginService);
+  private readonly router = inject(Router);
 
   protected readonly enviando = signal(false);
   protected readonly errorGeneral = signal<string | null>(null);
-  protected readonly exito = signal(false);
 
   protected readonly formulario = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -34,8 +35,7 @@ export class Login {
 
     this.loginService.iniciarSesion(this.formulario.getRawValue()).subscribe({
       next: () => {
-        this.enviando.set(false);
-        this.exito.set(true);
+        this.router.navigateByUrl('/productos');
       },
       error: (error: HttpErrorResponse) => {
         this.enviando.set(false);

@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Router, provideRouter } from '@angular/router';
 
 import { Login } from './login';
 
@@ -8,7 +9,7 @@ describe('Login', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Login],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
   });
 
@@ -17,10 +18,12 @@ describe('Login', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('muestra un mensaje de exito cuando las credenciales son correctas', () => {
+  it('redirige al catalogo cuando las credenciales son correctas', () => {
     const fixture = TestBed.createComponent(Login);
     const componente = fixture.componentInstance;
     const http = TestBed.inject(HttpTestingController);
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigateByUrl');
 
     componente['formulario'].setValue({
       email: 'ana@example.com',
@@ -35,10 +38,8 @@ describe('Login', () => {
       email: 'ana@example.com',
       telefono: '',
     });
-    fixture.detectChanges();
 
-    const texto = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(texto).toContain('Sesion iniciada correctamente');
+    expect(navegar).toHaveBeenCalledWith('/productos');
   });
 
   it('muestra un error generico cuando las credenciales son incorrectas', () => {
