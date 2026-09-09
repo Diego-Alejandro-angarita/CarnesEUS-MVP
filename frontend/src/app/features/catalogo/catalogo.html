@@ -25,7 +25,7 @@
       #campo
       type="search"
       name="busqueda"
-      [value]="busqueda()"
+      [value]="busquedaTexto()"
       placeholder="Buscar por nombre..."
       aria-label="Buscar productos"
     />
@@ -43,8 +43,8 @@
     }
     @case ('ok') {
       @if (productos().length === 0) {
-        @if (busqueda()) {
-          <p class="aviso">No encontramos productos que coincidan con "{{ busqueda() }}".</p>
+        @if (busquedaTexto()) {
+          <p class="aviso">No encontramos productos que coincidan con "{{ busquedaTexto() }}".</p>
         } @else {
           <p class="aviso">Todavia no hay productos publicados en el catalogo.</p>
         }

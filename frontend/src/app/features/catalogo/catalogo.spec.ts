@@ -134,6 +134,19 @@ describe('Catalogo', () => {
     expect(peticion.request.params.has('search')).toBe(false);
   });
 
+  it('deja el campo de busqueda vacio cuando el query param desaparece (queda undefined)', () => {
+    const fixture = TestBed.createComponent(Catalogo);
+    // El binding de inputs del router deja el input en undefined cuando el
+    // query param ya no esta en la URL, en vez de volver al valor por defecto.
+    fixture.componentRef.setInput('busqueda', undefined);
+    fixture.detectChanges();
+
+    const campo = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+      '.busqueda input',
+    )!;
+    expect(campo.value).toBe('');
+  });
+
   it('manda el parametro search cuando hay un termino de busqueda', () => {
     const fixture = TestBed.createComponent(Catalogo);
     fixture.componentRef.setInput('busqueda', 'lomo');

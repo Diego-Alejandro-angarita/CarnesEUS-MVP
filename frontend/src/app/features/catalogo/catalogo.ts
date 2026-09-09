@@ -35,10 +35,14 @@ export class Catalogo {
   );
   protected readonly hayAnterior = computed(() => this.pagina()?.previous != null);
   protected readonly haySiguiente = computed(() => this.pagina()?.next != null);
+  // El binding de inputs del router deja el input en undefined cuando el
+  // query param sale de la URL, sin importar que su tipo declarado sea
+  // string: este computed es la unica fuente de verdad para mostrarlo.
+  protected readonly busquedaTexto = computed(() => this.busqueda() ?? '');
 
   constructor() {
     effect(() => {
-      void this.cargar(this.paginaActual(), this.busqueda());
+      void this.cargar(this.paginaActual(), this.busquedaTexto());
     });
   }
 
