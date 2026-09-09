@@ -1,6 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { CatalogoService, PaginaProductos, TAMANO_PAGINA } from './catalogo.service';
@@ -9,7 +9,7 @@ type EstadoCatalogo = 'cargando' | 'ok' | 'error';
 
 @Component({
   selector: 'app-catalogo',
-  imports: [CurrencyPipe],
+  imports: [CurrencyPipe, RouterLink],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.scss',
 })

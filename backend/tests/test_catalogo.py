@@ -97,3 +97,34 @@ def test_catalogo_vacio_responde_lista_vacia(api):
     assert respuesta.status_code == 200
     assert respuesta.data["count"] == 0
     assert respuesta.data["results"] == []
+
+
+@pytest.mark.django_db
+def test_ficha_de_producto_devuelve_el_detalle_completo(api, crear_producto):
+    crear_producto("Lomo fino", precio="38900")
+
+    respuesta = api.get("/api/productos/lomo-fino/")
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["nombre"] == "Lomo fino"
+    assert respuesta.data["descripcion"] == "Corte de prueba."
+    assert respuesta.data["presentacion"] == "Bandeja 500 g"
+    assert Decimal(respuesta.data["precio"]) == Decimal("38900")
+    assert respuesta.data["categoria"] == "Res"
+
+
+@pytest.mark.django_db
+def test_ficha_de_producto_agotado_tambien_se_puede_ver(api, crear_producto):
+    crear_producto("Agotado", disponible=False)
+
+    respuesta = api.get("/api/productos/agotado/")
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["disponible"] is False
+
+
+@pytest.mark.django_db
+def test_ficha_de_producto_inexistente_responde_404(api):
+    respuesta = api.get("/api/productos/no-existe/")
+
+    assert respuesta.status_code == 404
