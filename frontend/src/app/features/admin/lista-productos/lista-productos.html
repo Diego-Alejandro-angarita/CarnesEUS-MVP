@@ -1,0 +1,126 @@
+<section class="admin admin--ancha">
+  <header class="admin__cabecera admin__cabecera--fila">
+    <div>
+      <p class="admin__kicker">Administracion</p>
+      <h1 class="admin__titulo">Productos</h1>
+      <p class="admin__lead">Elige un producto para modificar sus datos.</p>
+    </div>
+    <a class="boton" routerLink="/admin/productos/nuevo">Crear producto</a>
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando los productos...</p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar los productos. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (errorAccion()) {
+        <p class="aviso aviso--error" role="alert">{{ errorAccion() }}</p>
+      }
+
+      @if (productos().length === 0) {
+        <p class="aviso">Todavia no hay productos. Crea el primero con el boton de arriba.</p>
+      } @else {
+        <p class="tabla__conteo">{{ total() }} productos</p>
+
+        <div class="tabla__marco">
+          <table class="tabla">
+            <caption class="visualmente-oculto">Productos del catalogo</caption>
+            <thead>
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Presentacion</th>
+                <th scope="col" class="tabla__numero">Precio</th>
+                <th scope="col">Estado</th>
+                <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (producto of productos(); track producto.id) {
+                <tr>
+                  <th scope="row" class="tabla__nombre">{{ producto.nombre }}</th>
+                  <td>{{ producto.categoria }}</td>
+                  <td>{{ producto.presentacion }}</td>
+                  <td class="tabla__numero">
+                    {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="insignia insignia--boton"
+                      [class.insignia--agotado]="!producto.disponible"
+                      [disabled]="cambiando() === producto.id"
+                      (click)="alternarDisponibilidad(producto.id, producto.disponible)"
+                    >
+                      {{ producto.disponible ? 'Disponible' : 'Agotado' }}
+                      <span class="visualmente-oculto">
+                        &mdash; marcar {{ producto.nombre }} como
+                        {{ producto.disponible ? 'agotado' : 'disponible' }}
+                      </span>
+                    </button>
+                  </td>
+                  <td class="tabla__acciones">
+                    @if (confirmando() === producto.id) {
+                      <span class="confirmacion" role="alert">
+                        <span class="confirmacion__texto">Eliminar {{ producto.nombre }}?</span>
+                        <button
+                          type="button"
+                          class="boton boton--menudo"
+                          [disabled]="eliminando() === producto.id"
+                          (click)="eliminar(producto.id)"
+                        >
+                          {{ eliminando() === producto.id ? 'Eliminando...' : 'Confirmar' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="boton boton--secundario boton--menudo"
+                          [disabled]="eliminando() === producto.id"
+                          (click)="cancelar()"
+                        >
+                          Cancelar
+                        </button>
+                      </span>
+                    } @else {
+                      <a
+                        class="boton boton--secundario boton--menudo"
+                        [routerLink]="['/admin/productos', producto.id, 'editar']"
+                      >
+                        Editar<span class="visualmente-oculto"> {{ producto.nombre }}</span>
+                      </a>
+                      <button
+                        type="button"
+                        class="boton boton--peligro boton--menudo"
+                        (click)="pedirConfirmacion(producto.id)"
+                      >
+                        Eliminar<span class="visualmente-oculto"> {{ producto.nombre }}</span>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPaginas() > 1) {
+          <nav class="paginacion" aria-label="Paginacion del listado">
+            <button type="button" [disabled]="!hayAnterior()" (click)="irA(paginaActual() - 1)">
+              Anterior
+            </button>
+            <p class="paginacion__estado" aria-live="polite">
+              Pagina {{ paginaActual() }} de {{ totalPaginas() }}
+            </p>
+            <button type="button" [disabled]="!haySiguiente()" (click)="irA(paginaActual() + 1)">
+              Siguiente
+            </button>
+          </nav>
+        }
+      }
+    }
+  }
+</section>

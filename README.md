@@ -88,3 +88,59 @@ docker compose exec backend python manage.py cargar_catalogo
 
 Los productos se administran desde el admin de Django, en
 <http://localhost:8001/admin/>.
+
+---
+
+## Administracion de productos (FR-03, FR-04, FR-05, FR-09)
+
+Interfaz para el personal de la carniceria: listado, alta, modificacion y
+eliminacion de productos. Lo que se guarda se ve en el catalogo al momento.
+
+- Listado: <http://localhost:4200/admin/productos>
+- Crear: <http://localhost:4200/admin/productos/nuevo>
+- Modificar: `/admin/productos/<id>/editar` (boton *Editar* de cada fila)
+- Eliminar: boton *Eliminar* de cada fila, con confirmacion en la propia fila
+- Cambiar disponibilidad: la etiqueta *Disponible* / *Agotado* de cada fila es
+  un boton; al pulsarla el producto cambia de estado sin abrir el formulario
+
+Endpoints:
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `POST` | `/api/productos/` | Alta. El `slug` se calcula del nombre si no se envia. |
+| `GET` | `/api/productos/<id>/` | Datos de un producto con la categoria como id. |
+| `PATCH` | `/api/productos/<id>/` | Modificacion. |
+| `PATCH` | `/api/productos/<id>/` | Tambien sirve para solo `{"disponible": ...}`. |
+| `DELETE` | `/api/productos/<id>/` | Eliminacion (archiva, ver abajo). |
+| `GET` | `/api/categorias/` | Categorias para el selector (sin paginar). |
+
+Renombrar un producto **no** le cambia el `slug`: es su direccion publica y
+moverla romperia los enlaces que ya circulan. Para cambiarlo hay que enviarlo
+a proposito.
+
+### Agotado no es eliminado
+
+Son dos cosas distintas y conviene no confundirlas:
+
+- **`disponible`** dice si hay existencias hoy. Un producto agotado **sigue en
+  el catalogo**, marcado y ordenado al final. Es reversible con un clic.
+- **`archivado`** saca el producto del catalogo por completo (ver abajo).
+
+### Eliminar archiva, no borra
+
+`DELETE` marca el producto como `archivado`: desaparece del catalogo y de la
+administracion (`GET`, `PATCH` y `DELETE` sobre el responden 404), pero la fila
+se conserva para que lo que ya la referencie siga teniendo a que apuntar.
+
+Para recuperarlo hay que quitarle la marca desde el admin de Django, en
+<http://localhost:8001/admin/> (la columna *archivado* se edita desde el
+listado). Recargar los datos de ejemplo con `cargar_catalogo` tambien los
+devuelve al catalogo.
+
+En el codigo, `Producto.objects.visibles()` es el queryset que excluye los
+archivados: toda consulta nueva sobre el catalogo deberia partir de ahi.
+
+> **Sin autenticacion todavia.** El `POST` esta abierto porque el inicio de
+> sesion es FR-02 y aun no existe. Queda un `TODO(FR-02)` en
+> `backend/apps/catalog/views.py` para cambiarlo a `IsAdminUser`. No desplegar
+> asi.
