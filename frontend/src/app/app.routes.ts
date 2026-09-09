@@ -17,6 +17,11 @@ export const routes: Routes = [
     title: 'Crear cuenta | CarnesEUS',
   },
   {
+    path: 'login',
+    loadComponent: () => import('./features/login/login').then((m) => m.Login),
+    title: 'Iniciar sesion | CarnesEUS',
+  },
+  {
     path: 'admin/productos',
     loadComponent: () =>
       import('./features/admin/lista-productos/lista-productos').then((m) => m.ListaProductos),

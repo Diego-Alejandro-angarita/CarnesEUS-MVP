@@ -1,8 +1,17 @@
-from django.contrib.auth import password_validation
+from django.contrib.auth import authenticate, password_validation
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from .models import Usuario
+
+
+class UsuarioSerializer(serializers.ModelSerializer):
+    """Datos publicos de un usuario ya autenticado."""
+
+    class Meta:
+        model = Usuario
+        fields = ["id", "first_name", "last_name", "email", "telefono"]
+        read_only_fields = fields
 
 
 class RegistroSerializer(serializers.ModelSerializer):
@@ -56,3 +65,22 @@ class RegistroSerializer(serializers.ModelSerializer):
         datos_validados.pop("password_confirmacion")
         password = datos_validados.pop("password")
         return Usuario.objects.create_user(password=password, **datos_validados)
+
+
+class LoginSerializer(serializers.Serializer):
+    """Valida credenciales de un cliente ya registrado."""
+
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, style={"input_type": "password"})
+
+    def validate(self, atributos: dict) -> dict:
+        usuario = authenticate(
+            self.context["request"],
+            username=atributos["email"].lower(),
+            password=atributos["password"],
+        )
+        if usuario is None:
+            raise serializers.ValidationError("Correo o contrasena incorrectos.")
+
+        atributos["usuario"] = usuario
+        return atributos
