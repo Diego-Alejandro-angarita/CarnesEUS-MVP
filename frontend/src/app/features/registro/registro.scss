@@ -1,3 +1,5 @@
+@use '../../styles/tokens' as t;
+
 .registro {
   max-width: 24rem;
   margin: 0 auto;
@@ -63,4 +65,13 @@ button:disabled {
   margin-top: 1.25rem;
   font-size: 0.9375rem;
   text-align: center;
+
+  a {
+    color: t.$color-marca-clara;
+    font-weight: 600;
+
+    &:hover {
+      color: t.$color-oro-claro;
+    }
+  }
 }
