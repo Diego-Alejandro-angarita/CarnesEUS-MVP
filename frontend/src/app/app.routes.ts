@@ -13,9 +13,32 @@ export const routes: Routes = [
   },
   {
     path: 'registro',
+    loadComponent: () => import('./features/registro/registro').then((m) => m.Registro),
+    title: 'Crear cuenta | CarnesEUS',
+  },
+  {
+    path: 'admin/productos',
     loadComponent: () =>
-      import('./features/registro/registro').then((m) => m.Registro),
-    title: 'Crear cuenta',
+      import('./features/admin/lista-productos/lista-productos').then((m) => m.ListaProductos),
+    title: 'Productos | CarnesEUS',
+  },
+  {
+    path: 'admin/productos/nuevo',
+    loadComponent: () =>
+      import('./features/admin/crear-producto/crear-producto').then((m) => m.CrearProducto),
+    title: 'Crear producto | CarnesEUS',
+  },
+  {
+    path: 'admin/productos/:id/editar',
+    loadComponent: () =>
+      import('./features/admin/editar-producto/editar-producto').then((m) => m.EditarProducto),
+    title: 'Modificar producto | CarnesEUS',
+  },
+  {
+    path: 'productos/:slug',
+    loadComponent: () =>
+      import('./features/ficha-producto/ficha-producto').then((m) => m.FichaProducto),
+    title: 'Producto | CarnesEUS',
   },
   { path: '**', redirectTo: 'productos' },
 ];

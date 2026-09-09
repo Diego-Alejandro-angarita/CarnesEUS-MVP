@@ -12,9 +12,9 @@ class CategoriaAdmin(admin.ModelAdmin):
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ["nombre", "categoria", "presentacion", "precio", "disponible"]
-    list_editable = ["precio", "disponible"]
-    list_filter = ["disponible", "categoria"]
+    list_display = ["nombre", "categoria", "presentacion", "precio", "disponible", "archivado"]
+    list_editable = ["precio", "disponible", "archivado"]
+    list_filter = ["archivado", "disponible", "categoria"]
     search_fields = ["nombre", "descripcion"]
     prepopulated_fields = {"slug": ("nombre",)}
     autocomplete_fields = ["categoria"]
