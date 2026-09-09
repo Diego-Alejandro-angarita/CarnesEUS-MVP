@@ -19,6 +19,7 @@ export class Catalogo {
   private readonly ruta = inject(ActivatedRoute);
 
   readonly page = input(1, { transform: numberAttribute });
+  readonly busqueda = input('');
 
   protected readonly estado = signal<EstadoCatalogo>('cargando');
   protected readonly pagina = signal<PaginaProductos | null>(null);
@@ -37,7 +38,7 @@ export class Catalogo {
 
   constructor() {
     effect(() => {
-      void this.cargar(this.paginaActual());
+      void this.cargar(this.paginaActual(), this.busqueda());
     });
   }
 
@@ -49,10 +50,19 @@ export class Catalogo {
     });
   }
 
-  private async cargar(numero: number): Promise<void> {
+  protected buscar(valor: string): void {
+    const termino = valor.trim();
+    void this.router.navigate([], {
+      relativeTo: this.ruta,
+      queryParams: { busqueda: termino || null, page: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  private async cargar(numero: number, busqueda: string): Promise<void> {
     this.estado.set('cargando');
     try {
-      this.pagina.set(await firstValueFrom(this.catalogo.listar(numero)));
+      this.pagina.set(await firstValueFrom(this.catalogo.listar(numero, busqueda)));
       this.estado.set('ok');
     } catch {
       this.pagina.set(null);

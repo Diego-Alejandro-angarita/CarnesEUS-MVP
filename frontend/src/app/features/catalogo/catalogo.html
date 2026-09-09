@@ -20,6 +20,18 @@
     }
   </header>
 
+  <form class="busqueda" (submit)="$event.preventDefault(); buscar(campo.value)">
+    <input
+      #campo
+      type="search"
+      name="busqueda"
+      [value]="busqueda()"
+      placeholder="Buscar por nombre..."
+      aria-label="Buscar productos"
+    />
+    <button type="submit">Buscar</button>
+  </form>
+
   @switch (estado()) {
     @case ('cargando') {
       <p class="aviso" role="status">Cargando el catalogo...</p>
@@ -31,7 +43,11 @@
     }
     @case ('ok') {
       @if (productos().length === 0) {
-        <p class="aviso">Todavia no hay productos publicados en el catalogo.</p>
+        @if (busqueda()) {
+          <p class="aviso">No encontramos productos que coincidan con "{{ busqueda() }}".</p>
+        } @else {
+          <p class="aviso">Todavia no hay productos publicados en el catalogo.</p>
+        }
       } @else {
         <ul class="rejilla">
           @for (producto of productos(); track producto.id) {
