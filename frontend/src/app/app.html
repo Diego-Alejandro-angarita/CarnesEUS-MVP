@@ -5,7 +5,20 @@
       CarnesEUs
     </a>
     <nav class="cabecera__nav">
-      <a class="cabecera__enlace" routerLink="/registro">Crear cuenta</a>
+      @if (!auth.verificando()) {
+        @if (auth.usuario(); as usuario) {
+          <span class="cabecera__usuario">
+            <span class="cabecera__sello" aria-hidden="true">{{ usuario.first_name.charAt(0) }}</span>
+            {{ usuario.first_name }}
+          </span>
+          <button type="button" class="cabecera__enlace cabecera__salir" (click)="salir()">
+            Salir
+          </button>
+        } @else {
+          <a class="cabecera__enlace" routerLink="/login">Iniciar sesion</a>
+          <a class="cabecera__enlace" routerLink="/registro">Crear cuenta</a>
+        }
+      }
       <a routerLink="/admin/productos">Administrar</a>
       <a class="cabecera__carrito" routerLink="/carrito">
         Carrito

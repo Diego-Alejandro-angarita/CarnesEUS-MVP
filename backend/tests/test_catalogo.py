@@ -91,6 +91,95 @@ def test_los_agotados_se_listan_al_final_sin_ocultarse(api, crear_producto):
 
 
 @pytest.mark.django_db
+def test_buscar_por_nombre_devuelve_las_coincidencias(api, crear_producto):
+    crear_producto("Lomo fino")
+    crear_producto("Punta de anca")
+
+    respuesta = api.get("/api/productos/", {"search": "lomo"})
+
+    assert respuesta.data["count"] == 1
+    assert respuesta.data["results"][0]["nombre"] == "Lomo fino"
+
+
+@pytest.mark.django_db
+def test_buscar_por_nombre_no_distingue_mayusculas(api, crear_producto):
+    crear_producto("Lomo fino")
+
+    respuesta = api.get("/api/productos/", {"search": "LOMO"})
+
+    assert respuesta.data["count"] == 1
+
+
+@pytest.mark.django_db
+def test_buscar_sin_coincidencias_devuelve_lista_vacia(api, crear_producto):
+    crear_producto("Lomo fino")
+
+    respuesta = api.get("/api/productos/", {"search": "chorizo"})
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["count"] == 0
+    assert respuesta.data["results"] == []
+
+
+@pytest.mark.django_db
+def test_filtrar_por_categoria_devuelve_solo_esa_categoria(api, crear_producto):
+    cerdo = Categoria.objects.create(nombre="Cerdo", slug="cerdo")
+    crear_producto("Lomo de res")
+    Producto.objects.create(
+        categoria=cerdo,
+        nombre="Lomo de cerdo",
+        slug="lomo-de-cerdo",
+        presentacion="Bandeja 500 g",
+        precio=Decimal("25000"),
+    )
+
+    respuesta = api.get("/api/productos/", {"categoria": cerdo.id})
+
+    assert respuesta.data["count"] == 1
+    assert respuesta.data["results"][0]["nombre"] == "Lomo de cerdo"
+
+
+@pytest.mark.django_db
+def test_filtrar_por_rango_de_precio(api, crear_producto):
+    crear_producto("Barato", precio="10000")
+    crear_producto("Medio", precio="30000")
+    crear_producto("Caro", precio="60000")
+
+    respuesta = api.get("/api/productos/", {"precio_min": 20000, "precio_max": 40000})
+
+    assert respuesta.data["count"] == 1
+    assert respuesta.data["results"][0]["nombre"] == "Medio"
+
+
+@pytest.mark.django_db
+def test_combinar_busqueda_y_filtro_de_categoria(api, crear_producto):
+    cerdo = Categoria.objects.create(nombre="Cerdo", slug="cerdo")
+    crear_producto("Lomo fino")
+    Producto.objects.create(
+        categoria=cerdo,
+        nombre="Lomo de cerdo",
+        slug="lomo-de-cerdo",
+        presentacion="Bandeja 500 g",
+        precio=Decimal("25000"),
+    )
+
+    respuesta = api.get("/api/productos/", {"search": "lomo", "categoria": cerdo.id})
+
+    assert respuesta.data["count"] == 1
+    assert respuesta.data["results"][0]["nombre"] == "Lomo de cerdo"
+
+
+@pytest.mark.django_db
+def test_filtro_sin_coincidencias_devuelve_lista_vacia(api, crear_producto):
+    crear_producto("Lomo fino", precio="30000")
+
+    respuesta = api.get("/api/productos/", {"precio_min": 100000})
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["count"] == 0
+
+
+@pytest.mark.django_db
 def test_catalogo_vacio_responde_lista_vacia(api):
     respuesta = api.get("/api/productos/")
 
