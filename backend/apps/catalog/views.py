@@ -16,7 +16,7 @@ from .serializers import CategoriaSerializer, ProductoAdminSerializer, ProductoS
         summary="Listado paginado del catalogo",
         description=(
             "Devuelve los productos del catalogo con foto, precio y disponibilidad. "
-            "Acepta los parametros page y page_size."
+            "Acepta los parametros page, page_size y search (busca por nombre)."
         ),
         responses={200: ProductoSerializer(many=True)},
     ),
@@ -35,6 +35,7 @@ class ProductoListView(ListCreateAPIView):
     # sesion. Hoy la creacion queda abierta porque todavia no hay autenticacion.
     permission_classes = [AllowAny]
     queryset = Producto.objects.visibles().select_related("categoria")
+    search_fields = ["nombre"]
 
     def get_serializer_class(self):
         if self.request.method == "POST":

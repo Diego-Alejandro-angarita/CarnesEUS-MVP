@@ -30,8 +30,11 @@ type PaginaProductosApi = Omit<PaginaProductos, 'results'> & { results: Producto
 export class CatalogoService {
   private readonly http = inject(HttpClient);
 
-  listar(pagina: number): Observable<PaginaProductos> {
-    const params = new HttpParams().set('page', pagina).set('page_size', TAMANO_PAGINA);
+  listar(pagina: number, busqueda = ''): Observable<PaginaProductos> {
+    let params = new HttpParams().set('page', pagina).set('page_size', TAMANO_PAGINA);
+    if (busqueda) {
+      params = params.set('search', busqueda);
+    }
 
     return this.http
       .get<PaginaProductosApi>('/api/productos/', { params })

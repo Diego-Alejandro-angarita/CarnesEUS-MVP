@@ -91,6 +91,37 @@ def test_los_agotados_se_listan_al_final_sin_ocultarse(api, crear_producto):
 
 
 @pytest.mark.django_db
+def test_buscar_por_nombre_devuelve_las_coincidencias(api, crear_producto):
+    crear_producto("Lomo fino")
+    crear_producto("Punta de anca")
+
+    respuesta = api.get("/api/productos/", {"search": "lomo"})
+
+    assert respuesta.data["count"] == 1
+    assert respuesta.data["results"][0]["nombre"] == "Lomo fino"
+
+
+@pytest.mark.django_db
+def test_buscar_por_nombre_no_distingue_mayusculas(api, crear_producto):
+    crear_producto("Lomo fino")
+
+    respuesta = api.get("/api/productos/", {"search": "LOMO"})
+
+    assert respuesta.data["count"] == 1
+
+
+@pytest.mark.django_db
+def test_buscar_sin_coincidencias_devuelve_lista_vacia(api, crear_producto):
+    crear_producto("Lomo fino")
+
+    respuesta = api.get("/api/productos/", {"search": "chorizo"})
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["count"] == 0
+    assert respuesta.data["results"] == []
+
+
+@pytest.mark.django_db
 def test_catalogo_vacio_responde_lista_vacia(api):
     respuesta = api.get("/api/productos/")
 
