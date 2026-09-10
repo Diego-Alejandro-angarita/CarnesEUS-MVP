@@ -119,3 +119,78 @@
   color: t.$color-texto-suave;
   line-height: 1.6;
 }
+
+.compra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: t.$espacio;
+  margin-top: 1.5rem;
+}
+
+.compra__cantidad {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  button {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid t.$color-borde;
+    border-radius: t.$radio-chip;
+    background: t.$color-fondo-alto;
+    color: t.$color-texto;
+    font-size: 1.125rem;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      border-color: t.$color-oro;
+      color: t.$color-oro-claro;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    min-width: 2ch;
+    color: t.$color-texto;
+    text-align: center;
+  }
+}
+
+.compra__boton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: t.$radio-chip;
+  background: t.$color-marca;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: t.$color-marca-clara;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.compra__aviso {
+  margin-top: 0.75rem;
+  color: t.$color-texto-suave;
+  font-size: 0.875rem;
+
+  a {
+    color: t.$color-oro;
+  }
+}
+
+.compra__aviso--error {
+  color: t.$color-error;
+}

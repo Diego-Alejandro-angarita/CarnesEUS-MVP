@@ -35,6 +35,11 @@ export const routes: Routes = [
     title: 'Modificar producto | CarnesEUS',
   },
   {
+    path: 'carrito',
+    loadComponent: () => import('./features/carrito/carrito').then((m) => m.CarritoPagina),
+    title: 'Tu carrito | CarnesEUS',
+  },
+  {
     path: 'productos/:slug',
     loadComponent: () =>
       import('./features/ficha-producto/ficha-producto').then((m) => m.FichaProducto),
