@@ -1,0 +1,262 @@
+@use '../../styles/tokens' as t;
+
+.carrito {
+  max-width: t.$ancho-maximo;
+  margin: 0 auto;
+  padding: 2rem t.$espacio 4rem;
+}
+
+.carrito__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: t.$espacio;
+  margin-bottom: 1.5rem;
+}
+
+.carrito__titulo {
+  margin: 0;
+  color: t.$color-texto;
+  font-family: t.$fuente-display;
+  font-size: 2.25rem;
+}
+
+.carrito__seguir {
+  color: t.$color-oro;
+  font-size: 0.875rem;
+  text-decoration: none;
+
+  &:hover {
+    color: t.$color-oro-claro;
+  }
+}
+
+.aviso {
+  padding: 1.5rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  color: t.$color-texto-suave;
+}
+
+.aviso--error {
+  border-color: t.$color-error;
+  color: t.$color-error;
+}
+
+.carrito__vacio {
+  display: grid;
+  justify-items: start;
+  gap: t.$espacio;
+  padding: 2.5rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-superficie;
+  color: t.$color-texto-suave;
+}
+
+.boton {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  border-radius: t.$radio-chip;
+  background: t.$color-marca;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    background: t.$color-marca-clara;
+  }
+}
+
+.lineas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-superficie;
+}
+
+.linea {
+  display: grid;
+  grid-template-columns: 5rem 1fr auto auto auto;
+  align-items: center;
+  gap: t.$espacio;
+  padding: t.$espacio;
+  border-bottom: 1px solid t.$color-borde-suave;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.linea--agotada {
+  opacity: 0.6;
+}
+
+.linea__foto {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border-radius: t.$radio-chip;
+  background: t.$color-fondo-alto;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.linea__sin-foto {
+  color: t.$color-texto-tenue;
+  font-size: 0.75rem;
+}
+
+.linea__datos {
+  min-width: 0;
+
+  p {
+    margin: 0.25rem 0 0;
+  }
+}
+
+.linea__nombre {
+  color: t.$color-texto;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    color: t.$color-oro-claro;
+  }
+}
+
+.linea__presentacion,
+.linea__precio {
+  color: t.$color-texto-suave;
+  font-size: 0.875rem;
+}
+
+.linea__agotado {
+  color: t.$color-error;
+  font-size: 0.8125rem;
+}
+
+.linea__cantidad {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  button {
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid t.$color-borde;
+    border-radius: t.$radio-chip;
+    background: t.$color-fondo-alto;
+    color: t.$color-texto;
+    font-size: 1rem;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      border-color: t.$color-oro;
+      color: t.$color-oro-claro;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    min-width: 2ch;
+    color: t.$color-texto;
+    text-align: center;
+  }
+}
+
+.linea__subtotal {
+  margin: 0;
+  min-width: 7ch;
+  color: t.$color-texto;
+  font-weight: 600;
+  text-align: right;
+}
+
+.linea__quitar {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio-chip;
+  background: transparent;
+  color: t.$color-texto-suave;
+  font-size: 0.8125rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: t.$color-error;
+    color: t.$color-error;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.resumen {
+  margin-top: 1.5rem;
+  padding: t.$espacio 1.25rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-fondo-alto;
+}
+
+.resumen__nota {
+  margin: 0 0 0.75rem;
+  color: t.$color-texto-suave;
+  font-size: 0.8125rem;
+}
+
+.resumen__total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+  color: t.$color-texto;
+
+  strong {
+    font-family: t.$fuente-display;
+    font-size: 1.75rem;
+    color: t.$color-oro;
+  }
+}
+
+@media (max-width: 40rem) {
+  .linea {
+    grid-template-columns: 4rem 1fr;
+    grid-template-areas:
+      'foto datos'
+      'cantidad subtotal'
+      'quitar quitar';
+  }
+
+  .linea__foto {
+    grid-area: foto;
+  }
+  .linea__datos {
+    grid-area: datos;
+  }
+  .linea__cantidad {
+    grid-area: cantidad;
+  }
+  .linea__subtotal {
+    grid-area: subtotal;
+  }
+  .linea__quitar {
+    grid-area: quitar;
+    justify-self: start;
+  }
+}

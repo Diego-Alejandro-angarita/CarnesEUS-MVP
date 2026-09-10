@@ -38,6 +38,49 @@
               <span>{{ producto.presentacion }}</span>
             </p>
             <p class="ficha__descripcion">{{ producto.descripcion }}</p>
+
+            @if (producto.disponible) {
+              <div class="compra">
+                <div class="compra__cantidad">
+                  <button
+                    type="button"
+                    [disabled]="cantidad() <= 1"
+                    (click)="cambiarCantidad(-1)"
+                    aria-label="Quitar una unidad"
+                  >
+                    &minus;
+                  </button>
+                  <span aria-live="polite">{{ cantidad() }}</span>
+                  <button type="button" (click)="cambiarCantidad(1)" aria-label="Agregar una unidad">
+                    +
+                  </button>
+                </div>
+
+                <button
+                  class="compra__boton"
+                  type="button"
+                  [disabled]="estadoAgregar() === 'enviando'"
+                  (click)="agregar()"
+                >
+                  {{ estadoAgregar() === 'enviando' ? 'Agregando...' : 'Agregar al carrito' }}
+                </button>
+              </div>
+
+              @if (estadoAgregar() === 'agregado') {
+                <p class="compra__aviso" role="status">
+                  Agregado al carrito. <a routerLink="/carrito">Ver el carrito</a>
+                </p>
+              }
+              @if (estadoAgregar() === 'error') {
+                <p class="compra__aviso compra__aviso--error" role="alert">
+                  No pudimos agregarlo. Intentalo de nuevo.
+                </p>
+              }
+            } @else {
+              <p class="compra__aviso" role="status">
+                Este producto esta agotado. Vuelve pronto.
+              </p>
+            }
           </div>
         </div>
       </article>

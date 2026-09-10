@@ -21,6 +21,7 @@ urlpatterns = [
     # --- Aqui van las rutas de cada historia de usuario -------------------
     path("api/auth/", include("apps.accounts.urls")),
     path("api/", include("apps.catalog.urls")),
+    path("api/", include("apps.cart.urls")),
 ]
 
 if settings.DEBUG:

@@ -20,6 +20,14 @@
         }
       }
       <a routerLink="/admin/productos">Administrar</a>
+      <a class="cabecera__carrito" routerLink="/carrito">
+        Carrito
+        @if (cantidadCarrito() > 0) {
+          <span class="cabecera__contador" aria-label="productos en el carrito">
+            {{ cantidadCarrito() }}
+          </span>
+        }
+      </a>
     </nav>
   </div>
   <p class="cabecera__servicio">

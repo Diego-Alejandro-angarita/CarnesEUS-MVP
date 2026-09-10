@@ -1,0 +1,97 @@
+<section class="carrito">
+  <header class="carrito__cabecera">
+    <h1 class="carrito__titulo">Tu carrito</h1>
+    <a class="carrito__seguir" routerLink="/productos">&larr; Seguir comprando</a>
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando el carrito...</p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar el carrito. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (items().length === 0) {
+        <div class="carrito__vacio">
+          <p>Todavia no has agregado nada.</p>
+          <a class="boton" routerLink="/productos">Ver el catalogo</a>
+        </div>
+      } @else {
+        <ul class="lineas">
+          @for (item of items(); track item.id) {
+            <li class="linea" [class.linea--agotada]="!item.comprable">
+              <div class="linea__foto">
+                @if (item.foto_url) {
+                  <img [src]="item.foto_url" [alt]="item.nombre" loading="lazy" />
+                } @else {
+                  <span class="linea__sin-foto">Sin foto</span>
+                }
+              </div>
+
+              <div class="linea__datos">
+                <a class="linea__nombre" [routerLink]="['/productos', item.slug]">
+                  {{ item.nombre }}
+                </a>
+                <p class="linea__presentacion">{{ item.presentacion }}</p>
+                <p class="linea__precio">
+                  {{ item.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }} c/u
+                </p>
+                @if (!item.comprable) {
+                  <p class="linea__agotado">Agotado. No suma al total.</p>
+                }
+              </div>
+
+              <div class="linea__cantidad">
+                <button
+                  type="button"
+                  [disabled]="ocupado() === item.id || item.cantidad <= 1"
+                  (click)="cambiar(item.id, item.cantidad - 1)"
+                  [attr.aria-label]="'Quitar una unidad de ' + item.nombre"
+                >
+                  &minus;
+                </button>
+                <span aria-live="polite">{{ item.cantidad }}</span>
+                <button
+                  type="button"
+                  [disabled]="ocupado() === item.id"
+                  (click)="cambiar(item.id, item.cantidad + 1)"
+                  [attr.aria-label]="'Agregar una unidad de ' + item.nombre"
+                >
+                  +
+                </button>
+              </div>
+
+              <p class="linea__subtotal">
+                {{ item.subtotal | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+              </p>
+
+              <button
+                class="linea__quitar"
+                type="button"
+                [disabled]="ocupado() === item.id"
+                (click)="quitar(item.id)"
+              >
+                Quitar
+              </button>
+            </li>
+          }
+        </ul>
+
+        <footer class="resumen">
+          @if (hayAgotados()) {
+            <p class="resumen__nota">
+              Los productos agotados siguen en tu carrito pero no se cobran.
+            </p>
+          }
+          <p class="resumen__total">
+            <span>Total</span>
+            <strong>{{ total() | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
+          </p>
+        </footer>
+      }
+    }
+  }
+</section>
