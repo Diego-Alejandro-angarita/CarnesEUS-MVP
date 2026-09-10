@@ -42,6 +42,26 @@ describe('Login', () => {
     expect(navegar).toHaveBeenCalledWith('/productos');
   });
 
+  it('alterna el tipo del campo de contrasena al pulsar mostrar/ocultar', () => {
+    const fixture = TestBed.createComponent(Login);
+    fixture.detectChanges();
+
+    const elemento = fixture.nativeElement as HTMLElement;
+    const campo = elemento.querySelector<HTMLInputElement>('#password')!;
+    const boton = elemento.querySelector<HTMLButtonElement>('.campo-password button')!;
+
+    expect(campo.type).toBe('password');
+
+    boton.click();
+    fixture.detectChanges();
+    expect(campo.type).toBe('text');
+    expect(boton.textContent).toContain('Ocultar');
+
+    boton.click();
+    fixture.detectChanges();
+    expect(campo.type).toBe('password');
+  });
+
   it('muestra un error generico cuando las credenciales son incorrectas', () => {
     const fixture = TestBed.createComponent(Login);
     const componente = fixture.componentInstance;

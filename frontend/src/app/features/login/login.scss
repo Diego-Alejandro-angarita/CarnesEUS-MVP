@@ -1,9 +1,27 @@
 @use '../../styles/tokens' as t;
 
 .login {
-  max-width: 24rem;
-  margin: 0 auto;
-  padding: 2rem 1.25rem;
+  max-width: 26rem;
+  margin: 3rem auto;
+  padding: 0 1.25rem;
+}
+
+.tarjeta-login {
+  padding: 2rem 1.75rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-fondo-alto;
+}
+
+h1 {
+  margin: 0 0 0.375rem;
+  font-size: 1.5rem;
+}
+
+.subtitulo {
+  margin: 0 0 1.5rem;
+  color: t.$color-texto-suave;
+  font-size: 0.9375rem;
 }
 
 form {
@@ -19,26 +37,74 @@ label {
 }
 
 input {
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio-chip;
+  background: t.$color-superficie;
+  color: t.$color-texto;
   font-size: 1rem;
+
+  &::placeholder {
+    color: t.$color-texto-tenue;
+  }
+
+  &:focus-visible {
+    outline: 2px solid t.$color-oro;
+    outline-offset: 1px;
+  }
 }
 
-button {
+.campo-password {
+  position: relative;
+  display: flex;
+
+  input {
+    flex: 1;
+    padding-right: 4.5rem;
+  }
+
+  button {
+    position: absolute;
+    inset: 0 0 0 auto;
+    padding: 0 0.875rem;
+    border: none;
+    background: transparent;
+    color: t.$color-texto-tenue;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      color: t.$color-oro;
+    }
+  }
+}
+
+.boton-entrar {
   margin-top: 1.5rem;
-  padding: 0.65rem;
+  padding: 0.75rem;
   border: none;
-  border-radius: 0.375rem;
-  background: #111827;
-  color: #fff;
+  border-radius: t.$radio-chip;
+  background: t.$color-marca;
+  color: #ffffff;
   font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: t.$color-marca-clara;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+hr {
+  margin: 1.75rem 0 1.25rem;
+  border: none;
+  border-top: 1px solid t.$color-borde-suave;
 }
 
 .mensaje {
@@ -49,12 +115,6 @@ button:disabled {
   font-size: 0.9375rem;
 }
 
-.mensaje--ok {
-  background: #ecfdf5;
-  border-color: #10b981;
-  color: #065f46;
-}
-
 .mensaje--error {
   background: #fef2f2;
   border-color: #ef4444;
@@ -62,7 +122,7 @@ button:disabled {
 }
 
 .enlace-alterno {
-  margin-top: 1.25rem;
+  margin: 0;
   font-size: 0.9375rem;
   text-align: center;
 
