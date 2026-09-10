@@ -29,6 +29,11 @@ function pagina(resultados: unknown[], extra: Record<string, unknown> = {}) {
   return { count: resultados.length, next: null, previous: null, results: resultados, ...extra };
 }
 
+const CATEGORIAS = [
+  { id: 1, nombre: 'Res', slug: 'res' },
+  { id: 2, nombre: 'Cerdo', slug: 'cerdo' },
+];
+
 describe('Catalogo', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -42,10 +47,16 @@ describe('Catalogo', () => {
     }).compileComponents();
   });
 
+  function flushCategorias(http: HttpTestingController, categorias: unknown[] = CATEGORIAS) {
+    http.expectOne((r) => r.url === '/api/categorias/').flush(categorias);
+  }
+
   function crear() {
     const fixture = TestBed.createComponent(Catalogo);
     fixture.detectChanges();
-    return { fixture, http: TestBed.inject(HttpTestingController) };
+    const http = TestBed.inject(HttpTestingController);
+    flushCategorias(http);
+    return { fixture, http };
   }
 
   function texto(fixture: { nativeElement: unknown }) {
@@ -140,6 +151,7 @@ describe('Catalogo', () => {
     // query param ya no esta en la URL, en vez de volver al valor por defecto.
     fixture.componentRef.setInput('busqueda', undefined);
     fixture.detectChanges();
+    flushCategorias(TestBed.inject(HttpTestingController));
 
     const campo = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
       '.busqueda input',
@@ -152,6 +164,7 @@ describe('Catalogo', () => {
     fixture.componentRef.setInput('busqueda', 'lomo');
     fixture.detectChanges();
     const http = TestBed.inject(HttpTestingController);
+    flushCategorias(http);
 
     const peticion = http.expectOne((r) => r.url === '/api/productos/');
 
@@ -183,11 +196,122 @@ describe('Catalogo', () => {
     fixture.componentRef.setInput('busqueda', 'chorizo');
     fixture.detectChanges();
     const http = TestBed.inject(HttpTestingController);
+    flushCategorias(http);
 
     http.expectOne((r) => r.url === '/api/productos/').flush(pagina([]));
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(texto(fixture)).toContain('No encontramos productos que coincidan con "chorizo"');
+  });
+
+  it('llena el selector de categorias con lo que devuelve el backend', async () => {
+    const { fixture, http } = crear();
+    http.expectOne((r) => r.url === '/api/productos/').flush(pagina([]));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const elemento = fixture.nativeElement as HTMLElement;
+    (elemento.querySelector<HTMLButtonElement>('.boton-filtros'))!.click();
+    fixture.detectChanges();
+
+    const opciones = elemento.querySelectorAll('#filtro-categoria option');
+    expect(opciones.length).toBe(3);
+    expect(opciones[1].textContent).toContain('Res');
+    expect(opciones[2].textContent).toContain('Cerdo');
+  });
+
+  it('no manda categoria ni precio si no hay filtros activos', () => {
+    const { http } = crear();
+
+    const peticion = http.expectOne((r) => r.url === '/api/productos/');
+
+    expect(peticion.request.params.has('categoria')).toBe(false);
+    expect(peticion.request.params.has('precio_min')).toBe(false);
+    expect(peticion.request.params.has('precio_max')).toBe(false);
+  });
+
+  it('manda categoria y rango de precio cuando hay filtros activos', () => {
+    const fixture = TestBed.createComponent(Catalogo);
+    fixture.componentRef.setInput('categoria', 2);
+    fixture.componentRef.setInput('precio_min', 20000);
+    fixture.componentRef.setInput('precio_max', 50000);
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    flushCategorias(http);
+
+    const peticion = http.expectOne((r) => r.url === '/api/productos/');
+
+    expect(peticion.request.params.get('categoria')).toBe('2');
+    expect(peticion.request.params.get('precio_min')).toBe('20000');
+    expect(peticion.request.params.get('precio_max')).toBe('50000');
+  });
+
+  it('al aplicar el panel de filtros navega con los query params correctos', async () => {
+    const { fixture, http } = crear();
+    http.expectOne((r) => r.url === '/api/productos/').flush(pagina([producto()]));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const elemento = fixture.nativeElement as HTMLElement;
+    elemento.querySelector<HTMLButtonElement>('.boton-filtros')!.click();
+    fixture.detectChanges();
+
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigate');
+
+    const categoriaSel = elemento.querySelector<HTMLSelectElement>('#filtro-categoria')!;
+    categoriaSel.value = '2';
+    const precioMinCampo = elemento.querySelector<HTMLInputElement>('#filtro-precio-min')!;
+    precioMinCampo.value = '10000';
+    elemento.querySelector('form.panel-filtros')?.dispatchEvent(new Event('submit'));
+
+    expect(navegar).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({
+        queryParams: { categoria: '2', precio_min: '10000', precio_max: null, page: null },
+      }),
+    );
+  });
+
+  it('limpiar filtros navega quitando categoria y precio', async () => {
+    const fixture = TestBed.createComponent(Catalogo);
+    fixture.componentRef.setInput('categoria', 2);
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    flushCategorias(http);
+    http.expectOne((r) => r.url === '/api/productos/').flush(pagina([producto()]));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const elemento = fixture.nativeElement as HTMLElement;
+    elemento.querySelector<HTMLButtonElement>('.boton-filtros')!.click();
+    fixture.detectChanges();
+
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigate');
+
+    elemento.querySelector<HTMLButtonElement>('.boton-texto')!.click();
+
+    expect(navegar).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({
+        queryParams: { categoria: null, precio_min: null, precio_max: null, page: null },
+      }),
+    );
+  });
+
+  it('avisa con un mensaje distinto cuando el filtro no tiene coincidencias', async () => {
+    const fixture = TestBed.createComponent(Catalogo);
+    fixture.componentRef.setInput('precio_min', 999999);
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    flushCategorias(http);
+
+    http.expectOne((r) => r.url === '/api/productos/').flush(pagina([]));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('No encontramos productos con esos filtros.');
   });
 });

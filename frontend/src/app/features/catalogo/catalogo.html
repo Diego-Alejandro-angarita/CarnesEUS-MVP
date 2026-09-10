@@ -20,17 +20,79 @@
     }
   </header>
 
-  <form class="busqueda" (submit)="$event.preventDefault(); buscar(campo.value)">
-    <input
-      #campo
-      type="search"
-      name="busqueda"
-      [value]="busquedaTexto()"
-      placeholder="Buscar por nombre..."
-      aria-label="Buscar productos"
-    />
-    <button type="submit">Buscar</button>
-  </form>
+  <div class="controles">
+    <form class="busqueda" (submit)="$event.preventDefault(); buscar(campo.value)">
+      <input
+        #campo
+        type="search"
+        name="busqueda"
+        [value]="busquedaTexto()"
+        placeholder="Buscar por nombre..."
+        aria-label="Buscar productos"
+      />
+      <button type="submit">Buscar</button>
+    </form>
+
+    <button
+      type="button"
+      class="boton-filtros"
+      [class.boton-filtros--activo]="hayFiltrosActivos()"
+      [attr.aria-expanded]="filtrosAbiertos()"
+      (click)="alternarFiltros()"
+    >
+      Filtros
+    </button>
+  </div>
+
+  @if (filtrosAbiertos()) {
+    <form
+      class="panel-filtros"
+      (submit)="
+        $event.preventDefault(); aplicarFiltros(categoriaSel.value, precioMinCampo.value, precioMaxCampo.value)
+      "
+    >
+      <div class="campo-filtro">
+        <label for="filtro-categoria">Categoria</label>
+        <select id="filtro-categoria" #categoriaSel [value]="categoria() ?? ''">
+          <option value="">Todas</option>
+          @for (cat of categorias(); track cat.id) {
+            <option [value]="cat.id">{{ cat.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo-filtro">
+        <label for="filtro-precio-min">Precio minimo</label>
+        <input
+          id="filtro-precio-min"
+          #precioMinCampo
+          type="number"
+          min="0"
+          [value]="precioMin() ?? ''"
+          placeholder="0"
+        />
+      </div>
+
+      <div class="campo-filtro">
+        <label for="filtro-precio-max">Precio maximo</label>
+        <input
+          id="filtro-precio-max"
+          #precioMaxCampo
+          type="number"
+          min="0"
+          [value]="precioMax() ?? ''"
+          placeholder="Sin limite"
+        />
+      </div>
+
+      <div class="panel-filtros__acciones">
+        <button type="submit">Aplicar filtros</button>
+        @if (hayFiltrosActivos()) {
+          <button type="button" class="boton-texto" (click)="limpiarFiltros()">Limpiar</button>
+        }
+      </div>
+    </form>
+  }
 
   @switch (estado()) {
     @case ('cargando') {
@@ -45,6 +107,8 @@
       @if (productos().length === 0) {
         @if (busquedaTexto()) {
           <p class="aviso">No encontramos productos que coincidan con "{{ busquedaTexto() }}".</p>
+        } @else if (hayFiltrosActivos()) {
+          <p class="aviso">No encontramos productos con esos filtros.</p>
         } @else {
           <p class="aviso">Todavia no hay productos publicados en el catalogo.</p>
         }
