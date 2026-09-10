@@ -7,6 +7,7 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import AllowAny
 
+from .filters import ProductoFilter
 from .models import Categoria, Producto
 from .serializers import CategoriaSerializer, ProductoAdminSerializer, ProductoSerializer
 
@@ -16,7 +17,8 @@ from .serializers import CategoriaSerializer, ProductoAdminSerializer, ProductoS
         summary="Listado paginado del catalogo",
         description=(
             "Devuelve los productos del catalogo con foto, precio y disponibilidad. "
-            "Acepta los parametros page, page_size y search (busca por nombre)."
+            "Acepta los parametros page, page_size, search (busca por nombre), "
+            "categoria (id) y precio_min/precio_max (rango de precio)."
         ),
         responses={200: ProductoSerializer(many=True)},
     ),
@@ -36,6 +38,7 @@ class ProductoListView(ListCreateAPIView):
     permission_classes = [AllowAny]
     queryset = Producto.objects.visibles().select_related("categoria")
     search_fields = ["nombre"]
+    filterset_class = ProductoFilter
 
     def get_serializer_class(self):
         if self.request.method == "POST":
