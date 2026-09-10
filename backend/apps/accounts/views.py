@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -29,3 +29,26 @@ class LoginView(APIView):
         login(request, usuario)
 
         return Response(UsuarioSerializer(usuario).data, status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    """Cierre de sesion del cliente."""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        logout(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class QuienSoyView(APIView):
+    """Datos del cliente con sesion activa.
+
+    El frontend la consulta al arrancar para saber si ya hay sesion.
+    """
+
+    # Sin permission_classes: usa el default IsAuthenticated, asi devuelve
+    # 403 solo si no hay sesion.
+
+    def get(self, request):
+        return Response(UsuarioSerializer(request.user).data)

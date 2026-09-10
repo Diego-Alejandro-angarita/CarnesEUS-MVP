@@ -15,6 +15,9 @@
 }
 
 .cabecera__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin-left: auto;
 
   a {
@@ -62,6 +65,29 @@
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
+}
+
+.cabecera__usuario {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: t.$color-texto;
+  font-size: 0.9375rem;
+  font-weight: 600;
+
+  .cabecera__sello {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+.cabecera__salir {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
 }
 
 .cabecera__servicio {

@@ -3,7 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import { LoginService } from '../../core/services/login.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -13,11 +13,12 @@ import { LoginService } from '../../core/services/login.service';
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
-  private readonly loginService = inject(LoginService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
   protected readonly enviando = signal(false);
   protected readonly errorGeneral = signal<string | null>(null);
+  protected readonly mostrarPassword = signal(false);
 
   protected readonly formulario = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -33,7 +34,7 @@ export class Login {
     this.enviando.set(true);
     this.errorGeneral.set(null);
 
-    this.loginService.iniciarSesion(this.formulario.getRawValue()).subscribe({
+    this.auth.iniciarSesion(this.formulario.getRawValue()).subscribe({
       next: () => {
         this.router.navigateByUrl('/productos');
       },
@@ -42,6 +43,10 @@ export class Login {
         this.errorGeneral.set(this.mensajeDeError(error));
       },
     });
+  }
+
+  protected alternarPassword(): void {
+    this.mostrarPassword.update((valor) => !valor);
   }
 
   private mensajeDeError(error: HttpErrorResponse): string {

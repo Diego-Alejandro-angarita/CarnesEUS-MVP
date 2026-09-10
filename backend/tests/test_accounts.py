@@ -111,3 +111,33 @@ def test_login_con_correo_inexistente_devuelve_el_mismo_error_generico(api):
 
     assert respuesta.status_code == 400
     assert respuesta.data["non_field_errors"] == ["Correo o contrasena incorrectos."]
+
+
+@pytest.mark.django_db
+def test_quien_soy_sin_sesion_no_autoriza(api):
+    respuesta = api.get("/api/auth/quien-soy/")
+
+    assert respuesta.status_code == 403
+
+
+@pytest.mark.django_db
+def test_quien_soy_con_sesion_devuelve_el_usuario(api):
+    Usuario.objects.create_user(email="ana@example.com", password="UnaClaveSegura123")
+    api.post("/api/auth/login/", {"email": "ana@example.com", "password": "UnaClaveSegura123"})
+
+    respuesta = api.get("/api/auth/quien-soy/")
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["email"] == "ana@example.com"
+
+
+@pytest.mark.django_db
+def test_logout_cierra_la_sesion(api):
+    Usuario.objects.create_user(email="ana@example.com", password="UnaClaveSegura123")
+    api.post("/api/auth/login/", {"email": "ana@example.com", "password": "UnaClaveSegura123"})
+
+    respuesta_logout = api.post("/api/auth/logout/")
+    respuesta_quien_soy = api.get("/api/auth/quien-soy/")
+
+    assert respuesta_logout.status_code == 204
+    assert respuesta_quien_soy.status_code == 403
