@@ -1,0 +1,64 @@
+<section class="cobertura">
+  <h2 class="cobertura__titulo">Llegamos a tu barrio?</h2>
+  <p class="cobertura__ayuda">
+    Escribe tu municipio y tu barrio y te decimos si hacemos domicilios hasta alli.
+  </p>
+
+  <form class="cobertura__form" [formGroup]="formulario" (ngSubmit)="verificar()" novalidate>
+    <div class="campo">
+      <label [for]="'cobertura-municipio-' + uid">Municipio</label>
+      <input
+        [id]="'cobertura-municipio-' + uid"
+        type="text"
+        formControlName="municipio"
+        autocomplete="address-level2"
+        [attr.list]="'cobertura-municipios-' + uid"
+      />
+      <datalist [id]="'cobertura-municipios-' + uid">
+        @for (municipio of municipiosSugeridos(); track municipio) {
+          <option [value]="municipio"></option>
+        }
+      </datalist>
+    </div>
+
+    <div class="campo">
+      <label [for]="'cobertura-barrio-' + uid">Barrio</label>
+      <input
+        [id]="'cobertura-barrio-' + uid"
+        type="text"
+        formControlName="barrio"
+        autocomplete="address-level3"
+        [attr.list]="'cobertura-barrios-' + uid"
+      />
+      <datalist [id]="'cobertura-barrios-' + uid">
+        @for (barrio of barriosSugeridos(); track barrio) {
+          <option [value]="barrio"></option>
+        }
+      </datalist>
+    </div>
+
+    <button class="boton" type="submit" [disabled]="estado() === 'consultando'">
+      {{ estado() === 'consultando' ? 'Consultando...' : 'Verificar cobertura' }}
+    </button>
+  </form>
+
+  <div class="indicador" aria-live="polite">
+    @switch (estado()) {
+      @case ('cubierta') {
+        <p class="indicador__resultado indicador--si" role="status">
+          <span class="indicador__punto" aria-hidden="true"></span>
+          <strong>Si llegamos.</strong> {{ mensaje() }}
+        </p>
+      }
+      @case ('sin-cobertura') {
+        <p class="indicador__resultado indicador--no" role="status">
+          <span class="indicador__punto" aria-hidden="true"></span>
+          <strong>Fuera de la zona.</strong> {{ mensaje() }}
+        </p>
+      }
+      @case ('error') {
+        <p class="indicador__resultado indicador--error" role="alert">{{ mensaje() }}</p>
+      }
+    }
+  </div>
+</section>
