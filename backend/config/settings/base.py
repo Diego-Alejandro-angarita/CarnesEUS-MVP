@@ -59,6 +59,7 @@ LOCAL_APPS = [
     "apps.common",
     "apps.accounts",
     "apps.catalog",
+    "apps.pedidos",
     "apps.cart",
 ]
 
@@ -202,4 +203,15 @@ LOGGING = {
         "console": {"class": "logging.StreamHandler", "formatter": "simple"},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
+}
+# --------------------------------------------------------------------------
+# Pago por transferencia (FR-11)
+# --------------------------------------------------------------------------
+# Datos de la cuenta que ve el cliente al elegir transferencia. Valores de
+# ejemplo: se reemplazan con variables de entorno en backend/.env.
+DATOS_TRANSFERENCIA = {
+    "banco": env.str("TRANSFERENCIA_BANCO", default="Bancolombia"),
+    "tipo_cuenta": env.str("TRANSFERENCIA_TIPO_CUENTA", default="Ahorros"),
+    "numero_cuenta": env.str("TRANSFERENCIA_NUMERO_CUENTA", default="000-000000-00"),
+    "titular": env.str("TRANSFERENCIA_TITULAR", default="CarnesEUS"),
 }
