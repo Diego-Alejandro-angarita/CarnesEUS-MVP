@@ -44,6 +44,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/carrito/carrito').then((m) => m.CarritoPagina),
     title: 'Tu carrito | CarnesEUS',
   },
+    {
+    path: 'checkout',
+    loadComponent: () => import('./features/checkout/checkout').then((m) => m.Checkout),
+    title: 'Finalizar compra | CarnesEUS',
+  },
   {
     path: 'productos/:slug',
     loadComponent: () =>

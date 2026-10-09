@@ -1,0 +1,165 @@
+<section class="checkout">
+  @if (pedido(); as confirmado) {
+    <div class="confirmacion" role="status">
+      <h1 class="checkout__titulo">Pedido recibido</h1>
+      <p>
+        Gracias, {{ confirmado.nombre }}. Tu pedido <strong>#{{ confirmado.id }}</strong> va para
+        {{ confirmado.direccion }}, {{ confirmado.barrio }} ({{ confirmado.municipio }}).
+      </p>
+
+      @switch (confirmado.pago.metodo) {
+        @case ('transferencia') {
+          <p>
+            Para completar tu pedido transfiere
+            <strong>{{ confirmado.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
+            a esta cuenta. Cuando verifiquemos el pago, confirmamos tu pedido.
+          </p>
+          @if (confirmado.instrucciones_pago; as cuenta) {
+            <dl class="cuenta">
+              <dt>Banco</dt>
+              <dd>{{ cuenta.banco }}</dd>
+              <dt>Tipo de cuenta</dt>
+              <dd>{{ cuenta.tipo_cuenta }}</dd>
+              <dt>Numero de cuenta</dt>
+              <dd>{{ cuenta.numero_cuenta }}</dd>
+              <dt>Titular</dt>
+              <dd>{{ cuenta.titular }}</dd>
+            </dl>
+          }
+          <p class="nota">Usa el numero de pedido #{{ confirmado.id }} como referencia.</p>
+        }
+        @case ('contraentrega_qr') {
+          <p>
+            Pagas
+            <strong>{{ confirmado.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
+            con un codigo QR cuando recibas tu pedido.
+          </p>
+        }
+        @case ('contraentrega_datafono') {
+          <p>
+            Pagas
+            <strong>{{ confirmado.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
+            con tarjeta en el datafono cuando recibas tu pedido.
+          </p>
+        }
+      }
+
+      <ul class="resumen__lista">
+        @for (item of confirmado.items; track item.nombre) {
+          <li>
+            <span>{{ item.cantidad }} x {{ item.nombre }}</span>
+            <span>{{ item.subtotal | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+          </li>
+        }
+      </ul>
+
+      <a class="boton" routerLink="/productos">Seguir comprando</a>
+    </div>
+  } @else {
+    <header class="checkout__cabecera">
+      <h1 class="checkout__titulo">Finalizar compra</h1>
+      <a class="checkout__volver" routerLink="/carrito">&larr; Volver al carrito</a>
+    </header>
+
+    @if (cargandoCarrito()) {
+      <p class="aviso" role="status">Cargando tu pedido...</p>
+    } @else if (items().length === 0) {
+      <div class="aviso">
+        <p>No tienes productos para comprar.</p>
+        <a class="boton" routerLink="/productos">Ver el catalogo</a>
+      </div>
+    } @else {
+      <div class="checkout__cuerpo">
+        <form [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+          <fieldset class="bloque">
+            <legend>Datos de entrega</legend>
+
+            <div class="campo">
+              <label for="nombre">Nombre completo</label>
+              <input id="nombre" type="text" formControlName="nombre" autocomplete="name" />
+            </div>
+            <div class="campo">
+              <label for="email">Correo electronico</label>
+              <input id="email" type="email" formControlName="email" autocomplete="email" />
+            </div>
+            <div class="campo">
+              <label for="telefono">Telefono</label>
+              <input id="telefono" type="tel" formControlName="telefono" autocomplete="tel" />
+            </div>
+            <div class="campo">
+              <label for="direccion">Direccion</label>
+              <input
+                id="direccion"
+                type="text"
+                formControlName="direccion"
+                autocomplete="street-address"
+              />
+            </div>
+            <div class="fila">
+              <div class="campo">
+                <label for="municipio">Municipio</label>
+                <input
+                  id="municipio"
+                  type="text"
+                  formControlName="municipio"
+                  autocomplete="address-level2"
+                />
+              </div>
+              <div class="campo">
+                <label for="barrio">Barrio</label>
+                <input
+                  id="barrio"
+                  type="text"
+                  formControlName="barrio"
+                  autocomplete="address-level3"
+                />
+              </div>
+            </div>
+            <div class="campo">
+              <label for="notas">Notas para la entrega (opcional)</label>
+              <input id="notas" type="text" formControlName="notas" />
+            </div>
+          </fieldset>
+
+          <fieldset class="bloque">
+            <legend>Como quieres pagar?</legend>
+
+            @for (metodo of metodos; track metodo.valor) {
+              <label class="metodo">
+                <input type="radio" formControlName="metodo_pago" [value]="metodo.valor" />
+                <span>
+                  <strong>{{ metodo.nombre }}</strong>
+                  <small>{{ metodo.ayuda }}</small>
+                </span>
+              </label>
+            }
+          </fieldset>
+
+          @if (error()) {
+            <p class="aviso aviso--error" role="alert">{{ error() }}</p>
+          }
+
+          <button class="boton" type="submit" [disabled]="enviando()">
+            {{ enviando() ? 'Procesando...' : 'Confirmar pedido' }}
+          </button>
+        </form>
+
+        <aside class="resumen">
+          <h2>Tu pedido</h2>
+          <ul class="resumen__lista">
+            @for (item of items(); track item.id) {
+              <li>
+                <span>{{ item.cantidad }} x {{ item.nombre }}</span>
+                <span>{{ item.subtotal | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+              </li>
+            }
+          </ul>
+          <p class="resumen__total">
+            <span>Total</span>
+            <strong>{{ total() | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
+          </p>
+        </aside>
+      </div>
+    }
+  }
+</section>
