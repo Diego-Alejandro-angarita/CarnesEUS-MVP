@@ -55,5 +55,10 @@ export const routes: Routes = [
       import('./features/ficha-producto/ficha-producto').then((m) => m.FichaProducto),
     title: 'Producto | CarnesEUS',
   },
+  {
+    path: 'cobertura',
+    loadComponent: () => import('./features/cobertura/cobertura').then((m) => m.Cobertura),
+    title: 'Zona de cobertura | CarnesEUS',
+  },
   { path: '**', redirectTo: 'productos' },
 ];
