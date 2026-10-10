@@ -92,4 +92,31 @@ describe('FichaProducto', () => {
 
     expect(texto(fixture)).toContain('No pudimos cargar el producto');
   });
+
+  it('con una promocion vigente muestra el precio rebajado y el de lista tachado', async () => {
+    const { fixture, http } = crear();
+
+    http
+      .expectOne('/api/productos/lomo-fino/')
+      .flush(producto({ descuento: 15, precio_promocion: '33065.00' }));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.ficha__precio')?.textContent).toContain('33.065');
+    expect(raiz.querySelector('.precio-anterior')?.textContent).toContain('38.900');
+    expect(raiz.querySelector('.insignia--promo')?.textContent).toContain('-15%');
+  });
+
+  it('sin promocion muestra solo el precio de lista', async () => {
+    const { fixture, http } = crear();
+
+    http.expectOne('/api/productos/lomo-fino/').flush(producto());
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.insignia--promo')).toBeNull();
+    expect(raiz.querySelector('.precio-anterior')).toBeNull();
+  });
 });

@@ -144,3 +144,62 @@ archivados: toda consulta nueva sobre el catalogo deberia partir de ahi.
 > sesion es FR-02 y aun no existe. Queda un `TODO(FR-02)` en
 > `backend/apps/catalog/views.py` para cambiarlo a `IsAdminUser`. No desplegar
 > asi.
+
+---
+
+## Promociones (FR-13)
+
+Descuentos por porcentaje sobre un grupo de productos. El personal los crea
+desde el panel y el catalogo muestra el precio rebajado mientras rigen.
+
+- Listado: <http://localhost:4200/admin/promociones> (tambien desde el boton
+  *Promociones* del listado de productos)
+- Crear: <http://localhost:4200/admin/promociones/nueva>
+- Modificar: `/admin/promociones/<id>/editar` (boton *Editar* de cada fila)
+- Eliminar: boton *Eliminar* de cada fila, con confirmacion en la propia fila
+
+Cada promocion tiene nombre, porcentaje (1 a 99), fecha de inicio y de fin, un
+interruptor *activa* y al menos un producto.
+
+Endpoints (todos exigen sesion de **staff**; sin ella responden 403):
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `GET` | `/api/promociones/` | Listado paginado, con el `estado` de hoy de cada una. |
+| `POST` | `/api/promociones/` | Alta. `productos` es una lista de ids. |
+| `GET` | `/api/promociones/<id>/` | Datos de una promocion. |
+| `PATCH` | `/api/promociones/<id>/` | Modificacion. |
+| `DELETE` | `/api/promociones/<id>/` | Borrado. Los productos vuelven a su precio. |
+| `GET` | `/api/promociones/productos/` | Productos del catalogo, sin paginar, para el selector. |
+
+### Cuando rige una promocion
+
+Rige si esta **activa** y hoy (hora de Bogota) cae entre `fecha_inicio` y
+`fecha_fin`, **ambas incluidas**. El listado lo resume en `estado`:
+`vigente`, `programada` (aun no empieza), `vencida` o `inactiva`.
+
+Si un producto esta en varias promociones vigentes a la vez, se aplica la de
+**mayor porcentaje**; no se suman.
+
+### Que ve el cliente
+
+`GET /api/productos/` y la ficha `GET /api/productos/<slug>/` traen dos campos
+nuevos: `descuento` (porcentaje) y `precio_promocion` (rebajado y redondeado a
+pesos). Ambos van en `null` si el producto no tiene promocion vigente. El
+catalogo y la ficha muestran el precio rebajado, el de lista tachado y una
+etiqueta con el porcentaje.
+
+El carrito todavia cobra el precio de lista: aplicar el descuento al pago le
+corresponde al checkout.
+
+### Probarlo
+
+El panel pide una cuenta del personal. Crea una y entra con ella desde
+*Iniciar sesion*:
+
+```bash
+docker compose exec backend python manage.py createsuperuser
+```
+
+Las promociones tambien se pueden gestionar desde el admin de Django, en
+<http://localhost:8001/admin/>.

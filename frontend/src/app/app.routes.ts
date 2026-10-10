@@ -40,6 +40,26 @@ export const routes: Routes = [
     title: 'Modificar producto | CarnesEUS',
   },
   {
+    path: 'admin/promociones',
+    loadComponent: () =>
+      import('./features/admin/lista-promociones/lista-promociones').then(
+        (m) => m.ListaPromociones,
+      ),
+    title: 'Promociones | CarnesEUS',
+  },
+  {
+    path: 'admin/promociones/nueva',
+    loadComponent: () =>
+      import('./features/admin/crear-promocion/crear-promocion').then((m) => m.CrearPromocion),
+    title: 'Crear promocion | CarnesEUS',
+  },
+  {
+    path: 'admin/promociones/:id/editar',
+    loadComponent: () =>
+      import('./features/admin/editar-promocion/editar-promocion').then((m) => m.EditarPromocion),
+    title: 'Modificar promocion | CarnesEUS',
+  },
+  {
     path: 'carrito',
     loadComponent: () => import('./features/carrito/carrito').then((m) => m.CarritoPagina),
     title: 'Tu carrito | CarnesEUS',

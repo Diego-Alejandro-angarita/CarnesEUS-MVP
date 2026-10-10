@@ -132,6 +132,9 @@
                   <span class="insignia" [class.insignia--agotado]="!producto.disponible">
                     {{ producto.disponible ? 'Disponible' : 'Agotado' }}
                   </span>
+                  @if (producto.descuento) {
+                    <span class="insignia insignia--promo">-{{ producto.descuento }}%</span>
+                  }
                 </div>
 
                 <div class="tarjeta__cuerpo">
@@ -139,7 +142,15 @@
                   <h3 class="tarjeta__nombre">{{ producto.nombre }}</h3>
                   <p class="tarjeta__descripcion">{{ producto.descripcion }}</p>
                   <p class="tarjeta__precio">
-                    {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                    @if (producto.precio_promocion != null) {
+                      {{ producto.precio_promocion | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                      <s class="precio-anterior">
+                        <span class="visualmente-oculto">Antes </span>
+                        {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                      </s>
+                    } @else {
+                      {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                    }
                     <span>{{ producto.presentacion }}</span>
                   </p>
                 </div>

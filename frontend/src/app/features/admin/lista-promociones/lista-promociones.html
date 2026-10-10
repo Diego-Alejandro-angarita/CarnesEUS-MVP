@@ -1,0 +1,130 @@
+<section class="admin admin--ancha">
+  <header class="admin__cabecera admin__cabecera--fila">
+    <div>
+      <p class="admin__kicker">Administracion</p>
+      <h1 class="admin__titulo">Promociones</h1>
+      <p class="admin__lead">Descuentos por porcentaje sobre los cortes que elijas.</p>
+    </div>
+    <div class="admin__acciones">
+      <a class="boton boton--secundario" routerLink="/admin/productos">Productos</a>
+      <a class="boton" routerLink="/admin/promociones/nueva">Crear promocion</a>
+    </div>
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando las promociones...</p>
+    }
+    @case ('sin-permiso') {
+      <p class="aviso aviso--error" role="alert">
+        Necesitas iniciar sesion con una cuenta de administrador para gestionar promociones.
+        <a routerLink="/login">Iniciar sesion</a>
+      </p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar las promociones. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (errorAccion()) {
+        <p class="aviso aviso--error" role="alert">{{ errorAccion() }}</p>
+      }
+
+      @if (promociones().length === 0) {
+        <p class="aviso">Todavia no hay promociones. Crea la primera con el boton de arriba.</p>
+      } @else {
+        <p class="tabla__conteo">{{ total() }} {{ total() === 1 ? 'promocion' : 'promociones' }}</p>
+
+        <div class="tabla__marco">
+          <table class="tabla">
+            <caption class="visualmente-oculto">
+              Promociones
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Promocion</th>
+                <th scope="col" class="tabla__numero">Descuento</th>
+                <th scope="col">Vigencia</th>
+                <th scope="col" class="tabla__numero">Productos</th>
+                <th scope="col">Estado</th>
+                <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (promocion of promociones(); track promocion.id) {
+                <tr>
+                  <th scope="row" class="tabla__nombre">{{ promocion.nombre }}</th>
+                  <td class="tabla__numero">{{ promocion.porcentaje }} %</td>
+                  <td>
+                    {{ promocion.fecha_inicio | date: 'd MMM y' }} &ndash;
+                    {{ promocion.fecha_fin | date: 'd MMM y' }}
+                  </td>
+                  <td class="tabla__numero" [title]="nombresDe(promocion)">
+                    {{ promocion.productos_detalle.length }}
+                  </td>
+                  <td>
+                    <span class="insignia" [class]="'insignia--' + promocion.estado">
+                      {{ etiquetas[promocion.estado] }}
+                    </span>
+                  </td>
+                  <td class="tabla__acciones">
+                    @if (confirmando() === promocion.id) {
+                      <span class="confirmacion" role="alert">
+                        <span class="confirmacion__texto">Eliminar {{ promocion.nombre }}?</span>
+                        <button
+                          type="button"
+                          class="boton boton--menudo"
+                          [disabled]="eliminando() === promocion.id"
+                          (click)="eliminar(promocion.id)"
+                        >
+                          {{ eliminando() === promocion.id ? 'Eliminando...' : 'Confirmar' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="boton boton--secundario boton--menudo"
+                          [disabled]="eliminando() === promocion.id"
+                          (click)="cancelar()"
+                        >
+                          Cancelar
+                        </button>
+                      </span>
+                    } @else {
+                      <a
+                        class="boton boton--secundario boton--menudo"
+                        [routerLink]="['/admin/promociones', promocion.id, 'editar']"
+                      >
+                        Editar<span class="visualmente-oculto"> {{ promocion.nombre }}</span>
+                      </a>
+                      <button
+                        type="button"
+                        class="boton boton--peligro boton--menudo"
+                        (click)="pedirConfirmacion(promocion.id)"
+                      >
+                        Eliminar<span class="visualmente-oculto"> {{ promocion.nombre }}</span>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPaginas() > 1) {
+          <nav class="paginacion" aria-label="Paginacion de promociones">
+            <button type="button" [disabled]="!hayAnterior()" (click)="irA(paginaActual() - 1)">
+              Anterior
+            </button>
+            <p class="paginacion__estado" aria-live="polite">
+              Pagina {{ paginaActual() }} de {{ totalPaginas() }}
+            </p>
+            <button type="button" [disabled]="!haySiguiente()" (click)="irA(paginaActual() + 1)">
+              Siguiente
+            </button>
+          </nav>
+        }
+      }
+    }
+  }
+</section>

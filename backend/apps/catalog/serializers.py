@@ -1,5 +1,8 @@
 from django.utils.text import slugify
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+
+from apps.promotions.precios import precio_con_descuento
 
 from .models import Categoria, Producto
 
@@ -15,6 +18,10 @@ class CategoriaSerializer(serializers.ModelSerializer):
 
 class ProductoSerializer(serializers.ModelSerializer):
     categoria = serializers.CharField(source="categoria.nombre", read_only=True)
+    # Promocion vigente (FR-13). Los dos van en null si el producto no tiene
+    # ninguna; el descuento lo anota la vista con anotar_descuento().
+    descuento = serializers.SerializerMethodField()
+    precio_promocion = serializers.SerializerMethodField()
 
     class Meta:
         model = Producto
@@ -28,8 +35,22 @@ class ProductoSerializer(serializers.ModelSerializer):
             "foto_url",
             "disponible",
             "categoria",
+            "descuento",
+            "precio_promocion",
         ]
         read_only_fields = fields
+
+    def get_descuento(self, producto) -> int | None:
+        return getattr(producto, "descuento", None)
+
+    @extend_schema_field(
+        serializers.DecimalField(max_digits=10, decimal_places=2, allow_null=True)
+    )
+    def get_precio_promocion(self, producto):
+        descuento = self.get_descuento(producto)
+        if not descuento:
+            return None
+        return f"{precio_con_descuento(producto.precio, descuento):.2f}"
 
 
 class ProductoAdminSerializer(serializers.ModelSerializer):
