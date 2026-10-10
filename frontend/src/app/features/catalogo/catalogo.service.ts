@@ -14,6 +14,8 @@ export interface Producto {
   foto_url: string;
   disponible: boolean;
   categoria: string;
+  calificacion_promedio: number | null;
+  total_resenas: number;
 }
 
 export interface PaginaProductos {
