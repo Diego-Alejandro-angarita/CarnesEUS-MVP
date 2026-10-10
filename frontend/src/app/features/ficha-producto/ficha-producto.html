@@ -84,6 +84,204 @@
           </div>
         </div>
       </article>
+
+      <section class="resenas">
+        <h2 class="resenas__titulo">Reseñas de los clientes</h2>
+
+        <p class="resenas__resumen">
+          @if (producto.total_resenas > 0) {
+            <span class="estrellas" aria-hidden="true">
+              @for (n of ESTRELLAS; track n) {
+                <span class="estrella" [class.estrella--llena]="n <= redondear(producto.calificacion_promedio)">
+                  &starf;
+                </span>
+              }
+            </span>
+            <strong>{{ producto.calificacion_promedio }}</strong> de 5
+            <span>
+              ({{ producto.total_resenas }}
+              {{ producto.total_resenas === 1 ? 'reseña' : 'reseñas' }})
+            </span>
+          } @else {
+            <span>Todavia no tiene reseñas. Sé el primero en dejar la tuya.</span>
+          }
+        </p>
+
+        @if (!auth.usuario()) {
+          <p class="resenas__aviso">
+            <a routerLink="/login">Inicia sesion</a> para dejar tu reseña de este producto.
+          </p>
+        } @else if (puedeResenarInfo(); as info) {
+          @if (!info.ha_comprado) {
+            <p class="resenas__aviso">
+              Debes haber comprado este producto para poder reseñarlo.
+            </p>
+          } @else if (info.puede_resenar) {
+            <form
+              class="form-resena form-resena--nueva"
+              [formGroup]="formularioResena"
+              (submit)="$event.preventDefault(); enviarResena()"
+            >
+              <div class="campo-filtro">
+                <label for="resena-calificacion-nueva">Calificacion</label>
+                <select id="resena-calificacion-nueva" formControlName="calificacion">
+                  <option [ngValue]="5">5 - Excelente</option>
+                  <option [ngValue]="4">4 - Muy bueno</option>
+                  <option [ngValue]="3">3 - Regular</option>
+                  <option [ngValue]="2">2 - Malo</option>
+                  <option [ngValue]="1">1 - Muy malo</option>
+                </select>
+              </div>
+              <div class="campo-filtro">
+                <label for="resena-comentario-nueva">Comentario (opcional)</label>
+                <textarea
+                  id="resena-comentario-nueva"
+                  formControlName="comentario"
+                  rows="3"
+                  placeholder="Que te parecio el producto?"
+                ></textarea>
+              </div>
+              @if (errorResena()) {
+                <p class="resena__error" role="alert">{{ errorResena() }}</p>
+              }
+              <button type="submit" class="resena__boton-publicar" [disabled]="enviandoResena()">
+                {{ enviandoResena() ? 'Publicando...' : 'Publicar reseña' }}
+              </button>
+            </form>
+          }
+        }
+
+        @switch (estadoResenas()) {
+          @case ('cargando') {
+            <p class="aviso" role="status">Cargando reseñas...</p>
+          }
+          @case ('error') {
+            <p class="aviso aviso--error" role="alert">No pudimos cargar las reseñas.</p>
+          }
+          @case ('ok') {
+            @if (resenas().length === 0) {
+              <p class="resenas__vacio">Todavia no hay reseñas para este producto.</p>
+            } @else {
+              <ul class="lista-resenas">
+                @for (resena of resenas(); track resena.id) {
+                  <li class="resena">
+                    @if (editandoId() === resena.id) {
+                      <form
+                        class="form-resena form-resena--editar"
+                        [formGroup]="formularioResena"
+                        (submit)="$event.preventDefault(); enviarResena()"
+                      >
+                        <div class="campo-filtro">
+                          <label [for]="'resena-calificacion-' + resena.id">Calificacion</label>
+                          <select [id]="'resena-calificacion-' + resena.id" formControlName="calificacion">
+                            <option [ngValue]="5">5 - Excelente</option>
+                            <option [ngValue]="4">4 - Muy bueno</option>
+                            <option [ngValue]="3">3 - Regular</option>
+                            <option [ngValue]="2">2 - Malo</option>
+                            <option [ngValue]="1">1 - Muy malo</option>
+                          </select>
+                        </div>
+                        <div class="campo-filtro">
+                          <label [for]="'resena-comentario-' + resena.id">Comentario (opcional)</label>
+                          <textarea
+                            [id]="'resena-comentario-' + resena.id"
+                            formControlName="comentario"
+                            rows="3"
+                          ></textarea>
+                        </div>
+                        @if (errorResena()) {
+                          <p class="resena__error" role="alert">{{ errorResena() }}</p>
+                        }
+                        <div class="form-resena__acciones">
+                          <button type="submit" class="resena__boton-guardar" [disabled]="enviandoResena()">
+                            {{ enviandoResena() ? 'Guardando...' : 'Guardar cambios' }}
+                          </button>
+                          <button
+                            type="button"
+                            class="boton-texto resena__boton-cancelar-edicion"
+                            (click)="cancelarEdicion()"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </form>
+                    } @else {
+                      <div class="resena__cabecera">
+                        <span class="estrellas" aria-hidden="true">
+                          @for (n of ESTRELLAS; track n) {
+                            <span class="estrella" [class.estrella--llena]="n <= resena.calificacion">
+                              &starf;
+                            </span>
+                          }
+                        </span>
+                        <span class="resena__autor">{{ resena.usuario_nombre }}</span>
+                      </div>
+                      @if (resena.comentario) {
+                        <p class="resena__comentario">{{ resena.comentario }}</p>
+                      }
+                      @if (resena.es_propia) {
+                        <div class="resena__acciones">
+                          @if (confirmandoEliminar() === resena.id) {
+                            <span class="resena__confirmar">¿Eliminar tu reseña?</span>
+                            <button
+                              type="button"
+                              class="boton-texto resena__boton-eliminar-confirmar"
+                              (click)="eliminarResena(resena.id)"
+                            >
+                              Si, eliminar
+                            </button>
+                            <button
+                              type="button"
+                              class="boton-texto resena__boton-eliminar-cancelar"
+                              (click)="cancelarEliminar()"
+                            >
+                              Cancelar
+                            </button>
+                          } @else {
+                            <button
+                              type="button"
+                              class="boton-texto resena__boton-editar"
+                              (click)="comenzarEdicion(resena)"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              class="boton-texto resena__boton-eliminar"
+                              (click)="pedirConfirmacionEliminar(resena.id)"
+                            >
+                              Eliminar
+                            </button>
+                          }
+                        </div>
+                      }
+                    }
+                  </li>
+                }
+              </ul>
+
+              @if (hayResenaAnterior() || hayResenaSiguiente()) {
+                <nav class="paginacion" aria-label="Paginacion de reseñas">
+                  <button
+                    type="button"
+                    [disabled]="!hayResenaAnterior()"
+                    (click)="irAPaginaResenas(paginaResenasActual() - 1)"
+                  >
+                    Anterior
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="!hayResenaSiguiente()"
+                    (click)="irAPaginaResenas(paginaResenasActual() + 1)"
+                  >
+                    Siguiente
+                  </button>
+                </nav>
+              }
+            }
+          }
+        }
+      </section>
     }
   }
 }

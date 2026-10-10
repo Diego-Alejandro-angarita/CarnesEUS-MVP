@@ -1,3 +1,4 @@
+from django.db.models import Avg, Count
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.generics import (
     ListAPIView,
@@ -70,7 +71,10 @@ class ProductoDetalleView(RetrieveAPIView):
     permission_classes = [AllowAny]
     # Sin .visibles(): un producto archivado desaparece del catalogo pero su
     # ficha sigue respondiendo, para no romper enlaces que ya circulan.
-    queryset = Producto.objects.select_related("categoria")
+    queryset = Producto.objects.select_related("categoria").annotate(
+        calificacion_promedio=Avg("resenas__calificacion"),
+        total_resenas=Count("resenas", distinct=True),
+    )
     lookup_field = "slug"
 
 

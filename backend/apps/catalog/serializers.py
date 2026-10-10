@@ -15,6 +15,10 @@ class CategoriaSerializer(serializers.ModelSerializer):
 
 class ProductoSerializer(serializers.ModelSerializer):
     categoria = serializers.CharField(source="categoria.nombre", read_only=True)
+    # Anotados solo en la ficha (FR-18): ProductoListView no los anota para no
+    # pagar un Avg/Count de mas en cada tarjeta del catalogo.
+    calificacion_promedio = serializers.SerializerMethodField()
+    total_resenas = serializers.SerializerMethodField()
 
     class Meta:
         model = Producto
@@ -28,8 +32,17 @@ class ProductoSerializer(serializers.ModelSerializer):
             "foto_url",
             "disponible",
             "categoria",
+            "calificacion_promedio",
+            "total_resenas",
         ]
         read_only_fields = fields
+
+    def get_calificacion_promedio(self, producto) -> float | None:
+        promedio = getattr(producto, "calificacion_promedio", None)
+        return round(promedio, 1) if promedio is not None else None
+
+    def get_total_resenas(self, producto) -> int:
+        return getattr(producto, "total_resenas", 0)
 
 
 class ProductoAdminSerializer(serializers.ModelSerializer):

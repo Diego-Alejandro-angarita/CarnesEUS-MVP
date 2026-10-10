@@ -24,6 +24,7 @@ urlpatterns = [
     path("api/", include("apps.pedidos.urls")),  
     path("api/", include("apps.cart.urls")),
     path("api/", include("apps.cobertura.urls")),
+    path("api/", include("apps.resenas.urls")),
 ]
 
 if settings.DEBUG:
