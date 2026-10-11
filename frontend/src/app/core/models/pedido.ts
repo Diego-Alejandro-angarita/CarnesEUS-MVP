@@ -13,6 +13,8 @@ export interface NuevoPedido {
 }
 
 export interface ItemPedido {
+  producto_id: number;
+  producto_slug: string;
   nombre: string;
   precio_unitario: number;
   cantidad: number;

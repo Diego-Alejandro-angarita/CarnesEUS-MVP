@@ -3,11 +3,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
-import { MetodoPago, Pedido } from '../../core/models/pedido';
+import { ItemPedido, MetodoPago, Pedido } from '../../core/models/pedido';
 import { AuthService } from '../../core/services/auth.service';
 import { CarritoService } from '../../core/services/carrito.service';
 import { PedidoService } from '../../core/services/pedido.service';
+import { ResenaService } from '../../core/services/resena.service';
 
 const METODOS: { valor: MetodoPago; nombre: string; ayuda: string }[] = [
   {
@@ -37,7 +39,8 @@ export class Checkout {
   private readonly fb = inject(FormBuilder);
   private readonly pedidos = inject(PedidoService);
   private readonly carritoServicio = inject(CarritoService);
-  private readonly auth = inject(AuthService);
+  private readonly resenas = inject(ResenaService);
+  protected readonly auth = inject(AuthService);
 
   protected readonly metodos = METODOS;
   protected readonly cargandoCarrito = signal(true);
@@ -50,6 +53,21 @@ export class Checkout {
     () => this.carritoServicio.carrito()?.items.filter((item) => item.comprable) ?? [],
   );
   protected readonly total = this.carritoServicio.total;
+
+  // --- calificar lo recien comprado (FR-18) ---------------------------------
+  protected readonly itemsPedido = computed(() => this.pedido()?.items ?? []);
+  protected readonly productoSeleccionado = signal<number | null>(null);
+  protected readonly itemSeleccionado = computed<ItemPedido | null>(
+    () => this.itemsPedido().find((item) => item.producto_id === this.productoSeleccionado()) ?? null,
+  );
+  protected readonly resenasEnviadas = signal<ReadonlySet<number>>(new Set());
+  protected readonly enviandoResena = signal(false);
+  protected readonly errorResena = signal<string | null>(null);
+
+  protected readonly formularioResena = this.fb.nonNullable.group({
+    calificacion: [5, [Validators.required, Validators.min(1), Validators.max(5)]],
+    comentario: [''],
+  });
 
   protected readonly formulario = this.fb.nonNullable.group({
     metodo_pago: ['transferencia' as MetodoPago, Validators.required],
@@ -89,6 +107,7 @@ export class Checkout {
       next: (pedido) => {
         this.enviando.set(false);
         this.pedido.set(pedido);
+        this.productoSeleccionado.set(pedido.items[0]?.producto_id ?? null);
         // El backend vacio el carrito: se actualiza el contador de la cabecera.
         void this.carritoServicio.refrescar();
       },
@@ -97,6 +116,55 @@ export class Checkout {
         this.error.set(mensajeDeError(respuesta));
       },
     });
+  }
+
+  // --- calificar lo recien comprado (FR-18) ---------------------------------
+
+  protected seleccionarProducto(id: number): void {
+    this.productoSeleccionado.set(id);
+    this.errorResena.set(null);
+    this.formularioResena.reset({ calificacion: 5, comentario: '' });
+  }
+
+  protected async enviarResena(): Promise<void> {
+    const item = this.itemSeleccionado();
+    if (!item) {
+      return;
+    }
+    if (this.formularioResena.invalid) {
+      this.formularioResena.markAllAsTouched();
+      return;
+    }
+
+    this.enviandoResena.set(true);
+    this.errorResena.set(null);
+
+    try {
+      await firstValueFrom(this.resenas.crear(item.producto_slug, this.formularioResena.getRawValue()));
+      const enviadas = new Set(this.resenasEnviadas()).add(item.producto_id);
+      this.resenasEnviadas.set(enviadas);
+      this.formularioResena.reset({ calificacion: 5, comentario: '' });
+      // Adelanta la seleccion al siguiente producto que todavia no se califico.
+      const siguiente = this.itemsPedido().find((i) => !enviadas.has(i.producto_id));
+      this.productoSeleccionado.set(siguiente?.producto_id ?? item.producto_id);
+    } catch (error: unknown) {
+      this.errorResena.set(this.mensajeDeErrorResena(error));
+    } finally {
+      this.enviandoResena.set(false);
+    }
+  }
+
+  private mensajeDeErrorResena(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const datos = error.error as { detail?: string; calificacion?: string[] } | undefined;
+      if (datos?.detail) {
+        return datos.detail;
+      }
+      if (datos?.calificacion?.length) {
+        return datos.calificacion[0];
+      }
+    }
+    return 'No pudimos guardar tu reseña. Intentalo de nuevo.';
   }
 
   private async cargarCarrito(): Promise<void> {
