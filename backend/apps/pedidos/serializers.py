@@ -19,10 +19,14 @@ class CrearPedidoSerializer(serializers.Serializer):
 
 class ItemPedidoSerializer(serializers.ModelSerializer):
     subtotal = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    # Para que la confirmacion de compra pueda enlazar cada linea con la ficha
+    # del producto y dejarle su reseña (FR-18), aunque luego cambie de nombre.
+    producto_id = serializers.IntegerField(read_only=True)
+    producto_slug = serializers.SlugField(source="producto.slug", read_only=True)
 
     class Meta:
         model = ItemPedido
-        fields = ["nombre", "precio_unitario", "cantidad", "subtotal"]
+        fields = ["producto_id", "producto_slug", "nombre", "precio_unitario", "cantidad", "subtotal"]
 
 
 class PagoSerializer(serializers.ModelSerializer):
