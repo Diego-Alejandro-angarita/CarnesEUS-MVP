@@ -14,12 +14,12 @@ from apps.pedidos.models import ItemPedido, Pago, Pedido
 @pytest.fixture
 def staff(db):
     return Usuario.objects.create_user(
-        email="staff@carneseus.test", password="UnaClaveSegura123", is_staff=True)
+        email="staff@carneseus.test", password="x", is_staff=True)
 
 
 @pytest.fixture
 def cliente(db):
-    return Usuario.objects.create_user(email="ana@example.com", password="UnaClaveSegura123")
+    return Usuario.objects.create_user(email="ana@example.com", password="x")
 
 
 @pytest.fixture
