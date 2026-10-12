@@ -12,8 +12,8 @@ PROMPT = """Eres analista comercial de CarnesEUS, una carniceria en linea del Va
 Recibes estadisticas de ventas en JSON. Responde SOLO con un JSON con esta forma:
 {"sugerencias": ["...", "...", "..."],
  "campanas": [{"segmento": "nuevo|recurrente|inactivo", "mensaje": "..."}]}
-- 3 sugerencias concretas y accionables basadas en los datos (combos, productos a impulsar, etc.).
-- Un mensaje corto de WhatsApp por segmento, cercano y en español de Colombia, sin inventar precios."""
+- 3 sugerencias concretas y accionables basadas en los datos (combos, productos, etc.).
+- Un mensaje corto de WhatsApp por segmento, cercano y en español, sin inventar precios."""
 
 
 def contexto(desde, hasta) -> dict:
@@ -52,7 +52,7 @@ def sugerencias_por_reglas(ctx: dict) -> dict:
         ],
         "campanas": [
             {"segmento": "nuevo",
-             "mensaje": f"¡Gracias por tu primera compra! Esta semana tenemos {estrella} fresquito."},
+             "mensaje": f"¡Gracias por tu primera compra! Tenemos {estrella} fresquito."},
             {"segmento": "recurrente",
              "mensaje": "Eres de la casa: tu proximo pedido va con envio gratis."},
             {"segmento": "inactivo",

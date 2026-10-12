@@ -83,6 +83,10 @@ describe('Estadisticas', () => {
     http.expectOne((r) => r.url === '/api/estadisticas/clientes/')
       .flush('sin backend', { status: 502, statusText: 'Bad Gateway' });
 
+    // Promise.all rechaza en un microtask, el catch en otro, la senal en otro:
+    // hace falta mas de un ciclo para que la UI pase a estado 'error'.
+    await fixture.whenStable();
+    fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
 

@@ -42,7 +42,10 @@ class ResumenView(EstadisticasView):
         return Response(servicios.resumen(*self.rango(request)))
 
 
-@extend_schema(summary="Ventas por producto, categoria, barrio y metodo", parameters=PARAMETROS_RANGO)
+@extend_schema(
+    summary="Ventas por producto, categoria, barrio y metodo",
+    parameters=PARAMETROS_RANGO,
+)
 class ProductosView(EstadisticasView):
     def get(self, request):
         return Response(servicios.productos(*self.rango(request)))
@@ -56,7 +59,10 @@ class ClientesView(EstadisticasView):
 
 @extend_schema(
     summary="Sugerencias y borradores de campaña con IA",
-    description="FR-06: sin llave configurada usa reglas fijas. Solo cuenta clientes con autorizacion.",
+    description=(
+        "FR-06: sin llave configurada usa reglas fijas. "
+        "Solo cuenta clientes con autorizacion."
+    ),
     parameters=PARAMETROS_RANGO,
 )
 class SugerenciasView(EstadisticasView):
