@@ -243,6 +243,82 @@ form {
   }
 }
 
+.calificar {
+  display: grid;
+  width: 100%;
+  gap: 0.875rem;
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid t.$color-borde-suave;
+}
+
+.calificar__titulo {
+  margin: 0;
+  font-family: t.$fuente-display;
+  font-size: 1.25rem;
+  color: t.$color-texto;
+}
+
+.campo-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  label {
+    color: t.$color-texto-suave;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  select,
+  textarea {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid t.$color-borde;
+    border-radius: t.$radio-chip;
+    background: t.$color-fondo-alto;
+    color: t.$color-texto;
+    font: inherit;
+    resize: vertical;
+
+    &:focus-visible {
+      outline: 2px solid t.$color-oro;
+      outline-offset: 1px;
+    }
+  }
+}
+
+.form-resena {
+  display: grid;
+  gap: 0.875rem;
+
+  button[type='submit'] {
+    justify-self: start;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid t.$color-marca;
+    border-radius: t.$radio-chip;
+    background: t.$color-marca;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: t.$color-marca-clara;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.resena__error {
+  margin: 0;
+  color: t.$color-error;
+  font-size: 0.875rem;
+}
+
 @media (max-width: 52rem) {
   .checkout__cuerpo {
     grid-template-columns: 1fr;

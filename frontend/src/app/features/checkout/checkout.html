@@ -53,6 +53,69 @@
         }
       </ul>
 
+      @if (auth.usuario()) {
+        <section class="calificar">
+          <h2 class="calificar__titulo">Califica tu compra</h2>
+
+          @if (itemsPedido().length > 1) {
+            <div class="campo-filtro">
+              <label for="producto-a-calificar">Producto</label>
+              <select
+                id="producto-a-calificar"
+                [value]="productoSeleccionado()"
+                (change)="seleccionarProducto(+$any($event.target).value)"
+              >
+                @for (item of itemsPedido(); track item.producto_id) {
+                  <option [value]="item.producto_id">
+                    {{ item.nombre }}{{ resenasEnviadas().has(item.producto_id) ? ' (calificado)' : '' }}
+                  </option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (itemSeleccionado(); as item) {
+            @if (resenasEnviadas().has(item.producto_id)) {
+              <p class="aviso" role="status">
+                Gracias por calificar {{ item.nombre }}. Puedes verla en la ficha del producto.
+              </p>
+            } @else {
+              <form
+                class="form-resena"
+                [formGroup]="formularioResena"
+                (submit)="$event.preventDefault(); enviarResena()"
+              >
+                <div class="campo-filtro">
+                  <label for="calificar-calificacion">Calificacion de {{ item.nombre }}</label>
+                  <select id="calificar-calificacion" formControlName="calificacion">
+                    <option [ngValue]="5">5 - Excelente</option>
+                    <option [ngValue]="4">4 - Muy bueno</option>
+                    <option [ngValue]="3">3 - Regular</option>
+                    <option [ngValue]="2">2 - Malo</option>
+                    <option [ngValue]="1">1 - Muy malo</option>
+                  </select>
+                </div>
+                <div class="campo-filtro">
+                  <label for="calificar-comentario">Comentario (opcional)</label>
+                  <textarea
+                    id="calificar-comentario"
+                    formControlName="comentario"
+                    rows="3"
+                    placeholder="Que te parecio el producto?"
+                  ></textarea>
+                </div>
+                @if (errorResena()) {
+                  <p class="resena__error" role="alert">{{ errorResena() }}</p>
+                }
+                <button type="submit" [disabled]="enviandoResena()">
+                  {{ enviandoResena() ? 'Publicando...' : 'Publicar reseña' }}
+                </button>
+              </form>
+            }
+          }
+        </section>
+      }
+
       <a class="boton" routerLink="/productos">Seguir comprando</a>
     </div>
   } @else {

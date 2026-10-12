@@ -104,6 +104,15 @@ def test_comprar_vacia_el_carrito(api, token):
 
 
 @pytest.mark.django_db
+def test_el_item_expone_el_producto_para_poder_resenarlo_despues(api, token, producto):
+    respuesta = comprar(api, token, datos_pedido())
+
+    item = respuesta.data["items"][0]
+    assert item["producto_id"] == producto.id
+    assert item["producto_slug"] == producto.slug
+
+
+@pytest.mark.django_db
 def test_el_pedido_congela_el_precio(api, token, producto):
     comprar(api, token, datos_pedido())
 
