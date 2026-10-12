@@ -10,7 +10,7 @@ export const TAMANO_PAGINA_PEDIDOS = 20;
 type PedidoListaApi = Omit<PedidoLista, 'total'> & { total: string };
 type PaginaPedidosApi = Omit<PaginaPedidos, 'results'> & { results: PedidoListaApi[] };
 
-/** Panel administrativo de pedidos (FR-19): listar, ver el detalle y marcar como pagado. */
+/** Panel administrativo de pedidos (FR-19): listar, ver el detalle y cambiar el estado. */
 @Injectable({ providedIn: 'root' })
 export class AdminPedidosService {
   private readonly http = inject(HttpClient);
@@ -35,7 +35,10 @@ export class AdminPedidosService {
     return this.http.get<PedidoApi>(`/api/pedidos/admin/${id}/`).pipe(map(convertir));
   }
 
-  marcarPagado(id: number): Observable<Pedido> {
-    return this.http.post<PedidoApi>(`/api/pedidos/admin/${id}/marcar-pagado/`, {}).pipe(map(convertir));
+  /** Mueve el pedido a por_confirmar, por_cobrar o pagado (el pago se sincroniza solo). */
+  cambiarEstado(id: number, estado: EstadoPedido): Observable<Pedido> {
+    return this.http
+      .post<PedidoApi>(`/api/pedidos/admin/${id}/cambiar-estado/`, { estado })
+      .pipe(map(convertir));
   }
 }

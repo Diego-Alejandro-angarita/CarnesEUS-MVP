@@ -166,14 +166,17 @@ O marcar `is_staff` a un usuario que ya se registro, desde
 - Listado, con filtro por estado: <http://localhost:4200/admin/pedidos>
 - Detalle de un pedido: `/admin/pedidos/<id>` (boton *Ver* de cada fila), con
   los datos de entrega, el pago y los productos
-- Confirmar el pago: boton *Marcar como pagado* en el detalle (equivale a la
-  accion del admin de Django)
+- Cambiar el estado: en el detalle, las tres opciones (*Por confirmar*, *Por
+  cobrar*, *Pagado*) estan siempre visibles con una frase de que significa
+  cada una; se elige la que corresponda y se guarda sola, sin botones
+  aparte. El pago se sincroniza solo: aprobado si el pedido queda pagado,
+  pendiente en cualquier otro caso.
 
 | Metodo | Ruta | Para que |
 |---|---|---|
 | `GET` | `/api/pedidos/admin/` | Listado paginado. Admite `?estado=` y `?page=`. |
 | `GET` | `/api/pedidos/admin/<id>/` | Detalle completo. |
-| `POST` | `/api/pedidos/admin/<id>/marcar-pagado/` | Pasa el pedido y su pago a pagado/aprobado. |
+| `POST` | `/api/pedidos/admin/<id>/cambiar-estado/` | Body `{"estado": "por_confirmar" \| "por_cobrar" \| "pagado"}`. |
 
 ### Usuarios
 

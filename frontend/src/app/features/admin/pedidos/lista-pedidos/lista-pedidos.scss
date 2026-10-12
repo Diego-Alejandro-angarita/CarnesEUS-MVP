@@ -36,3 +36,19 @@
   border-color: t.$color-oro;
   color: t.$color-oro-claro;
 }
+
+// Pedido y Cliente llevan un dato secundario debajo: necesitan poder partir
+// linea, a diferencia del resto de la tabla que va en un solo renglon.
+.tabla__nombre,
+.tabla__cliente {
+  white-space: normal;
+}
+
+.tabla__secundario {
+  display: block;
+  margin-top: 0.125rem;
+  color: t.$color-texto-tenue;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  white-space: nowrap;
+}

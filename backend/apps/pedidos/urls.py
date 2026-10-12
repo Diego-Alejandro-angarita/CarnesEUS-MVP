@@ -1,8 +1,8 @@
 from django.urls import path
 
 from .views import (
+    CambiarEstadoPedidoView,
     CrearPedidoView,
-    MarcarPedidoPagadoView,
     PedidoDetalleView,
     PedidoListView,
 )
@@ -14,8 +14,8 @@ urlpatterns = [
     path("pedidos/admin/", PedidoListView.as_view(), name="admin-lista"),
     path("pedidos/admin/<int:pk>/", PedidoDetalleView.as_view(), name="admin-detalle"),
     path(
-        "pedidos/admin/<int:pk>/marcar-pagado/",
-        MarcarPedidoPagadoView.as_view(),
-        name="admin-marcar-pagado",
+        "pedidos/admin/<int:pk>/cambiar-estado/",
+        CambiarEstadoPedidoView.as_view(),
+        name="admin-cambiar-estado",
     ),
 ]

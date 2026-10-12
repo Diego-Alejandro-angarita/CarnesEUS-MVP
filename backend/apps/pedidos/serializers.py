@@ -4,6 +4,12 @@ from rest_framework import serializers
 from .models import ItemPedido, Pago, Pedido
 
 
+class CambiarEstadoSerializer(serializers.Serializer):
+    """Entrada del panel administrativo (FR-19) para mover un pedido de estado."""
+
+    estado = serializers.ChoiceField(choices=Pedido.Estado.choices)
+
+
 class CrearPedidoSerializer(serializers.Serializer):
     """Entrada de POST /api/pedidos/: entrega, contacto y forma de pago."""
 

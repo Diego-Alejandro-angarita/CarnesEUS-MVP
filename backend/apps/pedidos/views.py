@@ -10,7 +10,12 @@ from rest_framework.views import APIView
 from apps.cart.views import PARAMETRO_TOKEN, CarritoMixin
 
 from .models import ItemPedido, Pago, Pedido
-from .serializers import CrearPedidoSerializer, PedidoListaSerializer, PedidoSerializer
+from .serializers import (
+    CambiarEstadoSerializer,
+    CrearPedidoSerializer,
+    PedidoListaSerializer,
+    PedidoSerializer,
+)
 
 
 @extend_schema(
@@ -109,18 +114,22 @@ class PedidoDetalleView(RetrieveAPIView):
 
 
 @extend_schema(
-    summary="Marcar un pedido como pagado",
+    summary="Cambiar el estado de un pedido",
     description=(
-        "Panel administrativo (FR-19): confirma el pago de un pedido por "
-        "transferencia o contraentrega. Equivale a la accion del admin de Django."
+        "Panel administrativo (FR-19): mueve el pedido a por_confirmar, "
+        "por_cobrar o pagado. El pago se sincroniza solo: aprobado cuando el "
+        "pedido queda pagado, pendiente en cualquier otro estado."
     ),
-    request=None,
+    request=CambiarEstadoSerializer,
     responses={200: PedidoSerializer},
 )
-class MarcarPedidoPagadoView(APIView):
+class CambiarEstadoPedidoView(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request, pk):
+        entrada = CambiarEstadoSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+
         pedido = get_object_or_404(Pedido, pk=pk)
-        pedido.marcar_pagado()
+        pedido.cambiar_estado(entrada.validated_data["estado"])
         return Response(PedidoSerializer(pedido).data)

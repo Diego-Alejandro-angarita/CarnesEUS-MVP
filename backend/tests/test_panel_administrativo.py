@@ -178,14 +178,20 @@ def test_detalle_de_pedido_para_personal(api, staff, pedido):
     assert respuesta.data["pago"]["metodo"] == "transferencia"
 
 
-# --- marcar un pedido como pagado ----------------------------------------------
+# --- cambiar el estado de un pedido ---------------------------------------------
+
+
+def cambiar_estado(api, pedido_id, estado):
+    return api.post(
+        f"/api/pedidos/admin/{pedido_id}/cambiar-estado/", {"estado": estado}, format="json"
+    )
 
 
 @pytest.mark.django_db
-def test_marcar_pagado_rechaza_a_un_cliente(api, cliente, pedido):
+def test_cambiar_estado_rechaza_a_un_cliente(api, cliente, pedido):
     api.force_authenticate(cliente)
 
-    respuesta = api.post(f"/api/pedidos/admin/{pedido.id}/marcar-pagado/")
+    respuesta = cambiar_estado(api, pedido.id, "pagado")
 
     assert respuesta.status_code == 403
     pedido.refresh_from_db()
@@ -193,10 +199,10 @@ def test_marcar_pagado_rechaza_a_un_cliente(api, cliente, pedido):
 
 
 @pytest.mark.django_db
-def test_marcar_pagado_para_personal(api, staff, pedido):
+def test_marcar_como_pagado_aprueba_el_pago(api, staff, pedido):
     api.force_authenticate(staff)
 
-    respuesta = api.post(f"/api/pedidos/admin/{pedido.id}/marcar-pagado/")
+    respuesta = cambiar_estado(api, pedido.id, "pagado")
 
     assert respuesta.status_code == 200
     assert respuesta.data["estado"] == "pagado"
@@ -206,10 +212,49 @@ def test_marcar_pagado_para_personal(api, staff, pedido):
 
 
 @pytest.mark.django_db
-def test_marcar_pagado_de_un_pedido_inexistente_responde_404(api, staff):
+def test_devolver_un_pedido_pagado_a_por_confirmar_vuelve_a_dejar_el_pago_pendiente(
+    api, staff, pedido
+):
+    api.force_authenticate(staff)
+    cambiar_estado(api, pedido.id, "pagado")
+
+    respuesta = cambiar_estado(api, pedido.id, "por_confirmar")
+
+    assert respuesta.status_code == 200
+    pedido.refresh_from_db()
+    assert pedido.estado == Pedido.Estado.POR_CONFIRMAR
+    assert pedido.pago.estado == Pago.Estado.PENDIENTE
+
+
+@pytest.mark.django_db
+def test_mover_entre_por_confirmar_y_por_cobrar(api, staff, pedido):
     api.force_authenticate(staff)
 
-    assert api.post("/api/pedidos/admin/9999/marcar-pagado/").status_code == 404
+    respuesta = cambiar_estado(api, pedido.id, "por_cobrar")
+
+    assert respuesta.status_code == 200
+    assert respuesta.data["estado"] == "por_cobrar"
+    pedido.refresh_from_db()
+    assert pedido.estado == Pedido.Estado.POR_COBRAR
+    assert pedido.pago.estado == Pago.Estado.PENDIENTE
+
+
+@pytest.mark.django_db
+def test_cambiar_a_un_estado_invalido_se_rechaza(api, staff, pedido):
+    api.force_authenticate(staff)
+
+    respuesta = cambiar_estado(api, pedido.id, "cancelado")
+
+    assert respuesta.status_code == 400
+    pedido.refresh_from_db()
+    assert pedido.estado == Pedido.Estado.POR_CONFIRMAR
+
+
+@pytest.mark.django_db
+def test_cambiar_estado_de_un_pedido_inexistente_responde_404(api, staff):
+    api.force_authenticate(staff)
+
+    assert cambiar_estado(api, 9999, "pagado").status_code == 404
 
 
 # --- listado y activacion de usuarios -------------------------------------------

@@ -67,11 +67,29 @@
             <strong>{{ pedido.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
           </p>
 
-          @if (pedido.estado !== 'pagado') {
-            <button type="button" class="boton" [disabled]="marcando()" (click)="marcarPagado()">
-              {{ marcando() ? 'Marcando...' : 'Marcar como pagado' }}
-            </button>
-          }
+          <div class="cambiar-estado">
+            <h2 class="detalle__subtitulo">Cambiar estado</h2>
+            <div class="estado-opciones" role="radiogroup" aria-label="Estado del pedido">
+              @for (opcion of ESTADOS; track opcion) {
+                <label class="estado-opcion" [class.estado-opcion--activa]="pedido.estado === opcion">
+                  <input
+                    type="radio"
+                    name="estado"
+                    [checked]="pedido.estado === opcion"
+                    [disabled]="cambiando()"
+                    (change)="cambiarEstado(opcion)"
+                  />
+                  <span>
+                    <strong>{{ etiquetas[opcion] }}</strong>
+                    <small>{{ ayudaEstado[opcion] }}</small>
+                  </span>
+                </label>
+              }
+            </div>
+            @if (cambiando()) {
+              <p class="estado-guardando" role="status">Guardando...</p>
+            }
+          </div>
         </div>
       }
     }

@@ -79,6 +79,53 @@
   }
 }
 
-.boton {
-  justify-self: start;
+.cambiar-estado {
+  display: grid;
+  gap: 0.875rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid t.$color-borde-suave;
+}
+
+.estado-opciones {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.estado-opcion {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio-chip;
+  background: t.$color-fondo-alto;
+  cursor: pointer;
+
+  &:has(input:disabled) {
+    cursor: progress;
+    opacity: 0.7;
+  }
+
+  span {
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  small {
+    color: t.$color-texto-suave;
+  }
+}
+
+.estado-opcion--activa {
+  border-color: t.$color-oro;
+
+  strong {
+    color: t.$color-oro-claro;
+  }
+}
+
+.estado-guardando {
+  margin: 0;
+  color: t.$color-texto-suave;
+  font-size: 0.875rem;
 }

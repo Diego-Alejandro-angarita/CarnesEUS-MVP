@@ -42,20 +42,23 @@
               <tr>
                 <th scope="col">Pedido</th>
                 <th scope="col">Cliente</th>
-                <th scope="col">Entrega</th>
                 <th scope="col">Pago</th>
                 <th scope="col">Estado</th>
                 <th scope="col" class="tabla__numero">Total</th>
-                <th scope="col">Fecha</th>
                 <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
               </tr>
             </thead>
             <tbody>
               @for (pedido of pedidos(); track pedido.id) {
                 <tr>
-                  <th scope="row" class="tabla__nombre">#{{ pedido.id }}</th>
-                  <td>{{ pedido.nombre }}</td>
-                  <td>{{ pedido.barrio }}, {{ pedido.municipio }}</td>
+                  <th scope="row" class="tabla__nombre">
+                    #{{ pedido.id }}
+                    <span class="tabla__secundario">{{ pedido.creado_en | date: 'd MMM, h:mm a' }}</span>
+                  </th>
+                  <td class="tabla__cliente">
+                    {{ pedido.nombre }}
+                    <span class="tabla__secundario">{{ pedido.barrio }}, {{ pedido.municipio }}</span>
+                  </td>
                   <td>{{ pedido.metodo_pago }}</td>
                   <td>
                     <span class="insignia" [class.insignia--pagado]="pedido.estado === 'pagado'">
@@ -65,7 +68,6 @@
                   <td class="tabla__numero">
                     {{ pedido.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
                   </td>
-                  <td>{{ pedido.creado_en | date: 'd MMM, h:mm a' }}</td>
                   <td class="tabla__acciones">
                     <a class="boton boton--secundario boton--menudo" [routerLink]="['/admin/pedidos', pedido.id]">
                       Ver<span class="visualmente-oculto"> pedido #{{ pedido.id }}</span>

@@ -4,11 +4,18 @@ import { Component, effect, inject, input, numberAttribute, signal } from '@angu
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { Pedido } from '../../../../core/models/pedido';
+import { EstadoPedido, Pedido } from '../../../../core/models/pedido';
 import { AdminPedidosService } from '../../../../core/services/admin-pedidos.service';
 import { ETIQUETAS_ESTADO } from '../lista-pedidos/lista-pedidos';
 
 type EstadoPantalla = 'cargando' | 'ok' | 'no-encontrado' | 'error';
+
+/** Para que el admin sepa que implica cada estado al elegirlo, sin enredarse. */
+export const AYUDA_ESTADO: Record<EstadoPedido, string> = {
+  por_confirmar: 'El cliente va a pagar por transferencia; falta verificar que llego.',
+  por_cobrar: 'Se cobra contraentrega (QR o datafono) cuando se entregue el pedido.',
+  pagado: 'El pago ya quedo confirmado.',
+};
 
 @Component({
   selector: 'app-detalle-pedido',
@@ -20,27 +27,33 @@ export class DetallePedido {
   private readonly admin = inject(AdminPedidosService);
 
   protected readonly etiquetas = ETIQUETAS_ESTADO;
+  protected readonly ayudaEstado = AYUDA_ESTADO;
+  protected readonly ESTADOS: EstadoPedido[] = ['por_confirmar', 'por_cobrar', 'pagado'];
 
   readonly id = input.required({ transform: numberAttribute });
 
   protected readonly estado = signal<EstadoPantalla>('cargando');
   protected readonly pedido = signal<Pedido | null>(null);
-  protected readonly marcando = signal(false);
+  protected readonly cambiando = signal(false);
   protected readonly errorAccion = signal('');
 
   constructor() {
     effect(() => void this.cargar(this.id()));
   }
 
-  protected async marcarPagado(): Promise<void> {
+  protected async cambiarEstado(nuevoEstado: EstadoPedido): Promise<void> {
+    if (this.pedido()?.estado === nuevoEstado) {
+      return;
+    }
+
     this.errorAccion.set('');
-    this.marcando.set(true);
+    this.cambiando.set(true);
     try {
-      this.pedido.set(await firstValueFrom(this.admin.marcarPagado(this.id())));
+      this.pedido.set(await firstValueFrom(this.admin.cambiarEstado(this.id(), nuevoEstado)));
     } catch {
-      this.errorAccion.set('No pudimos marcar el pedido como pagado. Intentalo de nuevo.');
+      this.errorAccion.set('No pudimos cambiar el estado del pedido. Intentalo de nuevo.');
     } finally {
-      this.marcando.set(false);
+      this.cambiando.set(false);
     }
   }
 

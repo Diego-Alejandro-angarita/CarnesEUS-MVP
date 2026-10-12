@@ -101,47 +101,59 @@ describe('DetallePedido', () => {
     expect(texto_).toContain('Por confirmar');
   });
 
-  it('ofrece marcar como pagado si todavia no lo esta', async () => {
-    const { fixture } = await conPedido();
+  function opcionesEstado(fixture: ComponentFixture<DetallePedido>) {
+    return elemento(fixture).querySelectorAll<HTMLInputElement>('.estado-opciones input[type="radio"]');
+  }
 
-    const boton = elemento(fixture).querySelector('button');
-    expect(boton?.textContent).toContain('Marcar como pagado');
+  it('muestra las tres opciones de estado, con la actual marcada', async () => {
+    const { fixture } = await conPedido({ estado: 'por_cobrar' });
+
+    const opciones = opcionesEstado(fixture);
+    expect(opciones.length).toBe(3);
+    expect(texto(fixture)).toContain('El cliente va a pagar por transferencia');
+    expect(texto(fixture)).toContain('Se cobra contraentrega');
+    expect([...opciones].find((o) => o.checked)?.closest('label')?.textContent).toContain(
+      'Por cobrar',
+    );
   });
 
-  it('no ofrece marcar como pagado un pedido que ya lo esta', async () => {
-    const { fixture } = await conPedido({ estado: 'pagado' });
-
-    expect(elemento(fixture).querySelector('button')).toBeNull();
-  });
-
-  it('al marcar como pagado, actualiza el estado mostrado', async () => {
+  it('al elegir un estado distinto, lo envia y actualiza la pantalla', async () => {
     const { fixture, http } = await conPedido();
 
-    elemento(fixture).querySelector<HTMLButtonElement>('button')!.click();
+    opcionesEstado(fixture)[2].dispatchEvent(new Event('change'));
     await fixture.whenStable();
 
-    const peticion = http.expectOne('/api/pedidos/admin/15/marcar-pagado/');
+    const peticion = http.expectOne('/api/pedidos/admin/15/cambiar-estado/');
     expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual({ estado: 'pagado' });
     peticion.flush(pedido({ estado: 'pagado' }));
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(texto(fixture)).toContain('Pagado');
-    expect(elemento(fixture).querySelector('button')).toBeNull();
   });
 
-  it('avisa cuando no se puede marcar como pagado', async () => {
+  it('no envia nada si se elige el estado que ya tiene', async () => {
+    const { fixture, http } = await conPedido({ estado: 'por_confirmar' });
+
+    opcionesEstado(fixture)[0].dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+
+    http.expectNone('/api/pedidos/admin/15/cambiar-estado/');
+  });
+
+  it('avisa cuando no se puede cambiar el estado', async () => {
     const { fixture, http } = await conPedido();
 
-    elemento(fixture).querySelector<HTMLButtonElement>('button')!.click();
+    opcionesEstado(fixture)[2].dispatchEvent(new Event('change'));
     await fixture.whenStable();
     http
-      .expectOne('/api/pedidos/admin/15/marcar-pagado/')
+      .expectOne('/api/pedidos/admin/15/cambiar-estado/')
       .flush('sin backend', { status: 502, statusText: 'Bad Gateway' });
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(texto(fixture)).toContain('No pudimos marcar el pedido como pagado');
+    expect(texto(fixture)).toContain('No pudimos cambiar el estado del pedido');
   });
 
   it('avisa cuando el pedido no existe', async () => {

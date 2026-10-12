@@ -47,12 +47,27 @@ class Pedido(TimeStampedModel):
     def __str__(self):
         return f"Pedido #{self.pk} de {self.nombre}"
 
-    def marcar_pagado(self) -> None:
-        """Usado por el admin de Django y por el panel administrativo (FR-19)."""
-        self.estado = self.Estado.PAGADO
+    def cambiar_estado(self, nuevo_estado: str) -> None:
+        """
+        Usado por el admin de Django y por el panel administrativo (FR-19).
+
+        El pago sigue al pedido: pagado se refleja como aprobado, cualquier
+        otro estado como pendiente. Asi un cambio hecho por error se puede
+        deshacer sin dejar el pago desincronizado del pedido.
+        """
+        self.estado = nuevo_estado
         self.save(update_fields=["estado", "actualizado_en"])
-        self.pago.estado = Pago.Estado.APROBADO
-        self.pago.save(update_fields=["estado"])
+
+        estado_pago = (
+            Pago.Estado.APROBADO if nuevo_estado == self.Estado.PAGADO else Pago.Estado.PENDIENTE
+        )
+        if self.pago.estado != estado_pago:
+            self.pago.estado = estado_pago
+            self.pago.save(update_fields=["estado"])
+
+    def marcar_pagado(self) -> None:
+        """Atajo usado por la accion del admin de Django."""
+        self.cambiar_estado(self.Estado.PAGADO)
 
 
 class ItemPedido(TimeStampedModel):
