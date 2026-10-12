@@ -1,4 +1,4 @@
-import { APIRequestContext, expect, test } from '@playwright/test';
+import { Page, expect, test } from '@playwright/test';
 
 /**
  * FR-09 Cambiar disponibilidad: pruebas E2E.
@@ -12,18 +12,27 @@ interface ProductoCreado {
   nombre: string;
 }
 
-const API = 'http://127.0.0.1:8001/api';
+// Por el proxy de Angular: asi viaja la sesion de personal que deja
+// personal.setup.ts, que es la que piden crear y eliminar (FR-19).
+const API = '/api';
+
+/** Django pide el token CSRF en las peticiones que modifican algo. */
+async function cabeceraCsrf(page: Page) {
+  const cookies = await page.context().cookies();
+  return { 'X-CSRFToken': cookies.find((c) => c.name === 'csrftoken')?.value ?? '' };
+}
 
 /**
  * Crea un producto propio para la prueba. El "000" lo pone de primero en el
  * listado de administracion, que ordena los disponibles por nombre.
  */
-async function crearProducto(request: APIRequestContext): Promise<ProductoCreado> {
-  const categorias = await (await request.get(`${API}/categorias/`)).json();
+async function crearProducto(page: Page): Promise<ProductoCreado> {
+  const categorias = await (await page.request.get(`${API}/categorias/`)).json();
   expect(categorias.length, 'Sin categorias: corre "manage.py cargar_catalogo"').toBeGreaterThan(0);
 
   const nombre = `000 E2E Lomo ${Date.now()}`;
-  const respuesta = await request.post(`${API}/productos/`, {
+  const respuesta = await page.request.post(`${API}/productos/`, {
+    headers: await cabeceraCsrf(page),
     data: {
       categoria: categorias[0].id,
       nombre,
@@ -38,13 +47,15 @@ async function crearProducto(request: APIRequestContext): Promise<ProductoCreado
 
 let producto: ProductoCreado;
 
-test.beforeEach(async ({ request }) => {
-  producto = await crearProducto(request);
+test.beforeEach(async ({ page }) => {
+  producto = await crearProducto(page);
 });
 
-test.afterEach(async ({ request }) => {
+test.afterEach(async ({ page }) => {
   // Eliminar archiva: el producto deja de verse en el catalogo y el listado.
-  await request.delete(`${API}/productos/${producto.id}/`);
+  await page.request.delete(`${API}/productos/${producto.id}/`, {
+    headers: await cabeceraCsrf(page),
+  });
 });
 
 test('agotar un producto desde el listado lo marca como agotado en el catalogo', async ({
@@ -72,7 +83,7 @@ test('agotar un producto desde el listado lo marca como agotado en el catalogo',
   await expect(tarjeta.locator('.insignia').first()).toHaveText('Agotado');
 });
 
-test('si el servidor falla, avisa y el producto sigue disponible', async ({ page, request }) => {
+test('si el servidor falla, avisa y el producto sigue disponible', async ({ page }) => {
   // Solo se intercepta el cambio de disponibilidad; el resto va al backend real.
   await page.route(`**/api/productos/${producto.id}/`, (ruta) =>
     ruta.request().method() === 'PATCH'
@@ -90,6 +101,6 @@ test('si el servidor falla, avisa y el producto sigue disponible', async ({ page
   await expect(etiqueta).toHaveText(/Disponible/);
   await expect(etiqueta).toBeEnabled();
 
-  const guardado = await (await request.get(`${API}/productos/${producto.id}/`)).json();
+  const guardado = await (await page.request.get(`${API}/productos/${producto.id}/`)).json();
   expect(guardado.disponible).toBe(true);
 });

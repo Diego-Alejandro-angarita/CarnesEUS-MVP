@@ -17,7 +17,14 @@ export default defineConfig({
     baseURL: 'http://localhost:4200',
     trace: 'retain-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'setup', testMatch: '**/*.setup.ts' },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], storageState: 'e2e/.auth/personal.json' },
+      dependencies: ['setup'],
+    },
+  ],
   webServer: [
     {
       command: 'python manage.py runserver 8001 --noreload',

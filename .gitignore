@@ -27,6 +27,7 @@ node_modules/
 npm-debug.log*
 /frontend/test-results/
 /frontend/playwright-report/
+/frontend/e2e/.auth/
 
 # ---- Editores / SO ----
 # Solo la .vscode de la raiz; cada subproyecto decide en su propio .gitignore.
