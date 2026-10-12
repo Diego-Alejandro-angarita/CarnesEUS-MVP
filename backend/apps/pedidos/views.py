@@ -67,6 +67,7 @@ class CrearPedidoView(CarritoMixin, APIView):
                 municipio=datos["municipio"],
                 barrio=datos["barrio"],
                 notas=datos["notas"],
+                acepta_comunicaciones=datos["acepta_comunicaciones"],
                 estado=estado,
                 total=total,
             )

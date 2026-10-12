@@ -11,6 +11,7 @@ export interface NuevoPedido {
   municipio: string;
   barrio: string;
   notas: string;
+  acepta_comunicaciones: boolean;
 }
 
 export interface ItemPedido {

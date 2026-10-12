@@ -36,6 +36,8 @@ class Pedido(TimeStampedModel):
     municipio = models.CharField("municipio", max_length=80)
     barrio = models.CharField("barrio", max_length=120)
     notas = models.CharField("notas para la entrega", max_length=300, blank=True)
+    # FR-06: autorizacion para recibir promociones (Ley 1581 de 2012).
+    acepta_comunicaciones = models.BooleanField("acepta recibir comunicaciones", default=False)
     estado = models.CharField("estado", max_length=13, choices=Estado.choices)
     total = models.DecimalField("total", max_digits=12, decimal_places=2)
 

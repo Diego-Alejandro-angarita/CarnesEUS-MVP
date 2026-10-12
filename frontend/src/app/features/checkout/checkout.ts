@@ -78,6 +78,7 @@ export class Checkout {
     municipio: ['', Validators.required],
     barrio: ['', Validators.required],
     notas: [''],
+    acepta_comunicaciones: [false],
   });
 
   constructor() {

@@ -17,7 +17,7 @@ describe('Panel', () => {
     return fixture;
   }
 
-  it('enlaza a las tres secciones de administracion', () => {
+  it('enlaza a las secciones de administracion', () => {
     const fixture = crear();
 
     const enlaces = [...(fixture.nativeElement as HTMLElement).querySelectorAll('a')].map((a) =>
@@ -26,5 +26,6 @@ describe('Panel', () => {
     expect(enlaces).toContain('/admin/productos');
     expect(enlaces).toContain('/admin/pedidos');
     expect(enlaces).toContain('/admin/usuarios');
+    expect(enlaces).toContain('/admin/estadisticas');
   });
 });
