@@ -61,6 +61,10 @@ describe('Estadisticas', () => {
     http.expectOne((r) => r.url === '/api/estadisticas/resumen/').flush(RESUMEN);
     http.expectOne((r) => r.url === '/api/estadisticas/productos/').flush(PRODUCTOS);
     http.expectOne((r) => r.url === '/api/estadisticas/clientes/').flush(CLIENTES);
+    // Promise.all + senales se propagan en varios microtasks: hace falta
+    // mas de un ciclo para que la UI pase de 'cargando' a 'ok'.
+    await fixture.whenStable();
+    fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
     return { fixture, http };
