@@ -27,4 +27,6 @@ def anotar_descuento(productos: QuerySet) -> QuerySet:
 def precio_con_descuento(precio: Decimal, porcentaje: int) -> Decimal:
     """Precio rebajado, redondeado a pesos enteros."""
     rebajado = precio * (100 - porcentaje) / 100
-    return rebajado.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    # Con centavos, el redondeo puede quedar sobre el precio de lista (1.52 al
+    # 1% da 2): un descuento nunca puede encarecer el producto.
+    return min(rebajado.quantize(Decimal("1"), rounding=ROUND_HALF_UP), precio)

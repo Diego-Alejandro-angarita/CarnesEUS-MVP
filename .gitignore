@@ -13,6 +13,7 @@ venv/
 .coverage
 htmlcov/
 .ruff_cache/
+.hypothesis/
 
 # ---- Django ----
 db.sqlite3
@@ -24,6 +25,8 @@ node_modules/
 /frontend/dist/
 /frontend/.angular/
 npm-debug.log*
+/frontend/test-results/
+/frontend/playwright-report/
 
 # ---- Editores / SO ----
 # Solo la .vscode de la raiz; cada subproyecto decide en su propio .gitignore.
