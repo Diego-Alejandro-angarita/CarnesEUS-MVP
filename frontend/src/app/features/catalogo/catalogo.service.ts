@@ -14,6 +14,10 @@ export interface Producto {
   foto_url: string;
   disponible: boolean;
   categoria: string;
+  /** Porcentaje de la promocion vigente (FR-13), o null si no tiene. */
+  descuento: number | null;
+  /** Precio ya rebajado, o null si no hay promocion. */
+  precio_promocion: number | null;
   calificacion_promedio: number | null;
   total_resenas: number;
 }
@@ -37,7 +41,10 @@ export interface FiltrosProductos {
   precioMax?: number | null;
 }
 
-type ProductoApi = Omit<Producto, 'precio'> & { precio: string };
+type ProductoApi = Omit<Producto, 'precio' | 'precio_promocion'> & {
+  precio: string;
+  precio_promocion: string | null;
+};
 type PaginaProductosApi = Omit<PaginaProductos, 'results'> & { results: ProductoApi[] };
 
 @Injectable({ providedIn: 'root' })
@@ -77,5 +84,10 @@ export class CatalogoService {
 }
 
 function convertir(producto: ProductoApi): Producto {
-  return { ...producto, precio: Number(producto.precio) };
+  return {
+    ...producto,
+    precio: Number(producto.precio),
+    descuento: producto.descuento ?? null,
+    precio_promocion: producto.precio_promocion != null ? Number(producto.precio_promocion) : null,
+  };
 }

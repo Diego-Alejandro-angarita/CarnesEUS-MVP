@@ -8,6 +8,8 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import AllowAny, IsAdminUser
 
+from apps.promotions.precios import anotar_descuento
+
 from .filters import ProductoFilter
 from .models import Categoria, Producto
 from .serializers import CategoriaSerializer, ProductoAdminSerializer, ProductoSerializer
@@ -19,7 +21,8 @@ from .serializers import CategoriaSerializer, ProductoAdminSerializer, ProductoS
         description=(
             "Devuelve los productos del catalogo con foto, precio y disponibilidad. "
             "Acepta los parametros page, page_size, search (busca por nombre), "
-            "categoria (id) y precio_min/precio_max (rango de precio)."
+            "categoria (id) y precio_min/precio_max (rango de precio). Si el producto "
+            "tiene una promocion vigente trae su descuento y precio_promocion."
         ),
         responses={200: ProductoSerializer(many=True)},
     ),
@@ -39,6 +42,11 @@ class ProductoListView(ListCreateAPIView):
     queryset = Producto.objects.visibles().select_related("categoria")
     search_fields = ["nombre"]
     filterset_class = ProductoFilter
+
+    def get_queryset(self):
+        # Se anota en cada peticion, no en el atributo de clase: la vigencia
+        # depende de la fecha de hoy y el atributo se evalua una sola vez.
+        return anotar_descuento(super().get_queryset())
 
     def get_permissions(self):
         if self.request.method == "POST":
@@ -80,6 +88,9 @@ class ProductoDetalleView(RetrieveAPIView):
         total_resenas=Count("resenas", distinct=True),
     )
     lookup_field = "slug"
+
+    def get_queryset(self):
+        return anotar_descuento(super().get_queryset())
 
 
 @extend_schema_view(

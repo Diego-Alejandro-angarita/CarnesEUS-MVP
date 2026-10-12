@@ -1,0 +1,134 @@
+@if (errorGeneral()) {
+  <p class="aviso aviso--error" role="alert">{{ errorGeneral() }}</p>
+}
+
+<form class="formulario" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+  <div class="formulario__fila">
+    <div class="campo">
+      <label for="nombre">Nombre</label>
+      <input
+        id="nombre"
+        type="text"
+        formControlName="nombre"
+        maxlength="120"
+        autocomplete="off"
+        placeholder="Semana de la res"
+        [attr.aria-invalid]="errores().nombre ? 'true' : null"
+        [attr.aria-describedby]="errores().nombre ? 'error-nombre' : null"
+      />
+      @if (errores().nombre) {
+        <p class="campo__error" id="error-nombre">{{ errores().nombre }}</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="porcentaje">Descuento (%)</label>
+      <input
+        id="porcentaje"
+        type="number"
+        formControlName="porcentaje"
+        min="1"
+        max="99"
+        step="1"
+        inputmode="numeric"
+        placeholder="20"
+        [attr.aria-invalid]="errores().porcentaje ? 'true' : null"
+        [attr.aria-describedby]="errores().porcentaje ? 'error-porcentaje' : null"
+      />
+      @if (errores().porcentaje) {
+        <p class="campo__error" id="error-porcentaje">{{ errores().porcentaje }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="formulario__fila">
+    <div class="campo">
+      <label for="fecha_inicio">Desde</label>
+      <input
+        id="fecha_inicio"
+        type="date"
+        formControlName="fecha_inicio"
+        [attr.aria-invalid]="errores().fecha_inicio ? 'true' : null"
+        [attr.aria-describedby]="errores().fecha_inicio ? 'error-fecha_inicio' : null"
+      />
+      @if (errores().fecha_inicio) {
+        <p class="campo__error" id="error-fecha_inicio">{{ errores().fecha_inicio }}</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="fecha_fin">Hasta <span class="campo__opcional">incluido</span></label>
+      <input
+        id="fecha_fin"
+        type="date"
+        formControlName="fecha_fin"
+        [attr.aria-invalid]="errores().fecha_fin ? 'true' : null"
+        [attr.aria-describedby]="errores().fecha_fin ? 'error-fecha_fin' : null"
+      />
+      @if (errores().fecha_fin) {
+        <p class="campo__error" id="error-fecha_fin">{{ errores().fecha_fin }}</p>
+      }
+    </div>
+  </div>
+
+  <fieldset
+    class="selector"
+    [attr.aria-invalid]="errores().productos ? 'true' : null"
+    [attr.aria-describedby]="errores().productos ? 'error-productos' : null"
+  >
+    <legend class="selector__titulo">
+      Productos
+      <span class="selector__conteo" aria-live="polite">
+        {{ seleccionados().size }} {{ seleccionados().size === 1 ? 'elegido' : 'elegidos' }}
+      </span>
+    </legend>
+
+    <input
+      class="selector__filtro"
+      type="search"
+      placeholder="Filtrar por nombre o categoria..."
+      aria-label="Filtrar productos"
+      [value]="filtro()"
+      (input)="filtro.set($any($event.target).value)"
+    />
+
+    @if (productosFiltrados().length === 0) {
+      <p class="selector__vacio">Ningun producto coincide con "{{ filtro() }}".</p>
+    } @else {
+      <ul class="selector__lista">
+        @for (producto of productosFiltrados(); track producto.id) {
+          <li>
+            <label class="selector__opcion">
+              <input
+                type="checkbox"
+                [checked]="seleccionados().has(producto.id)"
+                (change)="alternar(producto.id, $any($event.target).checked)"
+              />
+              <span class="selector__nombre">{{ producto.nombre }}</span>
+              <span class="selector__detalle">
+                {{ producto.categoria }} &middot;
+                {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+              </span>
+            </label>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (errores().productos) {
+      <p class="campo__error" id="error-productos">{{ errores().productos }}</p>
+    }
+  </fieldset>
+
+  <label class="interruptor">
+    <input type="checkbox" formControlName="activa" />
+    <span>Activa (si la apagas, no rige aunque este dentro de las fechas)</span>
+  </label>
+
+  <div class="formulario__acciones">
+    <button type="submit" class="boton" [disabled]="enviando()">
+      {{ enviando() ? 'Guardando...' : etiquetaEnvio() }}
+    </button>
+    <a class="boton boton--secundario" [routerLink]="rutaCancelar()">Cancelar</a>
+  </div>
+</form>

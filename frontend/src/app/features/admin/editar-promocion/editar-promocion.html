@@ -1,0 +1,60 @@
+<section class="admin">
+  <header class="admin__cabecera">
+    <p class="admin__kicker">Administracion</p>
+    <h1 class="admin__titulo">Modificar promocion</h1>
+    <p class="admin__lead">
+      Ajusta el descuento, las fechas o los cortes. El catalogo se actualiza al guardar.
+    </p>
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando la promocion...</p>
+    }
+    @case ('sin-permiso') {
+      <p class="aviso aviso--error" role="alert">
+        Necesitas iniciar sesion con una cuenta de administrador para gestionar promociones.
+        <a routerLink="/login">Iniciar sesion</a>
+      </p>
+    }
+    @case ('no-encontrado') {
+      <p class="aviso aviso--error" role="alert">
+        Esta promocion ya no existe.
+        <a routerLink="/admin/promociones">Volver al listado</a>
+      </p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar la promocion. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('guardado') {
+      <div class="exito" role="status" aria-live="polite">
+        <h2 class="exito__titulo">Cambios guardados</h2>
+        <p class="exito__texto">
+          <strong>{{ promocion()?.nombre }}</strong> quedo con un {{ promocion()?.porcentaje }} % de
+          descuento.
+        </p>
+        <div class="exito__acciones">
+          <button type="button" class="boton" (click)="seguirEditando()">Seguir editando</button>
+          <a class="boton boton--secundario" routerLink="/admin/promociones">Ver el listado</a>
+        </div>
+      </div>
+    }
+    @default {
+      @if (errorGeneral()) {
+        <p class="aviso aviso--error" role="alert">{{ errorGeneral() }}</p>
+      }
+
+      <app-formulario-promocion
+        [productos]="productos()"
+        [valores]="valores()"
+        [enviando]="enviando()"
+        [erroresBackend]="erroresBackend()"
+        etiquetaEnvio="Guardar cambios"
+        rutaCancelar="/admin/promociones"
+        (guardar)="guardar($event)"
+      />
+    }
+  }
+</section>

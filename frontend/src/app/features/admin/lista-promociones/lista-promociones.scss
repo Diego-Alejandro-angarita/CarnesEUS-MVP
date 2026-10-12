@@ -1,0 +1,24 @@
+@use '../base';
+@use '../pagina';
+@use '../listado';
+@use '../../../styles/tokens' as t;
+
+// La que rige hoy resalta; las que no aplican quedan apagadas.
+.insignia--vigente {
+  border-color: t.$color-oro;
+  background: rgba(209, 161, 58, 0.15);
+  color: t.$color-oro-claro;
+}
+
+.insignia--programada {
+  border-color: t.$color-borde;
+  background: transparent;
+  color: t.$color-texto-suave;
+}
+
+.insignia--vencida,
+.insignia--inactiva {
+  border-color: t.$color-borde-suave;
+  background: transparent;
+  color: t.$color-texto-tenue;
+}

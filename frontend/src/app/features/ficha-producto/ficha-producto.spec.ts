@@ -22,6 +22,8 @@ function producto(sobrescribir: Record<string, unknown> = {}) {
     foto_url: 'https://ejemplo.test/lomo-fino.jpg',
     disponible: true,
     categoria: 'Res',
+    descuento: null,
+    precio_promocion: null,
     calificacion_promedio: null,
     total_resenas: 0,
     ...sobrescribir,
@@ -155,6 +157,25 @@ describe('FichaProducto', () => {
     fixture.detectChanges();
 
     expect(texto(fixture)).toContain('No pudimos cargar el producto');
+  });
+
+  it('con una promocion vigente muestra el precio rebajado y el de lista tachado', async () => {
+    const { fixture, http } = crear();
+    await cargarTodo(fixture, http, { producto: { descuento: 15, precio_promocion: '33065.00' } });
+
+    const raiz = elemento(fixture);
+    expect(raiz.querySelector('.ficha__precio')?.textContent).toContain('33.065');
+    expect(raiz.querySelector('.precio-anterior')?.textContent).toContain('38.900');
+    expect(raiz.querySelector('.insignia--promo')?.textContent).toContain('-15%');
+  });
+
+  it('sin promocion muestra solo el precio de lista', async () => {
+    const { fixture, http } = crear();
+    await cargarTodo(fixture, http);
+
+    const raiz = elemento(fixture);
+    expect(raiz.querySelector('.insignia--promo')).toBeNull();
+    expect(raiz.querySelector('.precio-anterior')).toBeNull();
   });
 
   // --- resenas (FR-18) -------------------------------------------------------

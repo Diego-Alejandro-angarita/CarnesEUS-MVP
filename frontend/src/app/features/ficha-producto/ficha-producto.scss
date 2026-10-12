@@ -79,6 +79,31 @@
   color: #fdeaea;
 }
 
+// Promocion vigente (FR-13): insignia en la esquina opuesta a la de
+// disponibilidad y el precio de lista tachado junto al rebajado.
+.insignia--promo {
+  inset: 0.75rem 0.75rem auto auto;
+  border-color: t.$color-marca-clara;
+  background: t.$color-marca;
+  color: #ffffff;
+}
+
+.precio-anterior {
+  color: t.$color-texto-tenue;
+  font-family: system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .ficha__categoria {
   margin: 0 0 0.375rem;
   color: t.$color-texto-tenue;

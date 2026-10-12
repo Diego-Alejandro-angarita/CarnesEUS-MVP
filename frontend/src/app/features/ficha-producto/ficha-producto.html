@@ -28,13 +28,24 @@
             <span class="insignia" [class.insignia--agotado]="!producto.disponible">
               {{ producto.disponible ? 'Disponible' : 'Agotado' }}
             </span>
+            @if (producto.descuento) {
+              <span class="insignia insignia--promo">-{{ producto.descuento }}%</span>
+            }
           </div>
 
           <div class="ficha__info">
             <p class="ficha__categoria">{{ producto.categoria }}</p>
             <h1 class="ficha__nombre">{{ producto.nombre }}</h1>
             <p class="ficha__precio">
-              {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+              @if (producto.precio_promocion != null) {
+                {{ producto.precio_promocion | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                <s class="precio-anterior">
+                  <span class="visualmente-oculto">Antes </span>
+                  {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                </s>
+              } @else {
+                {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+              }
               <span>{{ producto.presentacion }}</span>
             </p>
             <p class="ficha__descripcion">{{ producto.descripcion }}</p>

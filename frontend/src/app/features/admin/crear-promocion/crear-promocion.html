@@ -1,0 +1,62 @@
+<section class="admin">
+  <header class="admin__cabecera">
+    <p class="admin__kicker">Administracion</p>
+    <h1 class="admin__titulo">Crear promocion</h1>
+    <p class="admin__lead">
+      Elige los cortes y el descuento. El catalogo muestra el precio rebajado mientras la promocion
+      este vigente.
+    </p>
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando los productos...</p>
+    }
+    @case ('sin-permiso') {
+      <p class="aviso aviso--error" role="alert">
+        Necesitas iniciar sesion con una cuenta de administrador para gestionar promociones.
+        <a routerLink="/login">Iniciar sesion</a>
+      </p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar los productos. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('creado') {
+      <div class="exito" role="status" aria-live="polite">
+        <h2 class="exito__titulo">Promocion creada</h2>
+        <p class="exito__texto">
+          <strong>{{ creada()?.nombre }}</strong> aplica un {{ creada()?.porcentaje }} % de
+          descuento a {{ creada()?.productos?.length }}
+          {{ creada()?.productos?.length === 1 ? 'producto' : 'productos' }}.
+        </p>
+        <div class="exito__acciones">
+          <button type="button" class="boton" (click)="crearOtra()">Crear otra</button>
+          <a class="boton boton--secundario" routerLink="/admin/promociones">Ver el listado</a>
+        </div>
+      </div>
+    }
+    @default {
+      @if (!hayProductos()) {
+        <p class="aviso aviso--error" role="alert">
+          Todavia no hay productos en el catalogo. Crea alguno antes de armar una promocion.
+          <a routerLink="/admin/productos/nuevo">Crear producto</a>
+        </p>
+      } @else {
+        @if (errorGeneral()) {
+          <p class="aviso aviso--error" role="alert">{{ errorGeneral() }}</p>
+        }
+
+        <app-formulario-promocion
+          [productos]="productos()"
+          [enviando]="enviando()"
+          [erroresBackend]="erroresBackend()"
+          etiquetaEnvio="Guardar promocion"
+          rutaCancelar="/admin/promociones"
+          (guardar)="guardar($event)"
+        />
+      }
+    }
+  }
+</section>
