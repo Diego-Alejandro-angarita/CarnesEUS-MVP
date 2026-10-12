@@ -1,0 +1,97 @@
+<section class="admin">
+  <header class="admin__cabecera">
+    <p class="admin__kicker">Administracion</p>
+    <h1 class="admin__titulo">Pedido #{{ id() }}</h1>
+    <a class="admin__lead" routerLink="/admin/pedidos">&larr; Volver al listado</a>
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando el pedido...</p>
+    }
+    @case ('no-encontrado') {
+      <p class="aviso aviso--error" role="alert">
+        Este pedido no existe. <a routerLink="/admin/pedidos">Volver al listado</a>
+      </p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar el pedido. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (pedido(); as pedido) {
+        @if (errorAccion()) {
+          <p class="aviso aviso--error" role="alert">{{ errorAccion() }}</p>
+        }
+
+        <div class="detalle">
+          <dl class="datos">
+            <dt>Estado</dt>
+            <dd>
+              <span class="insignia" [class.insignia--pagado]="pedido.estado === 'pagado'">
+                {{ etiquetas[pedido.estado] }}
+              </span>
+            </dd>
+            <dt>Cliente</dt>
+            <dd>{{ pedido.nombre }}</dd>
+            <dt>Correo</dt>
+            <dd>{{ pedido.email }}</dd>
+            <dt>Telefono</dt>
+            <dd>{{ pedido.telefono }}</dd>
+            <dt>Entrega</dt>
+            <dd>{{ pedido.direccion }}, {{ pedido.barrio }}, {{ pedido.municipio }}</dd>
+            @if (pedido.notas) {
+              <dt>Notas</dt>
+              <dd>{{ pedido.notas }}</dd>
+            }
+            <dt>Metodo de pago</dt>
+            <dd>{{ pedido.pago.metodo_nombre }}</dd>
+            @if (pedido.pago.referencia) {
+              <dt>Referencia</dt>
+              <dd>{{ pedido.pago.referencia }}</dd>
+            }
+          </dl>
+
+          <h2 class="detalle__subtitulo">Productos</h2>
+          <ul class="resumen__lista">
+            @for (item of pedido.items; track item.producto_id) {
+              <li>
+                <span>{{ item.cantidad }} x {{ item.nombre }}</span>
+                <span>{{ item.subtotal | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+              </li>
+            }
+          </ul>
+          <p class="resumen__total">
+            <span>Total</span>
+            <strong>{{ pedido.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
+          </p>
+
+          <div class="cambiar-estado">
+            <h2 class="detalle__subtitulo">Cambiar estado</h2>
+            <div class="estado-opciones" role="radiogroup" aria-label="Estado del pedido">
+              @for (opcion of ESTADOS; track opcion) {
+                <label class="estado-opcion" [class.estado-opcion--activa]="pedido.estado === opcion">
+                  <input
+                    type="radio"
+                    name="estado"
+                    [checked]="pedido.estado === opcion"
+                    [disabled]="cambiando()"
+                    (change)="cambiarEstado(opcion)"
+                  />
+                  <span>
+                    <strong>{{ etiquetas[opcion] }}</strong>
+                    <small>{{ ayudaEstado[opcion] }}</small>
+                  </span>
+                </label>
+              }
+            </div>
+            @if (cambiando()) {
+              <p class="estado-guardando" role="status">Guardando...</p>
+            }
+          </div>
+        </div>
+      }
+    }
+  }
+</section>

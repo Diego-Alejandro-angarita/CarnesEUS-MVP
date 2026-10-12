@@ -1,0 +1,7 @@
+version: 2
+secret:
+  ignored-matches:
+    # Contrasena de prueba usada en los fixtures de pytest para crear
+    # usuarios de prueba (backend/tests/*.py). No es una credencial real.
+    - name: contrasena-de-prueba-en-tests
+      match: UnaClaveSegura123

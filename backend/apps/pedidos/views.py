@@ -1,13 +1,21 @@
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.cart.views import PARAMETRO_TOKEN, CarritoMixin
 
 from .models import ItemPedido, Pago, Pedido
-from .serializers import CrearPedidoSerializer, PedidoSerializer
+from .serializers import (
+    CambiarEstadoSerializer,
+    CrearPedidoSerializer,
+    PedidoListaSerializer,
+    PedidoSerializer,
+)
 
 
 @extend_schema(
@@ -77,3 +85,51 @@ class CrearPedidoView(CarritoMixin, APIView):
             carrito.items.filter(pk__in=[item.pk for item in items]).delete()
 
         return Response(PedidoSerializer(pedido).data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(
+    summary="Listado de pedidos",
+    description=(
+        "Panel administrativo (FR-19): listado paginado de pedidos, mas reciente "
+        "primero. Acepta el parametro estado (por_confirmar, por_cobrar, pagado)."
+    ),
+    responses={200: PedidoListaSerializer(many=True)},
+)
+class PedidoListView(ListAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = PedidoListaSerializer
+    queryset = Pedido.objects.select_related("pago")
+    filterset_fields = ["estado"]
+
+
+@extend_schema(
+    summary="Detalle de un pedido",
+    description="Panel administrativo (FR-19): un pedido con sus items y su pago.",
+    responses={200: PedidoSerializer},
+)
+class PedidoDetalleView(RetrieveAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = PedidoSerializer
+    queryset = Pedido.objects.select_related("pago").prefetch_related("items")
+
+
+@extend_schema(
+    summary="Cambiar el estado de un pedido",
+    description=(
+        "Panel administrativo (FR-19): mueve el pedido a por_confirmar, "
+        "por_cobrar o pagado. El pago se sincroniza solo: aprobado cuando el "
+        "pedido queda pagado, pendiente en cualquier otro estado."
+    ),
+    request=CambiarEstadoSerializer,
+    responses={200: PedidoSerializer},
+)
+class CambiarEstadoPedidoView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, pk):
+        entrada = CambiarEstadoSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+
+        pedido = get_object_or_404(Pedido, pk=pk)
+        pedido.cambiar_estado(entrada.validated_data["estado"])
+        return Response(PedidoSerializer(pedido).data)

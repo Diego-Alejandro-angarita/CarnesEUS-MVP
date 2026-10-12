@@ -6,7 +6,7 @@ from rest_framework.generics import (
     RetrieveAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 
 from .filters import ProductoFilter
 from .models import Categoria, Producto
@@ -34,12 +34,16 @@ from .serializers import CategoriaSerializer, ProductoAdminSerializer, ProductoS
     ),
 )
 class ProductoListView(ListCreateAPIView):
-    # TODO(FR-02): restringir el POST a IsAdminUser cuando exista el inicio de
-    # sesion. Hoy la creacion queda abierta porque todavia no hay autenticacion.
-    permission_classes = [AllowAny]
+    """El listado es publico; dar de alta (FR-03) es solo para personal (FR-19)."""
+
     queryset = Producto.objects.visibles().select_related("categoria")
     search_fields = ["nombre"]
     filterset_class = ProductoFilter
+
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [IsAdminUser()]
+        return [AllowAny()]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -112,10 +116,10 @@ class ProductoDetalleView(RetrieveAPIView):
     ),
 )
 class ProductoAdminDetalleView(RetrieveUpdateDestroyAPIView):
-    """Edicion (FR-04) y eliminacion (FR-05) de un producto por id."""
+    """Edicion (FR-04) y eliminacion (FR-05) de un producto por id. Solo personal (FR-19)."""
 
     serializer_class = ProductoAdminSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
     queryset = Producto.objects.visibles().select_related("categoria")
 
     def perform_destroy(self, instance):

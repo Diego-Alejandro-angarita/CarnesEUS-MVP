@@ -4,6 +4,12 @@ from rest_framework import serializers
 from .models import ItemPedido, Pago, Pedido
 
 
+class CambiarEstadoSerializer(serializers.Serializer):
+    """Entrada del panel administrativo (FR-19) para mover un pedido de estado."""
+
+    estado = serializers.ChoiceField(choices=Pedido.Estado.choices)
+
+
 class CrearPedidoSerializer(serializers.Serializer):
     """Entrada de POST /api/pedidos/: entrega, contacto y forma de pago."""
 
@@ -26,7 +32,14 @@ class ItemPedidoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ItemPedido
-        fields = ["producto_id", "producto_slug", "nombre", "precio_unitario", "cantidad", "subtotal"]
+        fields = [
+            "producto_id",
+            "producto_slug",
+            "nombre",
+            "precio_unitario",
+            "cantidad",
+            "subtotal",
+        ]
 
 
 class PagoSerializer(serializers.ModelSerializer):
@@ -68,3 +81,23 @@ class PedidoSerializer(serializers.ModelSerializer):
         if pedido.pago.metodo == Pago.Metodo.TRANSFERENCIA:
             return settings.DATOS_TRANSFERENCIA
         return None
+
+
+class PedidoListaSerializer(serializers.ModelSerializer):
+    """Una fila de la tabla del panel administrativo (FR-19): lo justo para listar."""
+
+    metodo_pago = serializers.CharField(source="pago.get_metodo_display", read_only=True)
+
+    class Meta:
+        model = Pedido
+        fields = [
+            "id",
+            "nombre",
+            "municipio",
+            "barrio",
+            "estado",
+            "total",
+            "metodo_pago",
+            "creado_en",
+        ]
+        read_only_fields = fields

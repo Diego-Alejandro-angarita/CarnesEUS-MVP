@@ -81,6 +81,7 @@ function usuarioMock(sobrescribir: Record<string, unknown> = {}) {
     last_name: 'Agudin',
     email: 'pepe@example.com',
     telefono: '',
+    is_staff: false,
     ...sobrescribir,
   };
 }

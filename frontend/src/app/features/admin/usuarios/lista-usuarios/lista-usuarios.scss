@@ -1,0 +1,13 @@
+@use '../../../../styles/tokens' as t;
+@use '../../base';
+@use '../../pagina';
+
+.admin--ancha {
+  max-width: t.$ancho-maximo;
+}
+
+.insignia--staff {
+  margin-left: 0.5rem;
+  border-color: t.$color-oro;
+  color: t.$color-oro-claro;
+}

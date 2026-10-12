@@ -1,0 +1,18 @@
+<section class="admin admin--ancha">
+  <header class="admin__cabecera">
+    <p class="admin__kicker">Administracion</p>
+    <h1 class="admin__titulo">Panel administrativo</h1>
+    <p class="admin__lead">Gestiona el catalogo, los pedidos y los clientes sin tocar la base de datos.</p>
+  </header>
+
+  <ul class="secciones">
+    @for (seccion of secciones; track seccion.ruta) {
+      <li>
+        <a class="seccion" [routerLink]="seccion.ruta">
+          <h2 class="seccion__titulo">{{ seccion.titulo }}</h2>
+          <p class="seccion__descripcion">{{ seccion.descripcion }}</p>
+        </a>
+      </li>
+    }
+  </ul>
+</section>

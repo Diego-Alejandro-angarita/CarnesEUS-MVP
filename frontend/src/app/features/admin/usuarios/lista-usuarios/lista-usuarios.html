@@ -1,0 +1,88 @@
+<section class="admin admin--ancha">
+  <header class="admin__cabecera">
+    <p class="admin__kicker">Administracion</p>
+    <h1 class="admin__titulo">Usuarios</h1>
+    <p class="admin__lead">Clientes registrados. Desactivar una cuenta le impide iniciar sesion.</p>
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando los usuarios...</p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar los usuarios. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (errorAccion()) {
+        <p class="aviso aviso--error" role="alert">{{ errorAccion() }}</p>
+      }
+
+      @if (usuarios().length === 0) {
+        <p class="aviso">Todavia no hay clientes registrados.</p>
+      } @else {
+        <p class="tabla__conteo">{{ total() }} usuarios</p>
+
+        <div class="tabla__marco">
+          <table class="tabla">
+            <caption class="visualmente-oculto">Clientes registrados</caption>
+            <thead>
+              <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Correo</th>
+                <th scope="col">Telefono</th>
+                <th scope="col">Registrado</th>
+                <th scope="col">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (usuario of usuarios(); track usuario.id) {
+                <tr>
+                  <th scope="row" class="tabla__nombre">
+                    {{ usuario.first_name }} {{ usuario.last_name }}
+                    @if (usuario.is_staff) {
+                      <span class="insignia insignia--staff">Personal</span>
+                    }
+                  </th>
+                  <td>{{ usuario.email }}</td>
+                  <td>{{ usuario.telefono || '—' }}</td>
+                  <td>{{ usuario.date_joined | date: 'd MMM y' }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="insignia insignia--boton"
+                      [class.insignia--agotado]="!usuario.is_active"
+                      [disabled]="cambiando() === usuario.id"
+                      (click)="alternarActivo(usuario.id, usuario.is_active)"
+                    >
+                      {{ usuario.is_active ? 'Activo' : 'Inactivo' }}
+                      <span class="visualmente-oculto">
+                        &mdash; marcar {{ usuario.email }} como
+                        {{ usuario.is_active ? 'inactivo' : 'activo' }}
+                      </span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPaginas() > 1) {
+          <nav class="paginacion" aria-label="Paginacion del listado">
+            <button type="button" [disabled]="!hayAnterior()" (click)="irA(paginaActual() - 1)">
+              Anterior
+            </button>
+            <p class="paginacion__estado" aria-live="polite">
+              Pagina {{ paginaActual() }} de {{ totalPaginas() }}
+            </p>
+            <button type="button" [disabled]="!haySiguiente()" (click)="irA(paginaActual() + 1)">
+              Siguiente
+            </button>
+          </nav>
+        }
+      }
+    }
+  }
+</section>
