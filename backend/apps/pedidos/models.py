@@ -47,6 +47,13 @@ class Pedido(TimeStampedModel):
     def __str__(self):
         return f"Pedido #{self.pk} de {self.nombre}"
 
+    def marcar_pagado(self) -> None:
+        """Usado por el admin de Django y por el panel administrativo (FR-19)."""
+        self.estado = self.Estado.PAGADO
+        self.save(update_fields=["estado", "actualizado_en"])
+        self.pago.estado = Pago.Estado.APROBADO
+        self.pago.save(update_fields=["estado"])
+
 
 class ItemPedido(TimeStampedModel):
     pedido = models.ForeignKey(

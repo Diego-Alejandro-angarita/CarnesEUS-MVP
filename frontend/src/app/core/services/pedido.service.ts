@@ -6,7 +6,9 @@ import { ItemPedido, NuevoPedido, Pago, Pedido } from '../models/pedido';
 import { CarritoService } from './carrito.service';
 
 // La API devuelve los montos como texto ("77800.00"); aqui se pasan a numero.
-type PedidoApi = Omit<Pedido, 'total' | 'items' | 'pago'> & {
+// Se exporta para que el panel administrativo (admin-pedidos.service) reuse
+// la misma conversion al pedir el detalle de un pedido.
+export type PedidoApi = Omit<Pedido, 'total' | 'items' | 'pago'> & {
   total: string;
   items: (Omit<ItemPedido, 'precio_unitario' | 'subtotal'> & {
     precio_unitario: string;
@@ -31,7 +33,7 @@ export class PedidoService {
   }
 }
 
-function convertir(api: PedidoApi): Pedido {
+export function convertir(api: PedidoApi): Pedido {
   return {
     ...api,
     total: Number(api.total),

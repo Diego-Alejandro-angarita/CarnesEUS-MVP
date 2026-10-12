@@ -68,3 +68,23 @@ class PedidoSerializer(serializers.ModelSerializer):
         if pedido.pago.metodo == Pago.Metodo.TRANSFERENCIA:
             return settings.DATOS_TRANSFERENCIA
         return None
+
+
+class PedidoListaSerializer(serializers.ModelSerializer):
+    """Una fila de la tabla del panel administrativo (FR-19): lo justo para listar."""
+
+    metodo_pago = serializers.CharField(source="pago.get_metodo_display", read_only=True)
+
+    class Meta:
+        model = Pedido
+        fields = [
+            "id",
+            "nombre",
+            "municipio",
+            "barrio",
+            "estado",
+            "total",
+            "metodo_pago",
+            "creado_en",
+        ]
+        read_only_fields = fields

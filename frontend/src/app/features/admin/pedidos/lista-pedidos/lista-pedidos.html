@@ -1,0 +1,96 @@
+<section class="admin admin--ancha">
+  <header class="admin__cabecera admin__cabecera--fila">
+    <div>
+      <p class="admin__kicker">Administracion</p>
+      <h1 class="admin__titulo">Pedidos</h1>
+      <p class="admin__lead">Revisa los pedidos de los clientes y confirma los que ya se pagaron.</p>
+    </div>
+    <div class="campo-filtro">
+      <label for="filtro-estado">Estado</label>
+      <select
+        id="filtro-estado"
+        [value]="estadoFiltro() ?? ''"
+        (change)="filtrarPorEstado($any($event.target).value)"
+      >
+        <option value="">Todos</option>
+        <option value="por_confirmar">Por confirmar</option>
+        <option value="por_cobrar">Por cobrar</option>
+        <option value="pagado">Pagado</option>
+      </select>
+    </div>
+  </header>
+
+  @switch (estadoPantalla()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando los pedidos...</p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar los pedidos. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (pedidos().length === 0) {
+        <p class="aviso">No hay pedidos{{ estadoFiltro() ? ' con ese estado' : '' }}.</p>
+      } @else {
+        <p class="tabla__conteo">{{ total() }} pedidos</p>
+
+        <div class="tabla__marco">
+          <table class="tabla">
+            <caption class="visualmente-oculto">Pedidos de los clientes</caption>
+            <thead>
+              <tr>
+                <th scope="col">Pedido</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Entrega</th>
+                <th scope="col">Pago</th>
+                <th scope="col">Estado</th>
+                <th scope="col" class="tabla__numero">Total</th>
+                <th scope="col">Fecha</th>
+                <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (pedido of pedidos(); track pedido.id) {
+                <tr>
+                  <th scope="row" class="tabla__nombre">#{{ pedido.id }}</th>
+                  <td>{{ pedido.nombre }}</td>
+                  <td>{{ pedido.barrio }}, {{ pedido.municipio }}</td>
+                  <td>{{ pedido.metodo_pago }}</td>
+                  <td>
+                    <span class="insignia" [class.insignia--pagado]="pedido.estado === 'pagado'">
+                      {{ etiquetas[pedido.estado] }}
+                    </span>
+                  </td>
+                  <td class="tabla__numero">
+                    {{ pedido.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                  </td>
+                  <td>{{ pedido.creado_en | date: 'd MMM, h:mm a' }}</td>
+                  <td class="tabla__acciones">
+                    <a class="boton boton--secundario boton--menudo" [routerLink]="['/admin/pedidos', pedido.id]">
+                      Ver<span class="visualmente-oculto"> pedido #{{ pedido.id }}</span>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPaginas() > 1) {
+          <nav class="paginacion" aria-label="Paginacion del listado">
+            <button type="button" [disabled]="!hayAnterior()" (click)="irA(paginaActual() - 1)">
+              Anterior
+            </button>
+            <p class="paginacion__estado" aria-live="polite">
+              Pagina {{ paginaActual() }} de {{ totalPaginas() }}
+            </p>
+            <button type="button" [disabled]="!haySiguiente()" (click)="irA(paginaActual() + 1)">
+              Siguiente
+            </button>
+          </nav>
+        }
+      }
+    }
+  }
+</section>

@@ -1,0 +1,84 @@
+@use '../../../../styles/tokens' as t;
+@use '../../base';
+@use '../../pagina';
+
+.admin__lead {
+  display: inline-block;
+  color: t.$color-oro;
+  text-decoration: none;
+
+  &:hover {
+    color: t.$color-oro-claro;
+  }
+}
+
+.detalle {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-fondo-alto;
+
+  dt {
+    color: t.$color-texto-suave;
+    font-size: 0.875rem;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.insignia--pagado {
+  border-color: t.$color-oro;
+  color: t.$color-oro-claro;
+}
+
+.detalle__subtitulo {
+  margin: 0;
+  font-family: t.$fuente-display;
+  font-size: 1.25rem;
+}
+
+.resumen__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.375rem 0;
+    border-bottom: 1px solid t.$color-borde-suave;
+    color: t.$color-texto-suave;
+    font-size: 0.9375rem;
+  }
+}
+
+.resumen__total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+  padding-top: 0.5rem;
+
+  strong {
+    color: t.$color-oro;
+    font-family: t.$fuente-display;
+    font-size: 1.5rem;
+  }
+}
+
+.boton {
+  justify-self: start;
+}

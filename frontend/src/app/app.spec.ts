@@ -12,6 +12,7 @@ function usuario(sobrescribir: Record<string, unknown> = {}) {
     last_name: 'Gomez',
     email: 'ana@example.com',
     telefono: '',
+    is_staff: false,
     ...sobrescribir,
   };
 }
@@ -69,6 +70,33 @@ describe('App', () => {
     expect(texto(fixture)).toContain('Ana');
     expect(texto(fixture)).toContain('Salir');
     expect(texto(fixture)).not.toContain('Iniciar sesion');
+  });
+
+  it('no muestra el enlace de administracion a un cliente', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/auth/quien-soy/').flush(usuario({ is_staff: false }));
+    fixture.detectChanges();
+
+    expect(texto(fixture)).not.toContain('Administrar');
+  });
+
+  it('muestra el enlace de administracion a personal', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne('/api/auth/quien-soy/').flush(usuario({ is_staff: true }));
+    fixture.detectChanges();
+
+    const enlace = (fixture.nativeElement as HTMLElement).querySelector('a[href="/admin"]');
+    expect(enlace?.textContent).toContain('Administrar');
+  });
+
+  it('no muestra el enlace de administracion a un visitante sin sesion', () => {
+    const { fixture } = crearSinSesion();
+
+    expect(texto(fixture)).not.toContain('Administrar');
   });
 
   it('al salir, cierra la sesion y vuelve a mostrar los enlaces de invitado', () => {

@@ -1,4 +1,5 @@
 export type MetodoPago = 'transferencia' | 'contraentrega_qr' | 'contraentrega_datafono';
+export type EstadoPedido = 'por_confirmar' | 'por_cobrar' | 'pagado';
 
 /** Lo que se envia a POST /api/pedidos/. */
 export interface NuevoPedido {
@@ -39,7 +40,7 @@ export interface DatosTransferencia {
 
 export interface Pedido {
   id: number;
-  estado: 'por_confirmar' | 'por_cobrar' | 'pagado';
+  estado: EstadoPedido;
   total: number;
   nombre: string;
   email: string;
@@ -52,4 +53,23 @@ export interface Pedido {
   pago: Pago;
   instrucciones_pago: DatosTransferencia | null;
   creado_en: string;
+}
+
+/** Una fila del listado de pedidos del panel administrativo (FR-19). */
+export interface PedidoLista {
+  id: number;
+  nombre: string;
+  municipio: string;
+  barrio: string;
+  estado: EstadoPedido;
+  total: number;
+  metodo_pago: string;
+  creado_en: string;
+}
+
+export interface PaginaPedidos {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: PedidoLista[];
 }

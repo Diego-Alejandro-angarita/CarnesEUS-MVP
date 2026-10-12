@@ -20,9 +20,7 @@ class PagoInline(admin.StackedInline):
 @admin.action(description="Marcar los pedidos seleccionados como pagados")
 def marcar_como_pagados(modeladmin, request, queryset):
     for pedido in queryset:
-        pedido.estado = Pedido.Estado.PAGADO
-        pedido.save(update_fields=["estado"])
-        Pago.objects.filter(pedido=pedido).update(estado=Pago.Estado.APROBADO)
+        pedido.marcar_pagado()
 
 
 @admin.register(Pedido)
