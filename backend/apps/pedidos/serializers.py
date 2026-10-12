@@ -32,7 +32,14 @@ class ItemPedidoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ItemPedido
-        fields = ["producto_id", "producto_slug", "nombre", "precio_unitario", "cantidad", "subtotal"]
+        fields = [
+            "producto_id",
+            "producto_slug",
+            "nombre",
+            "precio_unitario",
+            "cantidad",
+            "subtotal",
+        ]
 
 
 class PagoSerializer(serializers.ModelSerializer):

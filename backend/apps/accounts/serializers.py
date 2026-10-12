@@ -35,7 +35,15 @@ class UsuarioAdminSerializer(serializers.ModelSerializer):
             "is_staff",
             "date_joined",
         ]
-        read_only_fields = ["id", "first_name", "last_name", "email", "telefono", "is_staff", "date_joined"]
+        read_only_fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "telefono",
+            "is_staff",
+            "date_joined",
+        ]
 
 
 class RegistroSerializer(serializers.ModelSerializer):

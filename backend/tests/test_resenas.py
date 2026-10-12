@@ -65,7 +65,9 @@ def cliente_autenticado(api, usuario):
 
 @pytest.mark.django_db
 def test_listado_de_resenas_es_publico(api, producto, usuario):
-    Resena.objects.create(producto=producto, usuario=usuario, calificacion=5, comentario="Excelente")
+    Resena.objects.create(
+        producto=producto, usuario=usuario, calificacion=5, comentario="Excelente"
+    )
 
     respuesta = api.get(f"/api/productos/{producto.slug}/resenas/")
 
