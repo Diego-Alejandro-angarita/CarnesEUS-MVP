@@ -1,11 +1,16 @@
 from django.contrib.auth import login, logout
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Usuario
-from .serializers import LoginSerializer, RegistroSerializer, UsuarioSerializer
+from .serializers import (
+    LoginSerializer,
+    RegistroSerializer,
+    UsuarioAdminSerializer,
+    UsuarioSerializer,
+)
 
 
 class RegistroView(generics.CreateAPIView):
@@ -52,3 +57,24 @@ class QuienSoyView(APIView):
 
     def get(self, request):
         return Response(UsuarioSerializer(request.user).data)
+
+
+class UsuarioListView(generics.ListAPIView):
+    """Listado de clientes registrados, para el panel administrativo (FR-19)."""
+
+    permission_classes = [IsAdminUser]
+    serializer_class = UsuarioAdminSerializer
+    queryset = Usuario.objects.all().order_by("-date_joined")
+
+
+class UsuarioDetalleView(generics.RetrieveUpdateAPIView):
+    """
+    Activar o desactivar una cuenta (FR-19).
+
+    Un usuario desactivado no puede iniciar sesion: lo bloquea el backend de
+    autenticacion de Django, no hace falta nada extra aqui.
+    """
+
+    permission_classes = [IsAdminUser]
+    serializer_class = UsuarioAdminSerializer
+    queryset = Usuario.objects.all()

@@ -5,11 +5,20 @@ from decimal import Decimal
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
+from apps.accounts.models import Usuario
 from apps.catalog.models import Categoria
 
 pytestmark = pytest.mark.django_db
 
 scenarios("features/crear_producto.feature")
+
+
+@pytest.fixture
+def api(api):
+    """Dar de alta un producto requiere personal (FR-19)."""
+    staff = Usuario.objects.create_user(email="staff@carneseus.test", password="x", is_staff=True)
+    api.force_authenticate(staff)
+    return api
 
 
 @given(parsers.parse('que existe la categoría "{nombre}"'), target_fixture="categorias")

@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+from apps.accounts.models import Usuario
+
 GOLDEN = Path(__file__).parent / "golden"
 
 
@@ -40,6 +42,14 @@ def comparar_con_golden(nombre, datos):
 
     assert archivo.exists(), f"Falta {archivo.name}; generalo con ACTUALIZAR_GOLDEN=1"
     assert obtenido == archivo.read_text(encoding="utf-8")
+
+
+@pytest.fixture
+def api(api):
+    """Modificar un producto requiere personal (FR-19)."""
+    staff = Usuario.objects.create_user(email="staff@carneseus.test", password="x", is_staff=True)
+    api.force_authenticate(staff)
+    return api
 
 
 @pytest.mark.django_db

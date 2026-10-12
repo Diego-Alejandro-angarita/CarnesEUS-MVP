@@ -1,0 +1,42 @@
+@use '../../../styles/tokens' as t;
+@use '../base';
+@use '../pagina';
+
+.admin--ancha {
+  max-width: t.$ancho-maximo;
+}
+
+.secciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.seccion {
+  display: block;
+  padding: 1.5rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-fondo-alto;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    border-color: t.$color-oro;
+  }
+}
+
+.seccion__titulo {
+  margin: 0 0 0.5rem;
+  font-family: t.$fuente-display;
+  font-size: 1.375rem;
+  color: t.$color-oro-claro;
+}
+
+.seccion__descripcion {
+  margin: 0;
+  color: t.$color-texto-suave;
+}

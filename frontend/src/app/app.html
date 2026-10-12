@@ -19,7 +19,10 @@
           <a class="cabecera__enlace" routerLink="/registro">Crear cuenta</a>
         }
       }
-      <a routerLink="/admin/productos">Administrar</a>
+      <a routerLink="/cobertura">Cobertura</a>
+      @if (auth.usuario()?.is_staff) {
+        <a routerLink="/admin">Administrar</a>
+      }
       <a class="cabecera__carrito" routerLink="/carrito">
         Carrito
         @if (cantidadCarrito() > 0) {

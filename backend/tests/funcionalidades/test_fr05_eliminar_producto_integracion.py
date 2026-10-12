@@ -23,13 +23,20 @@ def staff(db):
     )
 
 
+@pytest.fixture
+def api(api, staff):
+    """Eliminar un producto requiere personal (FR-19)."""
+    api.force_authenticate(staff)
+    return api
+
+
 def nombres(respuesta):
     filas = respuesta.data["results"] if "results" in respuesta.data else respuesta.data
     return {fila["nombre"] for fila in filas}
 
 
 @pytest.mark.django_db
-def test_eliminar_saca_el_producto_de_todos_los_componentes(api, crear_producto, staff):
+def test_eliminar_saca_el_producto_de_todos_los_componentes(api, crear_producto):
     lomo = crear_producto("Lomo fino")
     crear_producto("Punta de anca")
     hoy = timezone.localdate()
@@ -50,7 +57,6 @@ def test_eliminar_saca_el_producto_de_todos_los_componentes(api, crear_producto,
     # Ficha: los enlaces que ya circulan siguen respondiendo.
     assert api.get("/api/productos/lomo-fino/").status_code == 200
     # Promociones: no se ofrece para armar una nueva.
-    api.force_authenticate(staff)
     assert nombres(api.get("/api/promociones/productos/")) == {"Punta de anca"}
     # Base de datos: la fila se conserva, archivada.
     lomo.refresh_from_db()

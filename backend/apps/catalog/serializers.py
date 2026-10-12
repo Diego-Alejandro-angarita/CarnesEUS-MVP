@@ -22,6 +22,10 @@ class ProductoSerializer(serializers.ModelSerializer):
     # ninguna; el descuento lo anota la vista con anotar_descuento().
     descuento = serializers.SerializerMethodField()
     precio_promocion = serializers.SerializerMethodField()
+    # Anotados solo en la ficha (FR-18): ProductoListView no los anota para no
+    # pagar un Avg/Count de mas en cada tarjeta del catalogo.
+    calificacion_promedio = serializers.SerializerMethodField()
+    total_resenas = serializers.SerializerMethodField()
 
     class Meta:
         model = Producto
@@ -37,6 +41,8 @@ class ProductoSerializer(serializers.ModelSerializer):
             "categoria",
             "descuento",
             "precio_promocion",
+            "calificacion_promedio",
+            "total_resenas",
         ]
         read_only_fields = fields
 
@@ -51,6 +57,13 @@ class ProductoSerializer(serializers.ModelSerializer):
         if not descuento:
             return None
         return f"{precio_con_descuento(producto.precio, descuento):.2f}"
+
+    def get_calificacion_promedio(self, producto) -> float | None:
+        promedio = getattr(producto, "calificacion_promedio", None)
+        return round(promedio, 1) if promedio is not None else None
+
+    def get_total_resenas(self, producto) -> int:
+        return getattr(producto, "total_resenas", 0)
 
 
 class ProductoAdminSerializer(serializers.ModelSerializer):

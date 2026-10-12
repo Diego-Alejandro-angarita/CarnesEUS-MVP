@@ -1,0 +1,54 @@
+@use '../../../../styles/tokens' as t;
+@use '../../base';
+@use '../../pagina';
+
+.admin--ancha {
+  max-width: t.$ancho-maximo;
+}
+
+.campo-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  label {
+    color: t.$color-texto-suave;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid t.$color-borde;
+    border-radius: t.$radio-chip;
+    background: t.$color-fondo-alto;
+    color: t.$color-texto;
+    font: inherit;
+
+    &:focus-visible {
+      outline: 2px solid t.$color-oro;
+      outline-offset: 1px;
+    }
+  }
+}
+
+.insignia--pagado {
+  border-color: t.$color-oro;
+  color: t.$color-oro-claro;
+}
+
+// Pedido y Cliente llevan un dato secundario debajo: necesitan poder partir
+// linea, a diferencia del resto de la tabla que va en un solo renglon.
+.tabla__nombre,
+.tabla__cliente {
+  white-space: normal;
+}
+
+.tabla__secundario {
+  display: block;
+  margin-top: 0.125rem;
+  color: t.$color-texto-tenue;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  white-space: nowrap;
+}

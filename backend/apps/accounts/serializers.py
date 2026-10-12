@@ -10,8 +10,40 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ["id", "first_name", "last_name", "email", "telefono"]
+        fields = ["id", "first_name", "last_name", "email", "telefono", "is_staff"]
         read_only_fields = fields
+
+
+class UsuarioAdminSerializer(serializers.ModelSerializer):
+    """
+    Un cliente visto desde el panel administrativo (FR-19).
+
+    Solo `is_active` se puede modificar desde aqui: activar o desactivar la
+    cuenta. Cambiar el personal (`is_staff`) o los demas datos se sigue
+    haciendo desde el admin de Django, que tiene mas resguardos.
+    """
+
+    class Meta:
+        model = Usuario
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "telefono",
+            "is_active",
+            "is_staff",
+            "date_joined",
+        ]
+        read_only_fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "telefono",
+            "is_staff",
+            "date_joined",
+        ]
 
 
 class RegistroSerializer(serializers.ModelSerializer):

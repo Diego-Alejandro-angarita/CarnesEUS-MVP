@@ -18,6 +18,8 @@ export interface Producto {
   descuento: number | null;
   /** Precio ya rebajado, o null si no hay promocion. */
   precio_promocion: number | null;
+  calificacion_promedio: number | null;
+  total_resenas: number;
 }
 
 export interface PaginaProductos {

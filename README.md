@@ -140,10 +140,64 @@ devuelve al catalogo.
 En el codigo, `Producto.objects.visibles()` es el queryset que excluye los
 archivados: toda consulta nueva sobre el catalogo deberia partir de ahi.
 
-> **Sin autenticacion todavia.** El `POST` esta abierto porque el inicio de
-> sesion es FR-02 y aun no existe. Queda un `TODO(FR-02)` en
-> `backend/apps/catalog/views.py` para cambiarlo a `IsAdminUser`. No desplegar
-> asi.
+> **Solo personal.** Dar de alta, modificar y eliminar productos requiere un
+> usuario con `is_staff` (FR-19). El listado y la ficha siguen siendo
+> publicos.
+
+---
+
+## Panel administrativo (FR-19)
+
+Punto de entrada para el personal: <http://localhost:4200/admin>. El enlace
+*Administrar* del encabezado solo aparece con sesion de personal iniciada; sin
+eso, entrar a cualquier `/admin/*` redirige al login.
+
+Para crear un usuario de personal (no hay pantalla para esto, es deliberado):
+
+```bash
+docker compose exec backend python manage.py createsuperuser
+```
+
+O marcar `is_staff` a un usuario que ya se registro, desde
+<http://localhost:8001/admin/> &rarr; Usuarios.
+
+### Pedidos
+
+- Listado, con filtro por estado: <http://localhost:4200/admin/pedidos>
+- Detalle de un pedido: `/admin/pedidos/<id>` (boton *Ver* de cada fila), con
+  los datos de entrega, el pago y los productos
+- Cambiar el estado: en el detalle, las tres opciones (*Por confirmar*, *Por
+  cobrar*, *Pagado*) estan siempre visibles con una frase de que significa
+  cada una; se elige la que corresponda y se guarda sola, sin botones
+  aparte. El pago se sincroniza solo: aprobado si el pedido queda pagado,
+  pendiente en cualquier otro caso.
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `GET` | `/api/pedidos/admin/` | Listado paginado. Admite `?estado=` y `?page=`. |
+| `GET` | `/api/pedidos/admin/<id>/` | Detalle completo. |
+| `POST` | `/api/pedidos/admin/<id>/cambiar-estado/` | Body `{"estado": "por_confirmar" \| "por_cobrar" \| "pagado"}`. |
+
+### Usuarios
+
+- Listado: <http://localhost:4200/admin/usuarios>
+- Activar o desactivar una cuenta: etiqueta *Activo* / *Inactivo* de cada
+  fila, es un boton. Una cuenta inactiva no puede iniciar sesion.
+
+Solo se puede cambiar `is_active` desde aqui. Para marcar o quitar personal
+(`is_staff`) o editar otros datos de la cuenta hay que ir al admin de Django:
+el panel no toca esos campos a proposito.
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `GET` | `/api/auth/usuarios/` | Listado paginado de clientes registrados. |
+| `PATCH` | `/api/auth/usuarios/<id>/` | Solo admite `{"is_active": ...}`. |
+
+### Inventario
+
+Hoy "inventario" es el mismo booleano Disponible/Agotado de FR-09: el negocio
+no maneja cantidades por producto. Se gestiona desde el listado de productos
+de arriba, no hay una pantalla aparte.
 
 ---
 
@@ -194,12 +248,9 @@ corresponde al checkout.
 
 ### Probarlo
 
-El panel pide una cuenta del personal. Crea una y entra con ella desde
-*Iniciar sesion*:
-
-```bash
-docker compose exec backend python manage.py createsuperuser
-```
+El panel pide una cuenta del personal: se crea como se explica en
+[Panel administrativo](#panel-administrativo-fr-19) y se entra con ella desde
+*Iniciar sesion*.
 
 Las promociones tambien se pueden gestionar desde el admin de Django, en
 <http://localhost:8001/admin/>.
