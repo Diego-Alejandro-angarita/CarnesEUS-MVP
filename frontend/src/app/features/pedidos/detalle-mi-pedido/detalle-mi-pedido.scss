@@ -1,0 +1,11 @@
+@use '../../../styles/tokens' as t;
+@use '../../admin/base';
+@use '../pagina';
+
+.aviso a {
+  color: t.$color-oro;
+
+  &:hover {
+    color: t.$color-oro-claro;
+  }
+}

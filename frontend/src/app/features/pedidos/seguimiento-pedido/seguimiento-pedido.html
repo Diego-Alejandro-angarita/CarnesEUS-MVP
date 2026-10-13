@@ -1,0 +1,22 @@
+<ol class="seguimiento" aria-label="Seguimiento del pedido">
+  @for (paso of pasos(); track paso.etapa) {
+    <li
+      class="paso paso--{{ paso.estado }}"
+      [class.paso--cancelado]="paso.etapa === 'cancelado'"
+      [attr.aria-current]="paso.estado === 'actual' ? 'step' : null"
+    >
+      <span class="paso__punto" aria-hidden="true"></span>
+      <div class="paso__texto">
+        <strong class="paso__nombre">{{ etiquetas[paso.etapa] }}</strong>
+        @if (paso.fecha) {
+          <span class="paso__fecha">{{ paso.fecha | date: 'd MMM, h:mm a' }}</span>
+        } @else {
+          <span class="paso__fecha">Pendiente</span>
+        }
+        @if (paso.estado === 'actual') {
+          <span class="paso__ayuda">{{ ayuda[paso.etapa] }}</span>
+        }
+      </div>
+    </li>
+  }
+</ol>

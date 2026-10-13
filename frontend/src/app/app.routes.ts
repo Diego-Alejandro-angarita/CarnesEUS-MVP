@@ -105,6 +105,20 @@ export const routes: Routes = [
     title: 'Finalizar compra | CarnesEUS',
   },
   {
+    path: 'mis-pedidos',
+    loadComponent: () =>
+      import('./features/pedidos/mis-pedidos/mis-pedidos').then((m) => m.MisPedidos),
+    title: 'Mis pedidos | CarnesEUS',
+  },
+  {
+    path: 'mis-pedidos/:id',
+    loadComponent: () =>
+      import('./features/pedidos/detalle-mi-pedido/detalle-mi-pedido').then(
+        (m) => m.DetalleMiPedido,
+      ),
+    title: 'Mi pedido | CarnesEUS',
+  },
+  {
     path: 'productos/:slug',
     loadComponent: () =>
       import('./features/ficha-producto/ficha-producto').then((m) => m.FichaProducto),

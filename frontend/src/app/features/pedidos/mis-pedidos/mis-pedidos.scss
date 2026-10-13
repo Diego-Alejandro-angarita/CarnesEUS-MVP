@@ -1,0 +1,119 @@
+@use '../../../styles/tokens' as t;
+@use '../../admin/base';
+@use '../../admin/listado';
+@use '../pagina';
+
+.aviso {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  margin: 0;
+
+  a:not(.boton) {
+    color: t.$color-oro;
+  }
+}
+
+.aviso__texto {
+  margin: 0;
+}
+
+.tabla__secundario {
+  display: block;
+  margin-top: 0.125rem;
+  color: t.$color-texto-tenue;
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+// Entregado se ve cumplido; cancelado, como algo que ya no va a pasar.
+.insignia--entregado {
+  border-color: t.$color-oro;
+  background: t.$color-oro;
+  color: t.$color-fondo;
+}
+
+.insignia--cancelado {
+  border-color: rgba(224, 138, 138, 0.5);
+  color: t.$color-error;
+}
+
+.consulta {
+  display: grid;
+  gap: 1rem;
+}
+
+// Con sesion, la consulta queda debajo de la lista como algo secundario.
+.consulta--secundaria {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid t.$color-borde-suave;
+
+  .consulta__titulo {
+    font-size: 1.25rem;
+  }
+}
+
+.consulta__titulo {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.consulta__texto {
+  margin: 0;
+  color: t.$color-texto-suave;
+
+  a {
+    color: t.$color-oro;
+  }
+}
+
+.consulta__form {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+
+  .boton {
+    // Alinea el boton con las cajas de texto, no con sus etiquetas.
+    margin-top: 1.7rem;
+  }
+
+  @media (max-width: 40rem) {
+    grid-template-columns: 1fr;
+
+    .boton {
+      margin-top: 0;
+      justify-self: start;
+    }
+  }
+}
+
+.campo {
+  display: grid;
+  gap: 0.375rem;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  input {
+    min-width: 0;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid t.$color-borde;
+    border-radius: t.$radio-chip;
+    background: t.$color-fondo-alto;
+    color: t.$color-texto;
+    font: inherit;
+  }
+}
+
+.campo__error {
+  color: t.$color-error;
+  font-size: 0.8125rem;
+}
+
+.consulta__resultado {
+  margin-top: 0.5rem;
+}

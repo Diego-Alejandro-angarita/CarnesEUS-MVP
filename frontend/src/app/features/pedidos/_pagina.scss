@@ -1,0 +1,33 @@
+// Encabezado y marco de las pantallas de pedidos del cliente (FR-12).
+@use '../../styles/tokens' as t;
+
+.pedidos {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 2.5rem t.$espacio 3rem;
+}
+
+.pedidos__cabecera {
+  margin-bottom: 2rem;
+}
+
+.pedidos__titulo {
+  margin: 0;
+  font-size: clamp(1.875rem, 5vw, 2.75rem);
+}
+
+.pedidos__lead {
+  margin: 0.5rem 0 0;
+  color: t.$color-texto-suave;
+}
+
+.pedidos__volver {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: t.$color-oro;
+  text-decoration: none;
+
+  &:hover {
+    color: t.$color-oro-claro;
+  }
+}

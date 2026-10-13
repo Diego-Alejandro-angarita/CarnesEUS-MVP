@@ -129,3 +129,52 @@
   color: t.$color-texto-suave;
   font-size: 0.875rem;
 }
+
+// --- etapa del pedido (FR-12) -------------------------------------------------
+
+.etapa-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+// Confirmacion de cancelar en la misma pantalla, como eliminar en los listados.
+.confirmacion {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confirmacion__texto {
+  color: t.$color-error;
+  font-size: 0.875rem;
+}
+
+.boton--peligro {
+  border-color: rgba(224, 138, 138, 0.5);
+  background: transparent;
+  color: t.$color-error;
+
+  &:hover:not(:disabled) {
+    border-color: t.$color-error;
+    background: rgba(157, 31, 31, 0.25);
+  }
+}
+
+.boton--menudo {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.875rem;
+}
+
+.insignia--entregado {
+  border-color: t.$color-oro;
+  background: t.$color-oro;
+  color: t.$color-fondo;
+}
+
+.insignia--cancelado {
+  border-color: rgba(224, 138, 138, 0.5);
+  color: t.$color-error;
+}

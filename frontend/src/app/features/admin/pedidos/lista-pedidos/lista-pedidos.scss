@@ -32,6 +32,23 @@
   }
 }
 
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.insignia--entregado {
+  border-color: t.$color-oro;
+  background: t.$color-oro;
+  color: t.$color-fondo;
+}
+
+.insignia--cancelado {
+  border-color: rgba(224, 138, 138, 0.5);
+  color: t.$color-error;
+}
+
 .insignia--pagado {
   border-color: t.$color-oro;
   color: t.$color-oro-claro;

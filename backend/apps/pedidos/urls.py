@@ -2,7 +2,11 @@ from django.urls import path
 
 from .views import (
     CambiarEstadoPedidoView,
+    CambiarEtapaPedidoView,
+    ConsultarPedidoView,
     CrearPedidoView,
+    MiPedidoDetalleView,
+    MisPedidosView,
     PedidoDetalleView,
     PedidoListView,
 )
@@ -18,4 +22,12 @@ urlpatterns = [
         CambiarEstadoPedidoView.as_view(),
         name="admin-cambiar-estado",
     ),
+    path(
+        "pedidos/admin/<int:pk>/cambiar-etapa/",
+        CambiarEtapaPedidoView.as_view(),
+        name="admin-cambiar-etapa",
+    ),
+    path("pedidos/mios/", MisPedidosView.as_view(), name="mios"),
+    path("pedidos/mios/<int:pk>/", MiPedidoDetalleView.as_view(), name="mio-detalle"),
+    path("pedidos/consultar/", ConsultarPedidoView.as_view(), name="consultar"),
 ]

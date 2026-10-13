@@ -221,6 +221,16 @@ form {
   }
 }
 
+// Enlace a "Mis pedidos" para ver en que va lo que se acaba de comprar (FR-12).
+.seguir-pedido a {
+  color: t.$color-oro;
+  font-weight: 600;
+
+  &:hover {
+    color: t.$color-oro-claro;
+  }
+}
+
 .cuenta {
   display: grid;
   grid-template-columns: max-content 1fr;
