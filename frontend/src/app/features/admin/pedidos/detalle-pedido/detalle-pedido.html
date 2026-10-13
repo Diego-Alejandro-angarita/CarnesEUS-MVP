@@ -27,7 +27,13 @@
 
         <div class="detalle">
           <dl class="datos">
-            <dt>Estado</dt>
+            <dt>Etapa</dt>
+            <dd>
+              <span class="insignia insignia--{{ pedido.etapa }}">
+                {{ etiquetasEtapa[pedido.etapa] }}
+              </span>
+            </dd>
+            <dt>Pago</dt>
             <dd>
               <span class="insignia" [class.insignia--pagado]="pedido.estado === 'pagado'">
                 {{ etiquetas[pedido.estado] }}
@@ -67,9 +73,69 @@
             <strong>{{ pedido.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
           </p>
 
+          <section class="cambiar-estado" aria-labelledby="titulo-seguimiento">
+            <h2 class="detalle__subtitulo" id="titulo-seguimiento">Seguimiento del pedido</h2>
+            <app-seguimiento-pedido [pedido]="pedido" />
+
+            @if (siguientePaso() || sePuedeCancelar()) {
+              <div class="etapa-acciones">
+                @if (siguientePaso(); as siguiente) {
+                  <button
+                    type="button"
+                    class="boton"
+                    [disabled]="cambiandoEtapa()"
+                    (click)="cambiarEtapa(siguiente)"
+                  >
+                    Pasar a {{ etiquetasEtapa[siguiente].toLowerCase() }}
+                  </button>
+                }
+                @if (sePuedeCancelar()) {
+                  @if (confirmandoCancelar()) {
+                    <span class="confirmacion">
+                      <span class="confirmacion__texto">Cancelar el pedido no se puede deshacer.</span>
+                      <button
+                        type="button"
+                        class="boton boton--peligro boton--menudo"
+                        [disabled]="cambiandoEtapa()"
+                        (click)="cambiarEtapa('cancelado')"
+                      >
+                        Si, cancelar
+                      </button>
+                      <button
+                        type="button"
+                        class="boton boton--secundario boton--menudo"
+                        [disabled]="cambiandoEtapa()"
+                        (click)="confirmandoCancelar.set(false)"
+                      >
+                        No
+                      </button>
+                    </span>
+                  } @else {
+                    <button
+                      type="button"
+                      class="boton boton--peligro"
+                      [disabled]="cambiandoEtapa()"
+                      (click)="confirmandoCancelar.set(true)"
+                    >
+                      Cancelar pedido
+                    </button>
+                  }
+                }
+              </div>
+            } @else {
+              <p class="estado-guardando">
+                El pedido esta {{ etiquetasEtapa[pedido.etapa].toLowerCase() }}: ya no cambia de
+                etapa.
+              </p>
+            }
+            @if (cambiandoEtapa()) {
+              <p class="estado-guardando" role="status">Guardando...</p>
+            }
+          </section>
+
           <div class="cambiar-estado">
-            <h2 class="detalle__subtitulo">Cambiar estado</h2>
-            <div class="estado-opciones" role="radiogroup" aria-label="Estado del pedido">
+            <h2 class="detalle__subtitulo">Estado del pago</h2>
+            <div class="estado-opciones" role="radiogroup" aria-label="Estado del pago">
               @for (opcion of ESTADOS; track opcion) {
                 <label class="estado-opcion" [class.estado-opcion--activa]="pedido.estado === opcion">
                   <input

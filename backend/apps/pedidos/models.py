@@ -1,7 +1,8 @@
 from decimal import Decimal
 
 from django.conf import settings
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
 
 from apps.catalog.models import Producto
 from apps.common.models import TimeStampedModel
@@ -21,6 +22,21 @@ class Pedido(TimeStampedModel):
         POR_COBRAR = "por_cobrar", "Por cobrar (contraentrega)"
         PAGADO = "pagado", "Pagado"
 
+    class Etapa(models.TextChoices):
+        """
+        En que va el pedido (FR-12), aparte de como va el pago (`estado`).
+
+        Un pedido contraentrega se entrega antes de quedar pagado y uno por
+        transferencia puede estar pagado y aun en preparacion: por eso son dos
+        campos y no uno.
+        """
+
+        RECIBIDO = "recibido", "Recibido"
+        EN_PREPARACION = "en_preparacion", "En preparacion"
+        EN_CAMINO = "en_camino", "En camino"
+        ENTREGADO = "entregado", "Entregado"
+        CANCELADO = "cancelado", "Cancelado"
+
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name="usuario",
@@ -37,6 +53,9 @@ class Pedido(TimeStampedModel):
     barrio = models.CharField("barrio", max_length=120)
     notas = models.CharField("notas para la entrega", max_length=300, blank=True)
     estado = models.CharField("estado", max_length=13, choices=Estado.choices)
+    etapa = models.CharField(
+        "etapa", max_length=14, choices=Etapa.choices, default=Etapa.RECIBIDO
+    )
     total = models.DecimalField("total", max_digits=12, decimal_places=2)
 
     class Meta:
@@ -68,6 +87,61 @@ class Pedido(TimeStampedModel):
     def marcar_pagado(self) -> None:
         """Atajo usado por la accion del admin de Django."""
         self.cambiar_estado(self.Estado.PAGADO)
+
+    def etapas_siguientes(self) -> list[str]:
+        """
+        A que etapas puede pasar el pedido desde la actual (FR-12).
+
+        Solo se avanza un paso a la vez y se puede cancelar mientras el pedido
+        no haya salido a entrega. Entregado y cancelado son finales.
+        """
+        siguientes = []
+        if self.etapa in SIGUIENTE_ETAPA:
+            siguientes.append(SIGUIENTE_ETAPA[self.etapa])
+        if self.etapa in ETAPAS_CANCELABLES:
+            siguientes.append(self.Etapa.CANCELADO)
+        return siguientes
+
+    def cambiar_etapa(self, nueva_etapa: str) -> None:
+        """Mueve el pedido de etapa si las reglas lo permiten y deja constancia."""
+        if nueva_etapa not in self.etapas_siguientes():
+            actual = self.get_etapa_display().lower()
+            nueva = self.Etapa(nueva_etapa).label.lower()
+            raise ValidationError(f"Un pedido {actual} no puede pasar a {nueva}.")
+
+        with transaction.atomic():
+            self.etapa = nueva_etapa
+            self.save(update_fields=["etapa", "actualizado_en"])
+            CambioEtapa.objects.create(pedido=self, etapa=nueva_etapa)
+
+
+SIGUIENTE_ETAPA = {
+    Pedido.Etapa.RECIBIDO: Pedido.Etapa.EN_PREPARACION,
+    Pedido.Etapa.EN_PREPARACION: Pedido.Etapa.EN_CAMINO,
+    Pedido.Etapa.EN_CAMINO: Pedido.Etapa.ENTREGADO,
+}
+ETAPAS_CANCELABLES = (Pedido.Etapa.RECIBIDO, Pedido.Etapa.EN_PREPARACION)
+
+
+class CambioEtapa(TimeStampedModel):
+    """
+    Cuando paso el pedido a cada etapa, para mostrarle al cliente el
+    seguimiento con fechas (FR-12). La etapa inicial no se guarda aqui: un
+    pedido queda recibido cuando se crea, asi que su fecha es `creado_en`.
+    """
+
+    pedido = models.ForeignKey(
+        Pedido, verbose_name="pedido", on_delete=models.CASCADE, related_name="historial"
+    )
+    etapa = models.CharField("etapa", max_length=14, choices=Pedido.Etapa.choices)
+
+    class Meta:
+        verbose_name = "cambio de etapa"
+        verbose_name_plural = "cambios de etapa"
+        ordering = ["creado_en", "id"]
+
+    def __str__(self):
+        return f"Pedido #{self.pedido_id}: {self.get_etapa_display()}"
 
 
 class ItemPedido(TimeStampedModel):

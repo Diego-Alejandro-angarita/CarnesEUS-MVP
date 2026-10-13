@@ -1,0 +1,36 @@
+<section class="pedidos">
+  <header class="pedidos__cabecera">
+    <h1 class="pedidos__titulo">Pedido #{{ id() }}</h1>
+    <a class="pedidos__volver" routerLink="/mis-pedidos">&larr; Mis pedidos</a>
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando el pedido...</p>
+    }
+    @case ('sin-sesion') {
+      <p class="aviso">
+        <a routerLink="/login">Inicia sesion</a> para ver este pedido, o
+        <a routerLink="/mis-pedidos" [queryParams]="{ numero: id() }"
+          >consultalo con su numero y tu correo</a
+        >.
+      </p>
+    }
+    @case ('no-encontrado') {
+      <p class="aviso aviso--error" role="alert">
+        No encontramos este pedido entre los tuyos.
+        <a routerLink="/mis-pedidos">Ver mis pedidos</a>
+      </p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar el pedido. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (pedido(); as pedido) {
+        <app-resumen-pedido [pedido]="pedido" />
+      }
+    }
+  }
+</section>

@@ -1,11 +1,15 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, effect, inject, input, numberAttribute, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { EstadoPedido, Pedido } from '../../../../core/models/pedido';
+import { EstadoPedido, EtapaPedido, Pedido } from '../../../../core/models/pedido';
 import { AdminPedidosService } from '../../../../core/services/admin-pedidos.service';
+import {
+  ETIQUETAS_ETAPA,
+  SeguimientoPedido,
+} from '../../../pedidos/seguimiento-pedido/seguimiento-pedido';
 import { ETIQUETAS_ESTADO } from '../lista-pedidos/lista-pedidos';
 
 type EstadoPantalla = 'cargando' | 'ok' | 'no-encontrado' | 'error';
@@ -19,7 +23,7 @@ export const AYUDA_ESTADO: Record<EstadoPedido, string> = {
 
 @Component({
   selector: 'app-detalle-pedido',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [CurrencyPipe, RouterLink, SeguimientoPedido],
   templateUrl: './detalle-pedido.html',
   styleUrl: './detalle-pedido.scss',
 })
@@ -29,6 +33,7 @@ export class DetallePedido {
   protected readonly etiquetas = ETIQUETAS_ESTADO;
   protected readonly ayudaEstado = AYUDA_ESTADO;
   protected readonly ESTADOS: EstadoPedido[] = ['por_confirmar', 'por_cobrar', 'pagado'];
+  protected readonly etiquetasEtapa = ETIQUETAS_ETAPA;
 
   readonly id = input.required({ transform: numberAttribute });
 
@@ -36,6 +41,18 @@ export class DetallePedido {
   protected readonly pedido = signal<Pedido | null>(null);
   protected readonly cambiando = signal(false);
   protected readonly errorAccion = signal('');
+
+  // --- etapa del pedido (FR-12) ---------------------------------------------
+  protected readonly cambiandoEtapa = signal(false);
+  /** Cancelar no tiene vuelta atras: se pide confirmar en la misma pantalla. */
+  protected readonly confirmandoCancelar = signal(false);
+  /** El siguiente paso del pedido, sin contar cancelar (va aparte). */
+  protected readonly siguientePaso = computed<EtapaPedido | null>(
+    () => this.pedido()?.etapas_siguientes.find((etapa) => etapa !== 'cancelado') ?? null,
+  );
+  protected readonly sePuedeCancelar = computed(
+    () => this.pedido()?.etapas_siguientes.includes('cancelado') ?? false,
+  );
 
   constructor() {
     effect(() => void this.cargar(this.id()));
@@ -54,6 +71,24 @@ export class DetallePedido {
       this.errorAccion.set('No pudimos cambiar el estado del pedido. Intentalo de nuevo.');
     } finally {
       this.cambiando.set(false);
+    }
+  }
+
+  protected async cambiarEtapa(etapa: EtapaPedido): Promise<void> {
+    this.errorAccion.set('');
+    this.cambiandoEtapa.set(true);
+    try {
+      this.pedido.set(await firstValueFrom(this.admin.cambiarEtapa(this.id(), etapa)));
+      this.confirmandoCancelar.set(false);
+    } catch (error) {
+      // El backend explica por que no se puede, por ejemplo si el pedido ya salio.
+      const detalle =
+        error instanceof HttpErrorResponse
+          ? (error.error as { detail?: string } | null)?.detail
+          : undefined;
+      this.errorAccion.set(detalle ?? 'No pudimos cambiar la etapa del pedido. Intentalo de nuevo.');
+    } finally {
+      this.cambiandoEtapa.set(false);
     }
   }
 

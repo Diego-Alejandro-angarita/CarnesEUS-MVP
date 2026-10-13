@@ -3,8 +3,9 @@ import { Component, computed, effect, inject, input, numberAttribute, signal } f
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { EstadoPedido, PaginaPedidos } from '../../../../core/models/pedido';
+import { EstadoPedido, EtapaPedido, PaginaPedidos } from '../../../../core/models/pedido';
 import { AdminPedidosService, TAMANO_PAGINA_PEDIDOS } from '../../../../core/services/admin-pedidos.service';
+import { ETIQUETAS_ETAPA } from '../../../pedidos/seguimiento-pedido/seguimiento-pedido';
 
 type EstadoPantalla = 'cargando' | 'ok' | 'error';
 
@@ -26,9 +27,11 @@ export class ListaPedidos {
   private readonly ruta = inject(ActivatedRoute);
 
   protected readonly etiquetas = ETIQUETAS_ESTADO;
+  protected readonly etiquetasEtapa = ETIQUETAS_ETAPA;
 
   readonly page = input(1, { transform: numberAttribute });
   readonly estado = input<EstadoPedido | null>(null);
+  readonly etapa = input<EtapaPedido | null>(null);
 
   protected readonly estadoPantalla = signal<EstadoPantalla>('cargando');
   protected readonly pagina = signal<PaginaPedidos | null>(null);
@@ -40,6 +43,7 @@ export class ListaPedidos {
   // El binding de inputs del router deja el input en undefined cuando el
   // query param sale de la URL: este computed es la unica fuente de verdad.
   protected readonly estadoFiltro = computed<EstadoPedido | null>(() => this.estado() ?? null);
+  protected readonly etapaFiltro = computed<EtapaPedido | null>(() => this.etapa() ?? null);
   protected readonly pedidos = computed(() => this.pagina()?.results ?? []);
   protected readonly total = computed(() => this.pagina()?.count ?? 0);
   protected readonly totalPaginas = computed(() =>
@@ -50,7 +54,7 @@ export class ListaPedidos {
 
   constructor() {
     effect(() => {
-      void this.cargar(this.paginaActual(), this.estadoFiltro());
+      void this.cargar(this.paginaActual(), this.estadoFiltro(), this.etapaFiltro());
     });
   }
 
@@ -70,10 +74,22 @@ export class ListaPedidos {
     });
   }
 
-  private async cargar(numero: number, estado: EstadoPedido | null): Promise<void> {
+  protected filtrarPorEtapa(valor: string): void {
+    void this.router.navigate([], {
+      relativeTo: this.ruta,
+      queryParams: { etapa: valor || null, page: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  private async cargar(
+    numero: number,
+    estado: EstadoPedido | null,
+    etapa: EtapaPedido | null,
+  ): Promise<void> {
     this.estadoPantalla.set('cargando');
     try {
-      this.pagina.set(await firstValueFrom(this.admin.listar(numero, estado)));
+      this.pagina.set(await firstValueFrom(this.admin.listar(numero, estado, etapa)));
       this.estadoPantalla.set('ok');
     } catch {
       this.pagina.set(null);

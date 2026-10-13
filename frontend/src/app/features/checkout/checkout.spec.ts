@@ -53,6 +53,10 @@ function pedido(
   return {
     id: 15,
     estado,
+    etapa: 'recibido',
+    etapa_nombre: 'Recibido',
+    etapas_siguientes: ['en_preparacion', 'cancelado'],
+    seguimiento: [{ etapa: 'recibido', etapa_nombre: 'Recibido', fecha: '2026-10-08T12:00:00Z' }],
     total: '77800.00',
     nombre: 'Ana Gomez',
     email: 'ana@example.com',
@@ -196,6 +200,15 @@ describe('Checkout', () => {
       expect(componente['pedido']()?.instrucciones_pago).toBeNull();
     },
   );
+
+  it('en la confirmacion enlaza al seguimiento del pedido con el numero ya puesto', async () => {
+    const { fixture, componente, http } = await crear();
+
+    await confirmarCompra(fixture, componente, http);
+
+    const enlace = (fixture.nativeElement as HTMLElement).querySelector('.seguir-pedido a');
+    expect(enlace?.getAttribute('href')).toBe('/mis-pedidos?numero=15');
+  });
 
   it('muestra el mensaje de error que devuelve el backend y conserva el formulario', async () => {
     const { componente, http } = await crear();

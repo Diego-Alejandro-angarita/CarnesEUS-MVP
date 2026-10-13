@@ -14,6 +14,12 @@ function pedido(sobrescribir: Record<string, unknown> = {}) {
   return {
     id: 15,
     estado: 'por_confirmar',
+    etapa: 'recibido',
+    etapa_nombre: 'Recibido',
+    etapas_siguientes: ['en_preparacion', 'cancelado'],
+    seguimiento: [
+      { etapa: 'recibido', etapa_nombre: 'Recibido', fecha: '2026-10-08T12:00:00Z' },
+    ],
     total: '77800.00',
     nombre: 'Ana Gomez',
     email: 'ana@example.com',
@@ -154,6 +160,96 @@ describe('DetallePedido', () => {
     fixture.detectChanges();
 
     expect(texto(fixture)).toContain('No pudimos cambiar el estado del pedido');
+  });
+
+  // --- etapa del pedido (FR-12) ---------------------------------------------
+
+  function boton(fixture: ComponentFixture<DetallePedido>, textoBoton: string) {
+    return [...elemento(fixture).querySelectorAll<HTMLButtonElement>('button')].find((b) =>
+      b.textContent?.includes(textoBoton),
+    );
+  }
+
+  it('muestra el seguimiento con la etapa actual', async () => {
+    const { fixture } = await conPedido();
+
+    expect(texto(fixture)).toContain('Seguimiento del pedido');
+    const actual = elemento(fixture).querySelector('[aria-current="step"]');
+    expect(actual?.textContent).toContain('Recibido');
+  });
+
+  it('avanza el pedido al siguiente paso', async () => {
+    const { fixture, http } = await conPedido();
+
+    boton(fixture, 'Pasar a en preparacion')!.click();
+    await fixture.whenStable();
+
+    const peticion = http.expectOne('/api/pedidos/admin/15/cambiar-etapa/');
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual({ etapa: 'en_preparacion' });
+    peticion.flush(
+      pedido({
+        etapa: 'en_preparacion',
+        etapa_nombre: 'En preparacion',
+        etapas_siguientes: ['en_camino', 'cancelado'],
+        seguimiento: [
+          { etapa: 'recibido', etapa_nombre: 'Recibido', fecha: '2026-10-08T12:00:00Z' },
+          { etapa: 'en_preparacion', etapa_nombre: 'En preparacion', fecha: '2026-10-08T13:00:00Z' },
+        ],
+      }),
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(boton(fixture, 'Pasar a en camino')).toBeTruthy();
+    expect(elemento(fixture).querySelector('[aria-current="step"]')?.textContent).toContain(
+      'En preparacion',
+    );
+  });
+
+  it('pide confirmar antes de cancelar', async () => {
+    const { fixture, http } = await conPedido();
+
+    boton(fixture, 'Cancelar pedido')!.click();
+    fixture.detectChanges();
+
+    http.expectNone('/api/pedidos/admin/15/cambiar-etapa/');
+    expect(texto(fixture)).toContain('no se puede deshacer');
+
+    boton(fixture, 'Si, cancelar')!.click();
+    await fixture.whenStable();
+
+    const peticion = http.expectOne('/api/pedidos/admin/15/cambiar-etapa/');
+    expect(peticion.request.body).toEqual({ etapa: 'cancelado' });
+  });
+
+  it('no muestra acciones de etapa cuando el pedido ya fue entregado', async () => {
+    const { fixture } = await conPedido({
+      etapa: 'entregado',
+      etapa_nombre: 'Entregado',
+      etapas_siguientes: [],
+    });
+
+    expect(boton(fixture, 'Pasar a')).toBeUndefined();
+    expect(boton(fixture, 'Cancelar pedido')).toBeUndefined();
+    expect(texto(fixture)).toContain('ya no cambia de etapa');
+  });
+
+  it('muestra el motivo cuando el backend rechaza el cambio de etapa', async () => {
+    const { fixture, http } = await conPedido();
+
+    boton(fixture, 'Pasar a en preparacion')!.click();
+    await fixture.whenStable();
+    http
+      .expectOne('/api/pedidos/admin/15/cambiar-etapa/')
+      .flush(
+        { detail: 'Un pedido recibido no puede pasar a entregado.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('Un pedido recibido no puede pasar a entregado.');
   });
 
   it('avisa cuando el pedido no existe', async () => {

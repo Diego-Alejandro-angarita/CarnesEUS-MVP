@@ -178,6 +178,9 @@ O marcar `is_staff` a un usuario que ya se registro, desde
 | `GET` | `/api/pedidos/admin/<id>/` | Detalle completo. |
 | `POST` | `/api/pedidos/admin/<id>/cambiar-estado/` | Body `{"estado": "por_confirmar" \| "por_cobrar" \| "pagado"}`. |
 
+La etapa del pedido (recibido, en preparacion...) se maneja aparte, desde el
+mismo detalle: ver [Estados del pedido](#estados-del-pedido-fr-12).
+
 ### Usuarios
 
 - Listado: <http://localhost:4200/admin/usuarios>
@@ -198,6 +201,68 @@ el panel no toca esos campos a proposito.
 Hoy "inventario" es el mismo booleano Disponible/Agotado de FR-09: el negocio
 no maneja cantidades por producto. Se gestiona desde el listado de productos
 de arriba, no hay una pantalla aparte.
+
+---
+
+## Estados del pedido (FR-12)
+
+Ademas de como va el **pago** (`estado`: por confirmar, por cobrar, pagado),
+cada pedido tiene una **etapa** que dice en que va:
+
+```
+recibido -> en_preparacion -> en_camino -> entregado
+    \______________/
+      cancelado
+```
+
+Son dos campos a proposito: un pedido contraentrega se entrega antes de quedar
+pagado, y uno por transferencia puede estar pagado y seguir en preparacion.
+
+### Reglas
+
+- Todo pedido nace **recibido**.
+- Solo se avanza **un paso a la vez**; no se salta ni se retrocede.
+- Se puede **cancelar** mientras este recibido o en preparacion. Una vez sale
+  a entrega, ya no.
+- **Entregado** y **cancelado** son finales.
+- Cambiar la etapa no toca el pago.
+
+Las reglas viven en `Pedido.etapas_siguientes()` y `Pedido.cambiar_etapa()`.
+La API devuelve `etapas_siguientes` con cada pedido, asi el frontend solo
+muestra los botones que se pueden usar. Desde el admin de Django la etapa es
+de solo lectura para que nadie se salte las reglas.
+
+Cada cambio queda guardado con su fecha (`CambioEtapa`). Con eso se arma el
+`seguimiento` que ve el cliente. La fecha de *recibido* es la de creacion del
+pedido.
+
+### Que ve el cliente
+
+- **Mis pedidos**: <http://localhost:4200/mis-pedidos> (enlace en la
+  cabecera). Con sesion iniciada lista sus pedidos con la etapa, y cada uno
+  abre su detalle en `/mis-pedidos/<id>` con la linea de tiempo.
+- **Sin cuenta**: en la misma pagina se consulta con el numero de pedido y el
+  correo con el que se compro. La confirmacion de compra trae un enlace que
+  deja el numero ya escrito.
+
+### Que hace el personal
+
+En el detalle del pedido del panel (`/admin/pedidos/<id>`), la seccion
+*Seguimiento del pedido* muestra la linea de tiempo y un boton para pasar al
+siguiente paso. *Cancelar pedido* pide confirmar en la misma pantalla. El
+listado `/admin/pedidos` tiene una columna y un filtro por etapa.
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `GET` | `/api/pedidos/mios/` | Pedidos del cliente con sesion, paginados. |
+| `GET` | `/api/pedidos/mios/<id>/` | Detalle con `seguimiento`. 404 si el pedido no es suyo. |
+| `POST` | `/api/pedidos/consultar/` | Publico. Body `{"numero": 15, "email": "..."}`. 404 si no coinciden. |
+| `POST` | `/api/pedidos/admin/<id>/cambiar-etapa/` | Solo staff. Body `{"etapa": "en_preparacion"}`. 400 con el motivo si no se permite. |
+| `GET` | `/api/pedidos/admin/?etapa=` | El listado del panel tambien filtra por etapa. |
+
+La consulta va por `POST` para que el correo no quede en la URL ni en los
+logs. Responde lo mismo si el numero no existe o si el correo no coincide, asi
+no sirve para averiguar que pedidos existen.
 
 ---
 
