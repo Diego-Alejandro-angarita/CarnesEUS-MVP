@@ -35,6 +35,7 @@ class CrearPedidoSerializer(serializers.Serializer):
     municipio = serializers.CharField(max_length=80)
     barrio = serializers.CharField(max_length=120)
     notas = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
+    acepta_comunicaciones = serializers.BooleanField(required=False, default=False)
 
 
 class ItemPedidoSerializer(serializers.ModelSerializer):

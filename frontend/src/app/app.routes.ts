@@ -95,6 +95,13 @@ export const routes: Routes = [
     title: 'Usuarios | CarnesEUS',
   },
   {
+    path: 'admin/estadisticas',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./features/admin/estadisticas/estadisticas').then((m) => m.Estadisticas),
+    title: 'Estadisticas | CarnesEUS',
+  },
+  {
     path: 'carrito',
     loadComponent: () => import('./features/carrito/carrito').then((m) => m.CarritoPagina),
     title: 'Tu carrito | CarnesEUS',
