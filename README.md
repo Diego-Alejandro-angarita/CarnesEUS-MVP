@@ -185,7 +185,11 @@ mismo detalle: ver [Estados del pedido](#estados-del-pedido-fr-12).
 
 - Listado: <http://localhost:4200/admin/usuarios>
 - Activar o desactivar una cuenta: etiqueta *Activo* / *Inactivo* de cada
-  fila, es un boton. Una cuenta inactiva no puede iniciar sesion.
+  fila, es un boton. Una cuenta inactiva no puede iniciar sesion, y si ya
+  tenia una sesion abierta deja de valer en la siguiente peticion.
+- La cuenta con la que se entro no se puede desactivar (aparece como *Tu
+  cuenta*, con el boton deshabilitado): el personal se quedaria fuera del
+  panel.
 
 Solo se puede cambiar `is_active` desde aqui. Para marcar o quitar personal
 (`is_staff`) o editar otros datos de la cuenta hay que ir al admin de Django:
