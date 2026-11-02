@@ -1,0 +1,149 @@
+<section class="pedidos">
+  <header class="pedidos__cabecera">
+    <h1 class="pedidos__titulo">Mis pedidos</h1>
+    <p class="pedidos__lead">
+      Mira en que va tu pedido: recibido, en preparacion, en camino o entregado.
+    </p>
+  </header>
+
+  @if (!auth.verificando() && auth.usuario()) {
+    @switch (estadoLista()) {
+      @case ('cargando') {
+        <p class="aviso" role="status">Cargando tus pedidos...</p>
+      }
+      @case ('error') {
+        <p class="aviso aviso--error" role="alert">
+          No pudimos cargar tus pedidos. Revisa tu conexion e intentalo de nuevo.
+        </p>
+      }
+      @case ('ok') {
+        @if (filas().length === 0) {
+          <div class="aviso">
+            <p class="aviso__texto">Todavia no tienes pedidos con esta cuenta.</p>
+            <a class="boton" routerLink="/productos">Ver el catalogo</a>
+          </div>
+        } @else {
+          <div class="tabla__marco">
+            <table class="tabla">
+              <caption class="visualmente-oculto">
+                Tus pedidos
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Pedido</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col" class="tabla__numero">Total</th>
+                  <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (fila of filas(); track fila.id) {
+                  <tr>
+                    <th scope="row" class="tabla__nombre">
+                      #{{ fila.id }}
+                      <span class="tabla__secundario">
+                        {{ fila.creado_en | date: 'd MMM y, h:mm a' }}
+                      </span>
+                    </th>
+                    <td>
+                      <span class="insignia insignia--{{ fila.etapa }}">{{
+                        fila.etapa_nombre
+                      }}</span>
+                    </td>
+                    <td class="tabla__numero">
+                      {{ fila.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                    </td>
+                    <td class="tabla__acciones">
+                      <a
+                        class="boton boton--secundario boton--menudo"
+                        [routerLink]="['/mis-pedidos', fila.id]"
+                      >
+                        Ver<span class="visualmente-oculto"> pedido #{{ fila.id }}</span>
+                      </a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (totalPaginas() > 1) {
+            <nav class="paginacion" aria-label="Paginacion de tus pedidos">
+              <button type="button" [disabled]="!hayAnterior()" (click)="irA(paginaActual() - 1)">
+                Anterior
+              </button>
+              <p class="paginacion__estado" aria-live="polite">
+                Pagina {{ paginaActual() }} de {{ totalPaginas() }}
+              </p>
+              <button type="button" [disabled]="!haySiguiente()" (click)="irA(paginaActual() + 1)">
+                Siguiente
+              </button>
+            </nav>
+          }
+        }
+      }
+    }
+  }
+
+  <section
+    class="consulta"
+    [class.consulta--secundaria]="auth.usuario()"
+    aria-labelledby="titulo-consulta"
+  >
+    <h2 class="consulta__titulo" id="titulo-consulta">
+      {{ auth.usuario() ? 'Compraste sin iniciar sesion?' : 'Consulta tu pedido' }}
+    </h2>
+    <p class="consulta__texto">
+      Escribe el numero de pedido que te dimos al comprar y el correo con el que lo hiciste.
+      @if (!auth.verificando() && !auth.usuario()) {
+        Si tienes cuenta, <a routerLink="/login">inicia sesion</a> para ver todos tus pedidos.
+      }
+    </p>
+
+    <form class="consulta__form" [formGroup]="formulario" (ngSubmit)="consultar()" novalidate>
+      <div class="campo">
+        <label for="consulta-numero">Numero de pedido</label>
+        <input
+          id="consulta-numero"
+          type="number"
+          min="1"
+          inputmode="numeric"
+          formControlName="numero"
+        />
+        @if (formulario.controls.numero.touched && formulario.controls.numero.invalid) {
+          <small class="campo__error">Escribe el numero de tu pedido.</small>
+        }
+      </div>
+      <div class="campo">
+        <label for="consulta-email">Correo electronico</label>
+        <input id="consulta-email" type="email" autocomplete="email" formControlName="email" />
+        @if (formulario.controls.email.touched && formulario.controls.email.invalid) {
+          <small class="campo__error">Escribe un correo valido.</small>
+        }
+      </div>
+      <button class="boton" type="submit" [disabled]="estadoConsulta() === 'consultando'">
+        {{ estadoConsulta() === 'consultando' ? 'Consultando...' : 'Consultar' }}
+      </button>
+    </form>
+
+    @switch (estadoConsulta()) {
+      @case ('no-encontrado') {
+        <p class="aviso aviso--error" role="alert">
+          No encontramos un pedido con ese numero y ese correo. Revisa los datos e intentalo de
+          nuevo.
+        </p>
+      }
+      @case ('error') {
+        <p class="aviso aviso--error" role="alert">
+          No pudimos consultar el pedido. Revisa tu conexion e intentalo de nuevo.
+        </p>
+      }
+    }
+
+    @if (consultado(); as pedido) {
+      <div class="consulta__resultado" role="status">
+        <app-resumen-pedido [pedido]="pedido" />
+      </div>
+    }
+  </section>
+</section>

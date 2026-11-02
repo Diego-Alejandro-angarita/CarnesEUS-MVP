@@ -1,0 +1,12 @@
+{
+  "categoria": "<int>",
+  "categoria_nombre": "Res",
+  "descripcion": "Corte de prueba.",
+  "disponible": false,
+  "foto_url": "https://ejemplo.test/lomo-fino.jpg",
+  "id": "<int>",
+  "nombre": "Lomo fino madurado",
+  "precio": "41500.00",
+  "presentacion": "Bandeja 500 g",
+  "slug": "lomo-fino"
+}

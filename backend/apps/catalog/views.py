@@ -1,3 +1,4 @@
+from django.db.models import Avg, Count
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.generics import (
     ListAPIView,
@@ -5,7 +6,9 @@ from rest_framework.generics import (
     RetrieveAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
+
+from apps.promotions.precios import anotar_descuento
 
 from .filters import ProductoFilter
 from .models import Categoria, Producto
@@ -18,7 +21,8 @@ from .serializers import CategoriaSerializer, ProductoAdminSerializer, ProductoS
         description=(
             "Devuelve los productos del catalogo con foto, precio y disponibilidad. "
             "Acepta los parametros page, page_size, search (busca por nombre), "
-            "categoria (id) y precio_min/precio_max (rango de precio)."
+            "categoria (id) y precio_min/precio_max (rango de precio). Si el producto "
+            "tiene una promocion vigente trae su descuento y precio_promocion."
         ),
         responses={200: ProductoSerializer(many=True)},
     ),
@@ -33,12 +37,21 @@ from .serializers import CategoriaSerializer, ProductoAdminSerializer, ProductoS
     ),
 )
 class ProductoListView(ListCreateAPIView):
-    # TODO(FR-02): restringir el POST a IsAdminUser cuando exista el inicio de
-    # sesion. Hoy la creacion queda abierta porque todavia no hay autenticacion.
-    permission_classes = [AllowAny]
+    """El listado es publico; dar de alta (FR-03) es solo para personal (FR-19)."""
+
     queryset = Producto.objects.visibles().select_related("categoria")
     search_fields = ["nombre"]
     filterset_class = ProductoFilter
+
+    def get_queryset(self):
+        # Se anota en cada peticion, no en el atributo de clase: la vigencia
+        # depende de la fecha de hoy y el atributo se evalua una sola vez.
+        return anotar_descuento(super().get_queryset())
+
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [IsAdminUser()]
+        return [AllowAny()]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -70,8 +83,14 @@ class ProductoDetalleView(RetrieveAPIView):
     permission_classes = [AllowAny]
     # Sin .visibles(): un producto archivado desaparece del catalogo pero su
     # ficha sigue respondiendo, para no romper enlaces que ya circulan.
-    queryset = Producto.objects.select_related("categoria")
+    queryset = Producto.objects.select_related("categoria").annotate(
+        calificacion_promedio=Avg("resenas__calificacion"),
+        total_resenas=Count("resenas", distinct=True),
+    )
     lookup_field = "slug"
+
+    def get_queryset(self):
+        return anotar_descuento(super().get_queryset())
 
 
 @extend_schema_view(
@@ -108,10 +127,10 @@ class ProductoDetalleView(RetrieveAPIView):
     ),
 )
 class ProductoAdminDetalleView(RetrieveUpdateDestroyAPIView):
-    """Edicion (FR-04) y eliminacion (FR-05) de un producto por id."""
+    """Edicion (FR-04) y eliminacion (FR-05) de un producto por id. Solo personal (FR-19)."""
 
     serializer_class = ProductoAdminSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
     queryset = Producto.objects.visibles().select_related("categoria")
 
     def perform_destroy(self, instance):

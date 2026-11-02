@@ -1,0 +1,71 @@
+@use '../../../styles/tokens' as t;
+
+.resumen-pedido {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.bloque {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-fondo-alto;
+}
+
+.bloque__titulo {
+  margin: 0;
+  font-family: t.$fuente-display;
+  font-size: 1.25rem;
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-fondo-alto;
+
+  dt {
+    color: t.$color-texto-suave;
+    font-size: 0.875rem;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.productos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.375rem 0;
+    border-bottom: 1px solid t.$color-borde-suave;
+    color: t.$color-texto-suave;
+    font-size: 0.9375rem;
+  }
+}
+
+.total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+
+  strong {
+    color: t.$color-oro;
+    font-family: t.$fuente-display;
+    font-size: 1.5rem;
+  }
+}

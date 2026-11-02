@@ -37,6 +37,7 @@ describe('Login', () => {
       last_name: 'Gomez',
       email: 'ana@example.com',
       telefono: '',
+      is_staff: false,
     });
 
     expect(navegar).toHaveBeenCalledWith('/productos');

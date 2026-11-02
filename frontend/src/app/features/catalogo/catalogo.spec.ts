@@ -314,4 +314,34 @@ describe('Catalogo', () => {
 
     expect(texto(fixture)).toContain('No encontramos productos con esos filtros.');
   });
+
+  it('con una promocion vigente muestra el precio rebajado y el de lista tachado', async () => {
+    const { fixture, http } = crear();
+
+    http
+      .expectOne((r) => r.url === '/api/productos/')
+      .flush(pagina([producto({ descuento: 20, precio_promocion: '31120.00' })]));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.tarjeta__precio')?.textContent).toContain('31.120');
+    expect(raiz.querySelector('.precio-anterior')?.textContent).toContain('38.900');
+    expect(raiz.querySelector('.insignia--promo')?.textContent).toContain('-20%');
+  });
+
+  it('sin promocion no muestra descuento', async () => {
+    const { fixture, http } = crear();
+
+    http
+      .expectOne((r) => r.url === '/api/productos/')
+      .flush(pagina([producto({ descuento: null, precio_promocion: null })]));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const raiz = fixture.nativeElement as HTMLElement;
+    expect(raiz.querySelector('.insignia--promo')).toBeNull();
+    expect(raiz.querySelector('.precio-anterior')).toBeNull();
+    expect(raiz.querySelector('.tarjeta__precio')?.textContent).toContain('38.900');
+  });
 });

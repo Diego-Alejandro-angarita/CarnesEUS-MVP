@@ -1,0 +1,39 @@
+@let p = pedido();
+<div class="resumen-pedido">
+  <section class="bloque" aria-labelledby="titulo-seguimiento-{{ p.id }}">
+    <h2 class="bloque__titulo" id="titulo-seguimiento-{{ p.id }}">
+      Pedido #{{ p.id }}: {{ p.etapa_nombre }}
+    </h2>
+    <app-seguimiento-pedido [pedido]="p" />
+  </section>
+
+  <dl class="datos">
+    <dt>Entrega</dt>
+    <dd>{{ p.direccion }}, {{ p.barrio }}, {{ p.municipio }}</dd>
+    @if (p.notas) {
+      <dt>Notas</dt>
+      <dd>{{ p.notas }}</dd>
+    }
+    <dt>Pago</dt>
+    <dd>
+      {{ p.pago.metodo_nombre }} &middot;
+      {{ p.pago.estado === 'aprobado' ? 'Pagado' : 'Pendiente' }}
+    </dd>
+  </dl>
+
+  <section class="bloque">
+    <h2 class="bloque__titulo">Productos</h2>
+    <ul class="productos">
+      @for (item of p.items; track item.producto_id) {
+        <li>
+          <span>{{ item.cantidad }} x {{ item.nombre }}</span>
+          <span>{{ item.subtotal | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+        </li>
+      }
+    </ul>
+    <p class="total">
+      <span>Total</span>
+      <strong>{{ p.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
+    </p>
+  </section>
+</div>

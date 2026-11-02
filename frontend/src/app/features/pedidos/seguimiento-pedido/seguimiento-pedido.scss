@@ -1,0 +1,93 @@
+@use '../../../styles/tokens' as t;
+
+.seguimiento {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.paso {
+  position: relative;
+  display: flex;
+  gap: 0.875rem;
+  padding-bottom: 1.25rem;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  // La linea que une un paso con el siguiente.
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    top: 1rem;
+    bottom: 0;
+    left: calc(0.5rem - 1px);
+    width: 2px;
+    background: t.$color-borde;
+  }
+}
+
+.paso--hecho:not(:last-child)::before {
+  background: t.$color-oro;
+}
+
+.paso__punto {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.2rem;
+  border: 2px solid t.$color-borde;
+  border-radius: 50%;
+  background: t.$color-fondo;
+}
+
+.paso--hecho .paso__punto {
+  border-color: t.$color-oro;
+  background: t.$color-oro;
+}
+
+.paso--actual .paso__punto {
+  border-color: t.$color-oro-claro;
+  background: t.$color-fondo;
+  box-shadow: 0 0 0 4px rgba(209, 161, 58, 0.25);
+}
+
+.paso--cancelado .paso__punto {
+  border-color: t.$color-error;
+  background: t.$color-marca;
+  box-shadow: none;
+}
+
+.paso__texto {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.paso__nombre {
+  color: t.$color-texto;
+}
+
+.paso--pendiente .paso__nombre {
+  color: t.$color-texto-tenue;
+  font-weight: 400;
+}
+
+.paso--actual .paso__nombre {
+  color: t.$color-oro-claro;
+}
+
+.paso--cancelado .paso__nombre {
+  color: t.$color-error;
+}
+
+.paso__fecha {
+  color: t.$color-texto-tenue;
+  font-size: 0.8125rem;
+}
+
+.paso__ayuda {
+  color: t.$color-texto-suave;
+  font-size: 0.875rem;
+}

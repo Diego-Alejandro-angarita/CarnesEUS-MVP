@@ -140,7 +140,186 @@ devuelve al catalogo.
 En el codigo, `Producto.objects.visibles()` es el queryset que excluye los
 archivados: toda consulta nueva sobre el catalogo deberia partir de ahi.
 
-> **Sin autenticacion todavia.** El `POST` esta abierto porque el inicio de
-> sesion es FR-02 y aun no existe. Queda un `TODO(FR-02)` en
-> `backend/apps/catalog/views.py` para cambiarlo a `IsAdminUser`. No desplegar
-> asi.
+> **Solo personal.** Dar de alta, modificar y eliminar productos requiere un
+> usuario con `is_staff` (FR-19). El listado y la ficha siguen siendo
+> publicos.
+
+---
+
+## Panel administrativo (FR-19)
+
+Punto de entrada para el personal: <http://localhost:4200/admin>. El enlace
+*Administrar* del encabezado solo aparece con sesion de personal iniciada; sin
+eso, entrar a cualquier `/admin/*` redirige al login.
+
+Para crear un usuario de personal (no hay pantalla para esto, es deliberado):
+
+```bash
+docker compose exec backend python manage.py createsuperuser
+```
+
+O marcar `is_staff` a un usuario que ya se registro, desde
+<http://localhost:8001/admin/> &rarr; Usuarios.
+
+### Pedidos
+
+- Listado, con filtro por estado: <http://localhost:4200/admin/pedidos>
+- Detalle de un pedido: `/admin/pedidos/<id>` (boton *Ver* de cada fila), con
+  los datos de entrega, el pago y los productos
+- Cambiar el estado: en el detalle, las tres opciones (*Por confirmar*, *Por
+  cobrar*, *Pagado*) estan siempre visibles con una frase de que significa
+  cada una; se elige la que corresponda y se guarda sola, sin botones
+  aparte. El pago se sincroniza solo: aprobado si el pedido queda pagado,
+  pendiente en cualquier otro caso.
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `GET` | `/api/pedidos/admin/` | Listado paginado. Admite `?estado=` y `?page=`. |
+| `GET` | `/api/pedidos/admin/<id>/` | Detalle completo. |
+| `POST` | `/api/pedidos/admin/<id>/cambiar-estado/` | Body `{"estado": "por_confirmar" \| "por_cobrar" \| "pagado"}`. |
+
+La etapa del pedido (recibido, en preparacion...) se maneja aparte, desde el
+mismo detalle: ver [Estados del pedido](#estados-del-pedido-fr-12).
+
+### Usuarios
+
+- Listado: <http://localhost:4200/admin/usuarios>
+- Activar o desactivar una cuenta: etiqueta *Activo* / *Inactivo* de cada
+  fila, es un boton. Una cuenta inactiva no puede iniciar sesion, y si ya
+  tenia una sesion abierta deja de valer en la siguiente peticion.
+- La cuenta con la que se entro no se puede desactivar (aparece como *Tu
+  cuenta*, con el boton deshabilitado): el personal se quedaria fuera del
+  panel.
+
+Solo se puede cambiar `is_active` desde aqui. Para marcar o quitar personal
+(`is_staff`) o editar otros datos de la cuenta hay que ir al admin de Django:
+el panel no toca esos campos a proposito.
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `GET` | `/api/auth/usuarios/` | Listado paginado de clientes registrados. |
+| `PATCH` | `/api/auth/usuarios/<id>/` | Solo admite `{"is_active": ...}`. |
+
+### Inventario
+
+Hoy "inventario" es el mismo booleano Disponible/Agotado de FR-09: el negocio
+no maneja cantidades por producto. Se gestiona desde el listado de productos
+de arriba, no hay una pantalla aparte.
+
+---
+
+## Estados del pedido (FR-12)
+
+Ademas de como va el **pago** (`estado`: por confirmar, por cobrar, pagado),
+cada pedido tiene una **etapa** que dice en que va:
+
+```
+recibido -> en_preparacion -> en_camino -> entregado
+    \______________/
+      cancelado
+```
+
+Son dos campos a proposito: un pedido contraentrega se entrega antes de quedar
+pagado, y uno por transferencia puede estar pagado y seguir en preparacion.
+
+### Reglas
+
+- Todo pedido nace **recibido**.
+- Solo se avanza **un paso a la vez**; no se salta ni se retrocede.
+- Se puede **cancelar** mientras este recibido o en preparacion. Una vez sale
+  a entrega, ya no.
+- **Entregado** y **cancelado** son finales.
+- Cambiar la etapa no toca el pago.
+
+Las reglas viven en `Pedido.etapas_siguientes()` y `Pedido.cambiar_etapa()`.
+La API devuelve `etapas_siguientes` con cada pedido, asi el frontend solo
+muestra los botones que se pueden usar. Desde el admin de Django la etapa es
+de solo lectura para que nadie se salte las reglas.
+
+Cada cambio queda guardado con su fecha (`CambioEtapa`). Con eso se arma el
+`seguimiento` que ve el cliente. La fecha de *recibido* es la de creacion del
+pedido.
+
+### Que ve el cliente
+
+- **Mis pedidos**: <http://localhost:4200/mis-pedidos> (enlace en la
+  cabecera). Con sesion iniciada lista sus pedidos con la etapa, y cada uno
+  abre su detalle en `/mis-pedidos/<id>` con la linea de tiempo.
+- **Sin cuenta**: en la misma pagina se consulta con el numero de pedido y el
+  correo con el que se compro. La confirmacion de compra trae un enlace que
+  deja el numero ya escrito.
+
+### Que hace el personal
+
+En el detalle del pedido del panel (`/admin/pedidos/<id>`), la seccion
+*Seguimiento del pedido* muestra la linea de tiempo y un boton para pasar al
+siguiente paso. *Cancelar pedido* pide confirmar en la misma pantalla. El
+listado `/admin/pedidos` tiene una columna y un filtro por etapa.
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `GET` | `/api/pedidos/mios/` | Pedidos del cliente con sesion, paginados. |
+| `GET` | `/api/pedidos/mios/<id>/` | Detalle con `seguimiento`. 404 si el pedido no es suyo. |
+| `POST` | `/api/pedidos/consultar/` | Publico. Body `{"numero": 15, "email": "..."}`. 404 si no coinciden. |
+| `POST` | `/api/pedidos/admin/<id>/cambiar-etapa/` | Solo staff. Body `{"etapa": "en_preparacion"}`. 400 con el motivo si no se permite. |
+| `GET` | `/api/pedidos/admin/?etapa=` | El listado del panel tambien filtra por etapa. |
+
+La consulta va por `POST` para que el correo no quede en la URL ni en los
+logs. Responde lo mismo si el numero no existe o si el correo no coincide, asi
+no sirve para averiguar que pedidos existen.
+
+---
+
+## Promociones (FR-13)
+
+Descuentos por porcentaje sobre un grupo de productos. El personal los crea
+desde el panel y el catalogo muestra el precio rebajado mientras rigen.
+
+- Listado: <http://localhost:4200/admin/promociones> (tambien desde el boton
+  *Promociones* del listado de productos)
+- Crear: <http://localhost:4200/admin/promociones/nueva>
+- Modificar: `/admin/promociones/<id>/editar` (boton *Editar* de cada fila)
+- Eliminar: boton *Eliminar* de cada fila, con confirmacion en la propia fila
+
+Cada promocion tiene nombre, porcentaje (1 a 99), fecha de inicio y de fin, un
+interruptor *activa* y al menos un producto.
+
+Endpoints (todos exigen sesion de **staff**; sin ella responden 403):
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `GET` | `/api/promociones/` | Listado paginado, con el `estado` de hoy de cada una. |
+| `POST` | `/api/promociones/` | Alta. `productos` es una lista de ids. |
+| `GET` | `/api/promociones/<id>/` | Datos de una promocion. |
+| `PATCH` | `/api/promociones/<id>/` | Modificacion. |
+| `DELETE` | `/api/promociones/<id>/` | Borrado. Los productos vuelven a su precio. |
+| `GET` | `/api/promociones/productos/` | Productos del catalogo, sin paginar, para el selector. |
+
+### Cuando rige una promocion
+
+Rige si esta **activa** y hoy (hora de Bogota) cae entre `fecha_inicio` y
+`fecha_fin`, **ambas incluidas**. El listado lo resume en `estado`:
+`vigente`, `programada` (aun no empieza), `vencida` o `inactiva`.
+
+Si un producto esta en varias promociones vigentes a la vez, se aplica la de
+**mayor porcentaje**; no se suman.
+
+### Que ve el cliente
+
+`GET /api/productos/` y la ficha `GET /api/productos/<slug>/` traen dos campos
+nuevos: `descuento` (porcentaje) y `precio_promocion` (rebajado y redondeado a
+pesos). Ambos van en `null` si el producto no tiene promocion vigente. El
+catalogo y la ficha muestran el precio rebajado, el de lista tachado y una
+etiqueta con el porcentaje.
+
+El carrito todavia cobra el precio de lista: aplicar el descuento al pago le
+corresponde al checkout.
+
+### Probarlo
+
+El panel pide una cuenta del personal: se crea como se explica en
+[Panel administrativo](#panel-administrativo-fr-19) y se entra con ella desde
+*Iniciar sesion*.
+
+Las promociones tambien se pueden gestionar desde el admin de Django, en
+<http://localhost:8001/admin/>.

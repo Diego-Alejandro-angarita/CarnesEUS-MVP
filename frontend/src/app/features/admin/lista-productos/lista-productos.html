@@ -5,7 +5,10 @@
       <h1 class="admin__titulo">Productos</h1>
       <p class="admin__lead">Elige un producto para modificar sus datos.</p>
     </div>
-    <a class="boton" routerLink="/admin/productos/nuevo">Crear producto</a>
+    <div class="admin__acciones">
+      <a class="boton boton--secundario" routerLink="/admin/promociones">Promociones</a>
+      <a class="boton" routerLink="/admin/productos/nuevo">Crear producto</a>
+    </div>
   </header>
 
   @switch (estado()) {

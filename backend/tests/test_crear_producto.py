@@ -2,7 +2,16 @@ from decimal import Decimal
 
 import pytest
 
+from apps.accounts.models import Usuario
 from apps.catalog.models import Categoria, Producto
+
+
+@pytest.fixture
+def api(api):
+    """Dar de alta un producto requiere personal (FR-19)."""
+    staff = Usuario.objects.create_user(email="staff@carneseus.test", password="x", is_staff=True)
+    api.force_authenticate(staff)
+    return api
 
 
 @pytest.fixture
