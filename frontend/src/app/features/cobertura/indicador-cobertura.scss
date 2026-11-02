@@ -36,21 +36,60 @@ $color-ok: #8fcf9b;
     font-weight: 600;
   }
 
-  input {
-    padding: 0.625rem 0.75rem;
+  select {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 0.875rem;
     border: 1px solid t.$color-borde;
     border-radius: t.$radio-chip;
-    background: t.$color-fondo-alto;
+    // Flecha propia (chevron dorado) en lugar de la del navegador.
+    background: t.$color-fondo-alto
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23d1a13a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 0.875rem center / 0.75rem;
     color: t.$color-texto;
     font-size: 1rem;
+    cursor: pointer;
+    appearance: none;
+    // Pide al navegador que pinte el menu desplegable en oscuro.
+    color-scheme: dark;
+    transition: border-color 0.15s ease;
+
+    &:hover {
+      border-color: t.$color-texto-tenue;
+    }
 
     &:focus-visible {
+      border-color: t.$color-oro;
       outline: 2px solid t.$color-oro;
       outline-offset: 1px;
+    }
+
+    // Mientras no elige nada, el texto de ayuda se ve atenuado.
+    &:has(option[value='']:checked) {
+      color: t.$color-texto-suave;
+    }
+
+    option,
+    optgroup {
+      background: t.$color-fondo-alto;
+      color: t.$color-texto;
+    }
+
+    optgroup {
+      color: t.$color-oro-claro;
+      font-style: normal;
     }
   }
 }
 
+.campo--invalido select {
+  border-color: t.$color-error;
+}
+
+.campo__error {
+  margin: 0;
+  color: t.$color-error;
+  font-size: 0.8125rem;
+}
 .boton {
   justify-self: start;
   padding: 0.625rem 1.25rem;

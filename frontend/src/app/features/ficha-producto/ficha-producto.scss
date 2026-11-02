@@ -194,3 +194,44 @@
 .compra__aviso--error {
   color: t.$color-error;
 }
+
+.zona {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-superficie;
+}
+
+.zona__titulo {
+  margin: 0;
+  color: t.$color-texto;
+  font-weight: 600;
+}
+
+.zona__ayuda {
+  margin: 0;
+  color: t.$color-texto-suave;
+  font-size: 0.875rem;
+}
+
+.zona__select {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio-chip;
+  background: t.$color-fondo-alto;
+  color: t.$color-texto;
+  font-size: 1rem;
+  color-scheme: dark;
+
+  &:focus-visible {
+    outline: 2px solid t.$color-oro;
+    outline-offset: 1px;
+  }
+}
+
+.compra__aviso--advertencia {
+  color: t.$color-oro-claro;
+}

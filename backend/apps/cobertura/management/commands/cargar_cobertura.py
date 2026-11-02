@@ -5,14 +5,17 @@ from apps.cobertura.models import ZonaCobertura
 # Datos de ejemplo para ver el indicador funcionando. La cobertura real la define
 # el negocio: se edita desde el admin de Django (/admin/cobertura/).
 ZONAS_EJEMPLO = {
+    # Los nombres son los de las comunas del menu del frontend (FR-15). Solo
+    # algunas quedan cubiertas para poder ver tambien el resultado "fuera de zona".
     "Medellin": [
-        "Laureles",
+        "Laureles-Estadio",
         "El Poblado",
         "Belen",
         "La America",
-        "Estadio",
-        "Conquistadores",
+        "Guayabal",
+        "La Candelaria",
     ],
+
     "Envigado": ["Centro", "Zuniga", "Las Antillas"],
     "Sabaneta": ["Centro", "Aves Maria"],
     "Itagui": ["Centro", "San Pio"],
