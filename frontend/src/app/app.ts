@@ -1,3 +1,4 @@
+import { ZonaEntregaService } from './core/services/zona-entrega.service';
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { BotonWhatsapp } from './shared/boton-whatsapp/boton-whatsapp';
@@ -15,7 +16,7 @@ export class App {
   private readonly carrito = inject(CarritoService);
 
   protected readonly cantidadCarrito = this.carrito.cantidad;
-
+  protected readonly zona = inject(ZonaEntregaService);
   constructor() {
     this.auth.verificarSesion();
     // Se pide al arrancar para que el contador muestre lo que el visitante

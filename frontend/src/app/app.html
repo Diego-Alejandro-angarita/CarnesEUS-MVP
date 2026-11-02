@@ -37,6 +37,15 @@
   <p class="cabecera__servicio">
     <span>Envio en 24 horas</span>
     <span>Lun&ndash;Sab 8:00&ndash;20:00</span>
+    @if (zona.comuna(); as comuna) {
+      <span class="cabecera__zona" [class.cabecera__zona--sin-cobertura]="zona.cubierta() === false">
+        Entrega en: {{ comuna }}
+        @if (zona.cubierta() === false) {
+          (sin cobertura)
+        }
+        <button type="button" class="cabecera__cambiar" (click)="zona.limpiar()">cambiar</button>
+      </span>
+    }
   </p>
 </header>
 

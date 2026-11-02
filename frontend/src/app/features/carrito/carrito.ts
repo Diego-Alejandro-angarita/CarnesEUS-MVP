@@ -1,7 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
+import { ZonaEntregaService } from '../../core/services/zona-entrega.service';
 import { CarritoService } from '../../core/services/carrito.service';
 
 type EstadoCarrito = 'cargando' | 'ok' | 'error';
@@ -14,7 +14,7 @@ type EstadoCarrito = 'cargando' | 'ok' | 'error';
 })
 export class CarritoPagina {
   private readonly carritoServicio = inject(CarritoService);
-
+  protected readonly zona = inject(ZonaEntregaService);
   protected readonly estado = signal<EstadoCarrito>('cargando');
   /** Id del item que se esta actualizando, para deshabilitar solo esa fila. */
   protected readonly ocupado = signal<number | null>(null);
