@@ -53,15 +53,23 @@
                       type="button"
                       class="insignia insignia--boton"
                       [class.insignia--agotado]="!usuario.is_active"
-                      [disabled]="cambiando() === usuario.id"
+                      [class.insignia--propia]="usuario.id === miId()"
+                      [disabled]="cambiando() === usuario.id || usuario.id === miId()"
                       (click)="alternarActivo(usuario.id, usuario.is_active)"
                     >
                       {{ usuario.is_active ? 'Activo' : 'Inactivo' }}
                       <span class="visualmente-oculto">
-                        &mdash; marcar {{ usuario.email }} como
-                        {{ usuario.is_active ? 'inactivo' : 'activo' }}
+                        @if (usuario.id === miId()) {
+                          &mdash; es tu cuenta, no puedes desactivarla
+                        } @else {
+                          &mdash; marcar {{ usuario.email }} como
+                          {{ usuario.is_active ? 'inactivo' : 'activo' }}
+                        }
                       </span>
                     </button>
+                    @if (usuario.id === miId()) {
+                      <span class="tabla__nota">Tu cuenta</span>
+                    }
                   </td>
                 </tr>
               }

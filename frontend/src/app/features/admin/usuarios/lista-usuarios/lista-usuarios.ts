@@ -1,9 +1,11 @@
 import { DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { PaginaUsuarios } from '../../../../core/models/usuario-admin';
+import { AuthService } from '../../../../core/services/auth.service';
 import {
   AdminUsuariosService,
   TAMANO_PAGINA_USUARIOS,
@@ -19,6 +21,7 @@ type EstadoPantalla = 'cargando' | 'ok' | 'error';
 })
 export class ListaUsuarios {
   private readonly admin = inject(AdminUsuariosService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
 
@@ -29,6 +32,8 @@ export class ListaUsuarios {
   /** Id del usuario cuyo cambio de estado esta en curso. */
   protected readonly cambiando = signal<number | null>(null);
   protected readonly errorAccion = signal('');
+  /** El personal no puede desactivar su propia cuenta: se quedaria fuera del panel. */
+  protected readonly miId = computed(() => this.auth.usuario()?.id ?? null);
 
   protected readonly paginaActual = computed(() => {
     const numero = this.page();
@@ -70,8 +75,14 @@ export class ListaUsuarios {
             }
           : pagina,
       );
-    } catch {
-      this.errorAccion.set('No pudimos cambiar el estado de la cuenta. Intentalo de nuevo.');
+    } catch (error) {
+      const motivo =
+        error instanceof HttpErrorResponse && error.status === 400
+          ? error.error?.is_active?.[0]
+          : undefined;
+      this.errorAccion.set(
+        motivo ?? 'No pudimos cambiar el estado de la cuenta. Intentalo de nuevo.',
+      );
     } finally {
       this.cambiando.set(null);
     }
