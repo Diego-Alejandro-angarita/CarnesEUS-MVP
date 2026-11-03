@@ -323,3 +323,65 @@ El panel pide una cuenta del personal: se crea como se explica en
 
 Las promociones tambien se pueden gestionar desde el admin de Django, en
 <http://localhost:8001/admin/>.
+
+---
+
+## Tutorial de primer acceso (FR-20)
+
+La primera vez que una cuenta entra se le muestra un tutorial corto que resalta
+los elementos de la pantalla y explica que hace cada uno. Un cliente ve el
+recorrido del catalogo; el personal ve el del panel, con un recorrido propio
+por cada pantalla de `/admin/*`. Un visitante sin sesion no ve ningun tutorial.
+
+### Como funciona
+
+- **Por cuenta, no por navegador.** Cada usuario guarda en la base
+  (`tutoriales_vistos`, una lista de claves) los tutoriales que ya vio o salto.
+  Un tutorial se muestra solo si su clave *no* esta en la lista, asi que no
+  reaparece aunque se cambie de equipo ni al recargar.
+- **Una clave por pantalla.** `cliente` para el catalogo del cliente;
+  `admin.bienvenida`, `admin.panel`, `admin.productos`,
+  `admin.producto-formulario`, `admin.promociones`, `admin.pedidos`,
+  `admin.pedido-detalle`, `admin.usuarios` y `admin.estadisticas` para el
+  panel. Cada pantalla dispara su tutorial cuando ya mostro sus datos.
+- **Por rol.** `cliente` solo se le muestra a quien *no* es personal; los
+  `admin.*` solo al personal (`is_staff`). Un cliente al que luego se le marca
+  `is_staff` vera los del panel aunque ya hubiera visto el de cliente.
+- **Saltar y Esc.** *Saltar tutorial*, la tecla `Esc`, *Terminar* en el ultimo
+  paso y *No mostrar mas tutoriales* (solo en `admin.panel`, apaga todos los
+  del panel de una vez) hacen lo mismo: guardan la clave (o claves) como vistas.
+  No se distingue saltado de completado. Hacer clic fuera de la tarjeta no
+  cierra el tutorial, para no perderlo por un clic accidental.
+- **Ver de nuevo.** El enlace *Ver tutorial* de cada pantalla del panel reabre
+  su recorrido aunque ya se haya visto; eso no cambia nada de lo guardado.
+- Los pasos resaltan un elemento con `data-tutorial="..."`. Si el elemento no
+  esta en pantalla (por ejemplo, un listado vacio sin primera fila), ese paso
+  se omite solo.
+
+### Endpoint
+
+| Metodo | Ruta | Para que |
+|---|---|---|
+| `POST` | `/api/auth/tutoriales/vistos/` | Marca tutoriales como vistos para la cuenta con sesion. |
+
+- **Body:** `{"claves": ["admin.productos"]}` (una o varias claves). Es
+  idempotente: repetir una clave no la duplica.
+- **Respuesta `200`:** el usuario actualizado, con `tutoriales_vistos` ya
+  ordenado e incluyendo las nuevas claves.
+- **`400`:** si alguna clave no existe (no es una de las de arriba); no guarda
+  nada.
+- **`403`:** sin sesion iniciada.
+
+El usuario con sesion tambien trae `tutoriales_vistos` en `login/` y
+`quien-soy/`, asi que el frontend no necesita otra peticion al arrancar. Solo
+se tocan los tutoriales de la cuenta que hace la peticion: no hay forma de
+cambiar los de otra.
+
+### Probarlo
+
+Para volver a ver los tutoriales de una cuenta hay que vaciar su lista desde el
+admin de Django, en <http://localhost:8001/admin/> &rarr; Usuarios &rarr; la
+cuenta &rarr; campo *tutoriales vistos*: dejarlo en `[]` y guardar. En el
+siguiente acceso los tutoriales vuelven a salir. (La migracion inicial marca
+`cliente` como visto para las cuentas que ya habian usado la tienda; los del
+panel no, para que el personal actual los vea una vez.)
