@@ -1,13 +1,13 @@
+import { ZonaEntregaService } from './core/services/zona-entrega.service';
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
-
+import { BotonWhatsapp } from './shared/boton-whatsapp/boton-whatsapp';
 import { AuthService } from './core/services/auth.service';
 import { CarritoService } from './core/services/carrito.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterOutlet],
-  templateUrl: './app.html',
+  imports: [RouterLink, RouterOutlet, BotonWhatsapp],  templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
@@ -16,7 +16,7 @@ export class App {
   private readonly carrito = inject(CarritoService);
 
   protected readonly cantidadCarrito = this.carrito.cantidad;
-
+  protected readonly zona = inject(ZonaEntregaService);
   constructor() {
     this.auth.verificarSesion();
     // Se pide al arrancar para que el contador muestre lo que el visitante

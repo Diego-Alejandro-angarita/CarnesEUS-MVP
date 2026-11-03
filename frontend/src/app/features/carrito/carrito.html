@@ -20,6 +20,21 @@
           <a class="boton" routerLink="/productos">Ver el catalogo</a>
         </div>
       } @else {
+        @if (zona.cubierta() === false) {
+          <p class="carrito__zona carrito__zona--alerta" role="status">
+            <strong>Ojo:</strong> por ahora no hacemos domicilios a {{ zona.comuna() }}. Puedes dejar
+            los productos en el carrito, pero no podremos enviarlos a esa zona.
+            <button type="button" class="carrito__zona-boton" (click)="zona.limpiar()">
+              Cambiar comuna
+            </button>
+          </p>
+        } @else if (zona.cubierta() === null) {
+          <p class="carrito__zona" role="status">
+            Todavia no sabemos si llegamos a tu zona.
+            <a routerLink="/cobertura">Verificar cobertura</a>
+          </p>
+        }
+
         <ul class="lineas">
           @for (item of items(); track item.id) {
             <li class="linea" [class.linea--agotada]="!item.comprable">

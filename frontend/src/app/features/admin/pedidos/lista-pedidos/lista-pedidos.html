@@ -5,18 +5,35 @@
       <h1 class="admin__titulo">Pedidos</h1>
       <p class="admin__lead">Revisa los pedidos de los clientes y confirma los que ya se pagaron.</p>
     </div>
-    <div class="campo-filtro">
-      <label for="filtro-estado">Estado</label>
-      <select
-        id="filtro-estado"
-        [value]="estadoFiltro() ?? ''"
-        (change)="filtrarPorEstado($any($event.target).value)"
-      >
-        <option value="">Todos</option>
-        <option value="por_confirmar">Por confirmar</option>
-        <option value="por_cobrar">Por cobrar</option>
-        <option value="pagado">Pagado</option>
-      </select>
+    <div class="filtros">
+      <div class="campo-filtro">
+        <label for="filtro-etapa">Etapa</label>
+        <select
+          id="filtro-etapa"
+          [value]="etapaFiltro() ?? ''"
+          (change)="filtrarPorEtapa($any($event.target).value)"
+        >
+          <option value="">Todas</option>
+          <option value="recibido">Recibido</option>
+          <option value="en_preparacion">En preparacion</option>
+          <option value="en_camino">En camino</option>
+          <option value="entregado">Entregado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+      <div class="campo-filtro">
+        <label for="filtro-estado">Pago</label>
+        <select
+          id="filtro-estado"
+          [value]="estadoFiltro() ?? ''"
+          (change)="filtrarPorEstado($any($event.target).value)"
+        >
+          <option value="">Todos</option>
+          <option value="por_confirmar">Por confirmar</option>
+          <option value="por_cobrar">Por cobrar</option>
+          <option value="pagado">Pagado</option>
+        </select>
+      </div>
     </div>
   </header>
 
@@ -31,7 +48,9 @@
     }
     @case ('ok') {
       @if (pedidos().length === 0) {
-        <p class="aviso">No hay pedidos{{ estadoFiltro() ? ' con ese estado' : '' }}.</p>
+        <p class="aviso">
+          No hay pedidos{{ estadoFiltro() || etapaFiltro() ? ' con esos filtros' : '' }}.
+        </p>
       } @else {
         <p class="tabla__conteo">{{ total() }} pedidos</p>
 
@@ -43,7 +62,8 @@
                 <th scope="col">Pedido</th>
                 <th scope="col">Cliente</th>
                 <th scope="col">Pago</th>
-                <th scope="col">Estado</th>
+                <th scope="col">Etapa</th>
+                <th scope="col">Estado del pago</th>
                 <th scope="col" class="tabla__numero">Total</th>
                 <th scope="col"><span class="visualmente-oculto">Acciones</span></th>
               </tr>
@@ -60,6 +80,11 @@
                     <span class="tabla__secundario">{{ pedido.barrio }}, {{ pedido.municipio }}</span>
                   </td>
                   <td>{{ pedido.metodo_pago }}</td>
+                  <td>
+                    <span class="insignia insignia--{{ pedido.etapa }}">
+                      {{ etiquetasEtapa[pedido.etapa] }}
+                    </span>
+                  </td>
                   <td>
                     <span class="insignia" [class.insignia--pagado]="pedido.estado === 'pagado'">
                       {{ etiquetas[pedido.estado] }}

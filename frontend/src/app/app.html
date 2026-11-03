@@ -20,6 +20,7 @@
         }
       }
       <a routerLink="/cobertura">Cobertura</a>
+      <a routerLink="/mis-pedidos">Mis pedidos</a>
       @if (auth.usuario()?.is_staff) {
         <a routerLink="/admin">Administrar</a>
       }
@@ -36,7 +37,17 @@
   <p class="cabecera__servicio">
     <span>Envio en 24 horas</span>
     <span>Lun&ndash;Sab 8:00&ndash;20:00</span>
+    @if (zona.comuna(); as comuna) {
+      <span class="cabecera__zona" [class.cabecera__zona--sin-cobertura]="zona.cubierta() === false">
+        Entrega en: {{ comuna }}
+        @if (zona.cubierta() === false) {
+          (sin cobertura)
+        }
+        <button type="button" class="cabecera__cambiar" (click)="zona.limpiar()">cambiar</button>
+      </span>
+    }
   </p>
 </header>
 
 <router-outlet />
+<app-boton-whatsapp />

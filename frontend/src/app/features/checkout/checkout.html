@@ -116,6 +116,13 @@
         </section>
       }
 
+      <p class="seguir-pedido">
+        <a routerLink="/mis-pedidos" [queryParams]="{ numero: confirmado.id }">
+          Sigue el estado de tu pedido
+        </a>
+        con el numero #{{ confirmado.id }} y tu correo.
+      </p>
+
       <a class="boton" routerLink="/productos">Seguir comprando</a>
     </div>
   } @else {

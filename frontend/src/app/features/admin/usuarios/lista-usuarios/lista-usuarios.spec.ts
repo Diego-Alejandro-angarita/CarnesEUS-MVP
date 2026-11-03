@@ -6,6 +6,7 @@ import { LOCALE_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { AuthService } from '../../../../core/services/auth.service';
 import { ListaUsuarios } from './lista-usuarios';
 
 registerLocaleData(localeEsCo);
@@ -124,6 +125,49 @@ describe('ListaUsuarios', () => {
     fixture.detectChanges();
 
     expect(texto(fixture)).toContain('No pudimos cambiar el estado de la cuenta');
+  });
+
+  it('no deja desactivar la cuenta con la que se entro', async () => {
+    TestBed.inject(AuthService).usuario.set({
+      id: 7,
+      first_name: 'Staff',
+      last_name: '',
+      email: 'staff@carneseus.test',
+      telefono: '',
+      is_staff: true,
+    });
+    const { fixture, http } = await conUsuarios([
+      usuario({ id: 7, email: 'staff@carneseus.test', is_staff: true }),
+      usuario({ id: 8 }),
+    ]);
+
+    const [propio, otro] = Array.from(
+      elemento(fixture).querySelectorAll<HTMLButtonElement>('.insignia--boton'),
+    );
+    expect(propio.disabled).toBe(true);
+    expect(otro.disabled).toBe(false);
+    expect(texto(fixture)).toContain('Tu cuenta');
+
+    propio.click();
+    await fixture.whenStable();
+    http.expectNone('/api/auth/usuarios/7/');
+  });
+
+  it('muestra el motivo cuando el backend rechaza el cambio', async () => {
+    const { fixture, http } = await conUsuarios([usuario({ id: 7 })]);
+
+    elemento(fixture).querySelector<HTMLButtonElement>('.insignia--boton')!.click();
+    await fixture.whenStable();
+    http
+      .expectOne('/api/auth/usuarios/7/')
+      .flush(
+        { is_active: ['No puedes desactivar tu propia cuenta.'] },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(texto(fixture)).toContain('No puedes desactivar tu propia cuenta.');
   });
 
   it('avisa cuando no hay usuarios', async () => {

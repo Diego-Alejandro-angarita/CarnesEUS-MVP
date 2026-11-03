@@ -1,6 +1,7 @@
 @use '../../../../styles/tokens' as t;
 @use '../../base';
 @use '../../pagina';
+@use '../../listado';
 
 .admin--ancha {
   max-width: t.$ancho-maximo;
@@ -10,4 +11,16 @@
   margin-left: 0.5rem;
   border-color: t.$color-oro;
   color: t.$color-oro-claro;
+}
+
+// La cuenta propia no se puede desactivar: el boton queda quieto, no "cargando".
+.insignia--propia:disabled {
+  cursor: not-allowed;
+}
+
+.tabla__nota {
+  display: block;
+  margin-top: 0.25rem;
+  color: t.$color-texto-tenue;
+  font-size: 0.75rem;
 }

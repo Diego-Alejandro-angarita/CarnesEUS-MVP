@@ -263,3 +263,32 @@
     justify-self: start;
   }
 }
+.carrito__zona {
+  margin: 0 0 1.25rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  background: t.$color-superficie;
+  color: t.$color-texto-suave;
+  font-size: 0.9375rem;
+
+  a {
+    color: t.$color-oro-claro;
+  }
+}
+
+.carrito__zona--alerta {
+  border-color: t.$color-oro;
+  color: t.$color-texto;
+}
+
+.carrito__zona-boton {
+  margin-left: 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: t.$color-oro-claro;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

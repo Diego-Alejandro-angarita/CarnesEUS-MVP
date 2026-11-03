@@ -11,9 +11,8 @@ from .serializers import (
     ZonaSerializer,
 )
 
-MENSAJE_CUBIERTA = "Hacemos domicilios a este barrio."
-MENSAJE_SIN_COBERTURA = "Por ahora no hacemos domicilios a este barrio."
-
+MENSAJE_CUBIERTA = "Hacemos domicilios a esta zona."
+MENSAJE_SIN_COBERTURA = "Por ahora no hacemos domicilios a esta zona."
 
 @extend_schema(
     summary="Consultar si una direccion esta en la zona de cobertura",

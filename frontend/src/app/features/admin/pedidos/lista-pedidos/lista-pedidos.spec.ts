@@ -17,6 +17,7 @@ function fila(sobrescribir: Record<string, unknown> = {}) {
     municipio: 'Medellin',
     barrio: 'Laureles',
     estado: 'por_confirmar',
+    etapa: 'recibido',
     total: '77800.00',
     metodo_pago: 'Transferencia',
     creado_en: '2026-10-08T12:00:00Z',
@@ -111,6 +112,40 @@ describe('ListaPedidos', () => {
       [],
       expect.objectContaining({ queryParams: { estado: 'pagado', page: null } }),
     );
+  });
+
+  it('muestra la etapa de cada pedido', async () => {
+    const { fixture } = await conPedidos([fila({ etapa: 'en_camino' })]);
+
+    expect(elemento(fixture).querySelector('tbody .insignia--en_camino')?.textContent).toContain(
+      'En camino',
+    );
+  });
+
+  it('filtra por etapa y vuelve a la primera pagina', async () => {
+    const { fixture } = await conPedidos([fila()]);
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigate');
+
+    const selector = elemento(fixture).querySelector<HTMLSelectElement>('#filtro-etapa')!;
+    selector.value = 'entregado';
+    selector.dispatchEvent(new Event('change'));
+
+    expect(navegar).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({ queryParams: { etapa: 'entregado', page: null } }),
+    );
+  });
+
+  it('envia el filtro de etapa al backend', () => {
+    const fixture = TestBed.createComponent(ListaPedidos);
+    fixture.componentRef.setInput('etapa', 'en_preparacion');
+    fixture.detectChanges();
+
+    const peticion = TestBed.inject(HttpTestingController).expectOne(
+      (r) => r.url === '/api/pedidos/admin/',
+    );
+    expect(peticion.request.params.get('etapa')).toBe('en_preparacion');
   });
 
   it('muestra la paginacion cuando hay mas de una pagina', async () => {

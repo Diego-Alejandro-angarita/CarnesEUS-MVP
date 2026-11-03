@@ -45,6 +45,13 @@ class UsuarioAdminSerializer(serializers.ModelSerializer):
             "date_joined",
         ]
 
+    def validate_is_active(self, valor: bool) -> bool:
+        # Desactivarse a uno mismo cierra la sesion en la siguiente peticion y
+        # deja al personal fuera del panel sin forma de deshacerlo desde aqui.
+        if not valor and self.instance == self.context["request"].user:
+            raise serializers.ValidationError("No puedes desactivar tu propia cuenta.")
+        return valor
+
 
 class RegistroSerializer(serializers.ModelSerializer):
     """Alta de un cliente nuevo con confirmacion de contrasena."""

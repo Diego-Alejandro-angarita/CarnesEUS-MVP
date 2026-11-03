@@ -1,27 +1,19 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Component, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { ZonaCobertura } from '../../core/models/cobertura';
+import {
+  COMUNAS_MEDELLIN,
+  CORREGIMIENTOS_MEDELLIN,
+  MUNICIPIO_COBERTURA,
+} from '../../core/data/comunas-medellin';
 import { CoberturaService } from '../../core/services/cobertura.service';
+import { ZonaEntregaService } from '../../core/services/zona-entrega.service';
 
 type EstadoCobertura = 'inicial' | 'consultando' | 'cubierta' | 'sin-cobertura' | 'error';
 
 let contador = 0;
 
-/**
- * Indicador de zona de cobertura (FR-15).
- *
- * El cliente escribe municipio y barrio y el indicador le dice si hay
- * domicilios. Sirve solo (pagina /cobertura) o incrustado en otro formulario,
- * por ejemplo la direccion de entrega del checkout:
- *
- *   <app-indicador-cobertura
- *     [municipio]="direccion.municipio"
- *     [barrio]="direccion.barrio"
- *     (resultado)="hayCobertura.set($event)"
- *   />
- */
 @Component({
   selector: 'app-indicador-cobertura',
   imports: [ReactiveFormsModule],
@@ -31,61 +23,44 @@ let contador = 0;
 export class IndicadorCobertura {
   private readonly fb = inject(FormBuilder);
   private readonly cobertura = inject(CoberturaService);
+  private readonly zona = inject(ZonaEntregaService);
 
-  /** Valores iniciales cuando el componente va dentro de otro formulario. */
-  readonly municipio = input('');
+  /** Comuna preseleccionada cuando el componente va dentro de otro formulario. */
   readonly barrio = input('');
 
-  /** Avisa al padre si el barrio consultado esta (true) o no (false) cubierto. */
+  /** Avisa al padre si la zona consultada esta (true) o no (false) cubierta. */
   readonly resultado = output<boolean>();
 
-  /** Evita ids repetidos si hay mas de un indicador en la misma pantalla. */
   protected readonly uid = ++contador;
+
+  protected readonly comunas = COMUNAS_MEDELLIN;
+  protected readonly corregimientos = CORREGIMIENTOS_MEDELLIN;
 
   protected readonly estado = signal<EstadoCobertura>('inicial');
   protected readonly mensaje = signal('');
-  protected readonly zonas = signal<ZonaCobertura[]>([]);
 
   protected readonly formulario = this.fb.nonNullable.group({
-    municipio: ['', Validators.required],
-    barrio: ['', Validators.required],
-  });
-
-  private readonly municipioEscrito = toSignal(this.formulario.controls.municipio.valueChanges, {
-    initialValue: '',
-  });
-
-  protected readonly municipiosSugeridos = computed(() =>
-    [...new Set(this.zonas().map((zona) => zona.municipio))].sort(),
-  );
-
-  /** Barrios del municipio escrito; si todavia no hay municipio, todos. */
-  protected readonly barriosSugeridos = computed(() => {
-    const municipio = normalizar(this.municipioEscrito());
-    return this.zonas()
-      .filter((zona) => !municipio || normalizar(zona.municipio) === municipio)
-      .map((zona) => zona.barrio)
-      .sort();
+    comuna: ['', Validators.required],
   });
 
   constructor() {
     effect(() => {
-      this.formulario.patchValue({ municipio: this.municipio(), barrio: this.barrio() });
+      // untracked: solo reaccionamos a `barrio`; si siguiera a la zona guardada,
+      // el resultado recien consultado se borraria al instante.
+      const recordada = untracked(() => this.zona.comuna());
+      this.formulario.patchValue({ comuna: this.barrio() || recordada || '' });
     });
 
-    // Si el cliente cambia el barrio, el resultado anterior ya no vale: se
-    // quita para no dejar un "Si llegamos" pegado a otra direccion.
     this.formulario.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       if (this.estado() !== 'consultando') {
         this.estado.set('inicial');
       }
     });
+  }
 
-    // Las sugerencias son una comodidad: si fallan, el formulario sigue sirviendo.
-    this.cobertura.zonas().subscribe({
-      next: (zonas) => this.zonas.set(zonas),
-      error: () => this.zonas.set([]),
-    });
+  protected get comunaInvalida(): boolean {
+    const control = this.formulario.controls.comuna;
+    return control.invalid && control.touched;
   }
 
   protected verificar(): void {
@@ -94,13 +69,14 @@ export class IndicadorCobertura {
       return;
     }
 
-    const { municipio, barrio } = this.formulario.getRawValue();
+    const { comuna } = this.formulario.getRawValue();
     this.estado.set('consultando');
 
-    this.cobertura.verificar(municipio, barrio).subscribe({
+    this.cobertura.verificar(MUNICIPIO_COBERTURA, comuna).subscribe({
       next: (respuesta) => {
         this.mensaje.set(respuesta.mensaje);
         this.estado.set(respuesta.cubierta ? 'cubierta' : 'sin-cobertura');
+        this.zona.recordar(comuna, respuesta.cubierta);
         this.resultado.emit(respuesta.cubierta);
       },
       error: () => {
@@ -109,14 +85,4 @@ export class IndicadorCobertura {
       },
     });
   }
-}
-
-/** Igual que en el backend: sin tildes ni mayusculas, para comparar sugerencias. */
-function normalizar(texto: string): string {
-  return texto
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, ' ');
 }
