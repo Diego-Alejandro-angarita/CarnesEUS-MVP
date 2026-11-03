@@ -1,0 +1,165 @@
+<section class="admin">
+  <header class="admin__cabecera">
+    <p class="admin__kicker">Administracion</p>
+    <h1 class="admin__titulo">Pedido #{{ id() }}</h1>
+    <a class="admin__lead" routerLink="/admin/pedidos">&larr; Volver al listado</a>
+    <app-boton-tutorial clave="admin.pedido-detalle" />
+  </header>
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando el pedido...</p>
+    }
+    @case ('no-encontrado') {
+      <p class="aviso aviso--error" role="alert">
+        Este pedido no existe. <a routerLink="/admin/pedidos">Volver al listado</a>
+      </p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar el pedido. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (pedido(); as pedido) {
+        @if (errorAccion()) {
+          <p class="aviso aviso--error" role="alert">{{ errorAccion() }}</p>
+        }
+
+        <div class="detalle">
+          <dl class="datos">
+            <dt>Etapa</dt>
+            <dd>
+              <span class="insignia insignia--{{ pedido.etapa }}">
+                {{ etiquetasEtapa[pedido.etapa] }}
+              </span>
+            </dd>
+            <dt>Pago</dt>
+            <dd>
+              <span class="insignia" [class.insignia--pagado]="pedido.estado === 'pagado'">
+                {{ etiquetas[pedido.estado] }}
+              </span>
+            </dd>
+            <dt>Cliente</dt>
+            <dd>{{ pedido.nombre }}</dd>
+            <dt>Correo</dt>
+            <dd>{{ pedido.email }}</dd>
+            <dt>Telefono</dt>
+            <dd>{{ pedido.telefono }}</dd>
+            <dt>Entrega</dt>
+            <dd>{{ pedido.direccion }}, {{ pedido.barrio }}, {{ pedido.municipio }}</dd>
+            @if (pedido.notas) {
+              <dt>Notas</dt>
+              <dd>{{ pedido.notas }}</dd>
+            }
+            <dt>Metodo de pago</dt>
+            <dd>{{ pedido.pago.metodo_nombre }}</dd>
+            @if (pedido.pago.referencia) {
+              <dt>Referencia</dt>
+              <dd>{{ pedido.pago.referencia }}</dd>
+            }
+          </dl>
+
+          <h2 class="detalle__subtitulo">Productos</h2>
+          <ul class="resumen__lista">
+            @for (item of pedido.items; track item.producto_id) {
+              <li>
+                <span>{{ item.cantidad }} x {{ item.nombre }}</span>
+                <span>{{ item.subtotal | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+              </li>
+            }
+          </ul>
+          <p class="resumen__total">
+            <span>Total</span>
+            <strong>{{ pedido.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
+          </p>
+
+          <section class="cambiar-estado" data-tutorial="pedido-seguimiento" aria-labelledby="titulo-seguimiento">
+            <h2 class="detalle__subtitulo" id="titulo-seguimiento">Seguimiento del pedido</h2>
+            <app-seguimiento-pedido [pedido]="pedido" />
+
+            @if (siguientePaso() || sePuedeCancelar()) {
+              <div class="etapa-acciones">
+                @if (siguientePaso(); as siguiente) {
+                  <button
+                    type="button"
+                    class="boton"
+                    [disabled]="cambiandoEtapa()"
+                    (click)="cambiarEtapa(siguiente)"
+                  >
+                    Pasar a {{ etiquetasEtapa[siguiente].toLowerCase() }}
+                  </button>
+                }
+                @if (sePuedeCancelar()) {
+                  @if (confirmandoCancelar()) {
+                    <span class="confirmacion">
+                      <span class="confirmacion__texto">Cancelar el pedido no se puede deshacer.</span>
+                      <button
+                        type="button"
+                        class="boton boton--peligro boton--menudo"
+                        [disabled]="cambiandoEtapa()"
+                        (click)="cambiarEtapa('cancelado')"
+                      >
+                        Si, cancelar
+                      </button>
+                      <button
+                        type="button"
+                        class="boton boton--secundario boton--menudo"
+                        [disabled]="cambiandoEtapa()"
+                        (click)="confirmandoCancelar.set(false)"
+                      >
+                        No
+                      </button>
+                    </span>
+                  } @else {
+                    <button
+                      type="button"
+                      class="boton boton--peligro"
+                      data-tutorial="pedido-cancelar"
+                      [disabled]="cambiandoEtapa()"
+                      (click)="confirmandoCancelar.set(true)"
+                    >
+                      Cancelar pedido
+                    </button>
+                  }
+                }
+              </div>
+            } @else {
+              <p class="estado-guardando">
+                El pedido esta {{ etiquetasEtapa[pedido.etapa].toLowerCase() }}: ya no cambia de
+                etapa.
+              </p>
+            }
+            @if (cambiandoEtapa()) {
+              <p class="estado-guardando" role="status">Guardando...</p>
+            }
+          </section>
+
+          <div class="cambiar-estado">
+            <h2 class="detalle__subtitulo">Estado del pago</h2>
+            <div class="estado-opciones" data-tutorial="pedido-pago" role="radiogroup" aria-label="Estado del pago">
+              @for (opcion of ESTADOS; track opcion) {
+                <label class="estado-opcion" [class.estado-opcion--activa]="pedido.estado === opcion">
+                  <input
+                    type="radio"
+                    name="estado"
+                    [checked]="pedido.estado === opcion"
+                    [disabled]="cambiando()"
+                    (change)="cambiarEstado(opcion)"
+                  />
+                  <span>
+                    <strong>{{ etiquetas[opcion] }}</strong>
+                    <small>{{ ayudaEstado[opcion] }}</small>
+                  </span>
+                </label>
+              }
+            </div>
+            @if (cambiando()) {
+              <p class="estado-guardando" role="status">Guardando...</p>
+            }
+          </div>
+        </div>
+      }
+    }
+  }
+</section>

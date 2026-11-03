@@ -1,0 +1,9 @@
+export interface Usuario {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  telefono: string;
+  is_staff: boolean;
+  tutoriales_vistos: string[];
+}

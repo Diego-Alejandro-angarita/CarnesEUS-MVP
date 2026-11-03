@@ -1,0 +1,61 @@
+// Encabezado y mensaje de confirmacion de las paginas de administracion.
+@use '../../styles/tokens' as t;
+
+.admin {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2.5rem t.$espacio 3rem;
+}
+
+.admin__cabecera {
+  margin-bottom: 2rem;
+}
+
+.admin__kicker {
+  margin: 0 0 0.5rem;
+  color: t.$color-oro;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.admin__titulo {
+  margin: 0;
+  font-size: clamp(1.875rem, 5vw, 2.75rem);
+}
+
+.admin__lead {
+  margin: 0.5rem 0 0;
+  color: t.$color-texto-suave;
+}
+
+.exito {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(209, 161, 58, 0.45);
+  border-radius: t.$radio;
+  background: t.$color-fondo-alto;
+}
+
+.exito__titulo {
+  margin: 0 0 0.5rem;
+  color: t.$color-oro-claro;
+  font-size: 1.5rem;
+}
+
+.exito__texto {
+  margin: 0 0 1.25rem;
+  color: t.$color-texto-suave;
+
+  strong {
+    color: t.$color-texto;
+  }
+}
+
+.exito__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}

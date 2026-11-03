@@ -1,0 +1,179 @@
+<section class="portada">
+  <div class="portada__interior">
+    <p class="portada__kicker">Carniceria artesanal desde 1978</p>
+    <h1 class="portada__titulo">Carne de <em>verdad.</em></h1>
+    <p class="portada__lead">
+      Seleccion diaria de los mejores proveedores nacionales. Corte a mano, maduracion controlada,
+      entrega en 24 horas.
+    </p>
+  </div>
+</section>
+
+<section class="catalogo">
+  <header class="catalogo__cabecera">
+    <div>
+      <h2 class="catalogo__titulo">Nuestra seleccion</h2>
+      <p class="catalogo__subtitulo">Actualizado cada manana con el genero del dia</p>
+    </div>
+    @if (estado() === 'ok' && total() > 0) {
+      <p class="catalogo__conteo">{{ total() }} productos</p>
+    }
+  </header>
+
+  <div class="controles">
+    <form class="busqueda" data-tutorial="catalogo-busqueda" (submit)="$event.preventDefault(); buscar(campo.value)">
+      <input
+        #campo
+        type="search"
+        name="busqueda"
+        [value]="busquedaTexto()"
+        placeholder="Buscar por nombre..."
+        aria-label="Buscar productos"
+      />
+      <button type="submit">Buscar</button>
+    </form>
+
+    <button
+      type="button"
+      class="boton-filtros"
+      data-tutorial="catalogo-filtros"
+      [class.boton-filtros--activo]="hayFiltrosActivos()"
+      [attr.aria-expanded]="filtrosAbiertos()"
+      (click)="alternarFiltros()"
+    >
+      Filtros
+    </button>
+  </div>
+
+  @if (filtrosAbiertos()) {
+    <form
+      class="panel-filtros"
+      (submit)="
+        $event.preventDefault(); aplicarFiltros(categoriaSel.value, precioMinCampo.value, precioMaxCampo.value)
+      "
+    >
+      <div class="campo-filtro">
+        <label for="filtro-categoria">Categoria</label>
+        <select id="filtro-categoria" #categoriaSel [value]="categoria() ?? ''">
+          <option value="">Todas</option>
+          @for (cat of categorias(); track cat.id) {
+            <option [value]="cat.id">{{ cat.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo-filtro">
+        <label for="filtro-precio-min">Precio minimo</label>
+        <input
+          id="filtro-precio-min"
+          #precioMinCampo
+          type="number"
+          min="0"
+          [value]="precioMin() ?? ''"
+          placeholder="0"
+        />
+      </div>
+
+      <div class="campo-filtro">
+        <label for="filtro-precio-max">Precio maximo</label>
+        <input
+          id="filtro-precio-max"
+          #precioMaxCampo
+          type="number"
+          min="0"
+          [value]="precioMax() ?? ''"
+          placeholder="Sin limite"
+        />
+      </div>
+
+      <div class="panel-filtros__acciones">
+        <button type="submit">Aplicar filtros</button>
+        @if (hayFiltrosActivos()) {
+          <button type="button" class="boton-texto" (click)="limpiarFiltros()">Limpiar</button>
+        }
+      </div>
+    </form>
+  }
+
+  @switch (estado()) {
+    @case ('cargando') {
+      <p class="aviso" role="status">Cargando el catalogo...</p>
+    }
+    @case ('error') {
+      <p class="aviso aviso--error" role="alert">
+        No pudimos cargar el catalogo. Revisa tu conexion e intentalo de nuevo.
+      </p>
+    }
+    @case ('ok') {
+      @if (productos().length === 0) {
+        @if (busquedaTexto()) {
+          <p class="aviso">No encontramos productos que coincidan con "{{ busquedaTexto() }}".</p>
+        } @else if (hayFiltrosActivos()) {
+          <p class="aviso">No encontramos productos con esos filtros.</p>
+        } @else {
+          <p class="aviso">Todavia no hay productos publicados en el catalogo.</p>
+        }
+      } @else {
+        <ul class="rejilla">
+          @for (producto of productos(); track producto.id) {
+            <li class="tarjeta" [class.tarjeta--agotada]="!producto.disponible">
+              <a class="tarjeta__enlace" [routerLink]="['/productos', producto.slug]">
+                <div class="tarjeta__foto">
+                  @if (producto.foto_url) {
+                    <img
+                      [src]="producto.foto_url"
+                      [alt]="producto.nombre"
+                      width="600"
+                      height="400"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <p class="tarjeta__sin-foto">Sin foto</p>
+                  }
+                  <span class="insignia" [class.insignia--agotado]="!producto.disponible">
+                    {{ producto.disponible ? 'Disponible' : 'Agotado' }}
+                  </span>
+                  @if (producto.descuento) {
+                    <span class="insignia insignia--promo">-{{ producto.descuento }}%</span>
+                  }
+                </div>
+
+                <div class="tarjeta__cuerpo">
+                  <p class="tarjeta__categoria">{{ producto.categoria }}</p>
+                  <h3 class="tarjeta__nombre">{{ producto.nombre }}</h3>
+                  <p class="tarjeta__descripcion">{{ producto.descripcion }}</p>
+                  <p class="tarjeta__precio">
+                    @if (producto.precio_promocion != null) {
+                      {{ producto.precio_promocion | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                      <s class="precio-anterior">
+                        <span class="visualmente-oculto">Antes </span>
+                        {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                      </s>
+                    } @else {
+                      {{ producto.precio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
+                    }
+                    <span>{{ producto.presentacion }}</span>
+                  </p>
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+
+        @if (totalPaginas() > 1) {
+          <nav class="paginacion" aria-label="Paginacion del catalogo">
+            <button type="button" [disabled]="!hayAnterior()" (click)="irA(paginaActual() - 1)">
+              Anterior
+            </button>
+            <p class="paginacion__estado" aria-live="polite">
+              Pagina {{ paginaActual() }} de {{ totalPaginas() }}
+            </p>
+            <button type="button" [disabled]="!haySiguiente()" (click)="irA(paginaActual() + 1)">
+              Siguiente
+            </button>
+          </nav>
+        }
+      }
+    }
+  }
+</section>

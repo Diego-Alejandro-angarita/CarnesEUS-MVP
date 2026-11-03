@@ -1,0 +1,60 @@
+<section class="cobertura">
+  <h2 class="cobertura__titulo">Llegamos a tu comuna?</h2>
+  <p class="cobertura__ayuda">
+    Elige tu comuna de Medellin y te decimos si hacemos domicilios hasta alli.
+  </p>
+
+  <form class="cobertura__form" [formGroup]="formulario" (ngSubmit)="verificar()" novalidate>
+    <div class="campo" [class.campo--invalido]="comunaInvalida">
+      <label [for]="'cobertura-comuna-' + uid">Comuna</label>
+      <select
+        [id]="'cobertura-comuna-' + uid"
+        formControlName="comuna"
+        required
+        [attr.aria-invalid]="comunaInvalida"
+        [attr.aria-describedby]="comunaInvalida ? 'cobertura-error-' + uid : null"
+      >
+        <option value="" disabled>Selecciona tu comuna</option>
+        <optgroup label="Comunas">
+          @for (comuna of comunas; track comuna.codigo) {
+            <option [value]="comuna.nombre">{{ comuna.codigo }} - {{ comuna.nombre }}</option>
+          }
+        </optgroup>
+        <optgroup label="Corregimientos">
+          @for (corregimiento of corregimientos; track corregimiento.codigo) {
+            <option [value]="corregimiento.nombre">{{ corregimiento.nombre }}</option>
+          }
+        </optgroup>
+      </select>
+      @if (comunaInvalida) {
+        <p class="campo__error" [id]="'cobertura-error-' + uid" role="alert">
+          Elige tu comuna para continuar.
+        </p>
+      }
+    </div>
+
+    <button class="boton" type="submit" [disabled]="estado() === 'consultando'">
+      {{ estado() === 'consultando' ? 'Consultando...' : 'Verificar cobertura' }}
+    </button>
+  </form>
+
+  <div class="indicador" aria-live="polite">
+    @switch (estado()) {
+      @case ('cubierta') {
+        <p class="indicador__resultado indicador--si" role="status">
+          <span class="indicador__punto" aria-hidden="true"></span>
+          <strong>Si llegamos.</strong> {{ mensaje() }}
+        </p>
+      }
+      @case ('sin-cobertura') {
+        <p class="indicador__resultado indicador--no" role="status">
+          <span class="indicador__punto" aria-hidden="true"></span>
+          <strong>Fuera de la zona.</strong> {{ mensaje() }}
+        </p>
+      }
+      @case ('error') {
+        <p class="indicador__resultado indicador--error" role="alert">{{ mensaje() }}</p>
+      }
+    }
+  </div>
+</section>

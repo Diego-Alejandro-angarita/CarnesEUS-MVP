@@ -1,0 +1,61 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
+
+import { EstadoPedido, EtapaPedido, PaginaPedidos, Pedido, PedidoLista } from '../models/pedido';
+import { PedidoApi, convertir } from './pedido.service';
+
+export const TAMANO_PAGINA_PEDIDOS = 20;
+
+type PedidoListaApi = Omit<PedidoLista, 'total'> & { total: string };
+type PaginaPedidosApi = Omit<PaginaPedidos, 'results'> & { results: PedidoListaApi[] };
+
+/**
+ * Panel administrativo de pedidos (FR-19): listar, ver el detalle y cambiar el
+ * estado del pago. Tambien mueve el pedido de etapa (FR-12).
+ */
+@Injectable({ providedIn: 'root' })
+export class AdminPedidosService {
+  private readonly http = inject(HttpClient);
+
+  listar(
+    pagina: number,
+    estado: EstadoPedido | null = null,
+    etapa: EtapaPedido | null = null,
+  ): Observable<PaginaPedidos> {
+    let params = new HttpParams().set('page', pagina).set('page_size', TAMANO_PAGINA_PEDIDOS);
+    if (estado) {
+      params = params.set('estado', estado);
+    }
+    if (etapa) {
+      params = params.set('etapa', etapa);
+    }
+
+    return this.http
+      .get<PaginaPedidosApi>('/api/pedidos/admin/', { params })
+      .pipe(
+        map((pagina) => ({
+          ...pagina,
+          results: pagina.results.map((fila) => ({ ...fila, total: Number(fila.total) })),
+        })),
+      );
+  }
+
+  obtener(id: number): Observable<Pedido> {
+    return this.http.get<PedidoApi>(`/api/pedidos/admin/${id}/`).pipe(map(convertir));
+  }
+
+  /** Mueve el pedido a por_confirmar, por_cobrar o pagado (el pago se sincroniza solo). */
+  cambiarEstado(id: number, estado: EstadoPedido): Observable<Pedido> {
+    return this.http
+      .post<PedidoApi>(`/api/pedidos/admin/${id}/cambiar-estado/`, { estado })
+      .pipe(map(convertir));
+  }
+
+  /** Avanza el pedido un paso o lo cancela; el backend rechaza lo que no se permite. */
+  cambiarEtapa(id: number, etapa: EtapaPedido): Observable<Pedido> {
+    return this.http
+      .post<PedidoApi>(`/api/pedidos/admin/${id}/cambiar-etapa/`, { etapa })
+      .pipe(map(convertir));
+  }
+}

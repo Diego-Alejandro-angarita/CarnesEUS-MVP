@@ -1,0 +1,147 @@
+@use '../../styles/tokens' as t;
+
+$color-ok: #8fcf9b;
+
+.cobertura {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 2rem t.$espacio 3rem;
+}
+
+.cobertura__titulo {
+  margin: 0 0 0.5rem;
+  color: t.$color-texto;
+  font-family: t.$fuente-display;
+  font-size: 1.75rem;
+}
+
+.cobertura__ayuda {
+  margin: 0 0 1.5rem;
+  color: t.$color-texto-suave;
+  font-size: 0.9375rem;
+}
+
+.cobertura__form {
+  display: grid;
+  gap: t.$espacio;
+}
+
+.campo {
+  display: grid;
+  gap: 0.375rem;
+
+  label {
+    color: t.$color-texto;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  select {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 0.875rem;
+    border: 1px solid t.$color-borde;
+    border-radius: t.$radio-chip;
+    // Flecha propia (chevron dorado) en lugar de la del navegador.
+    background: t.$color-fondo-alto
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23d1a13a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 0.875rem center / 0.75rem;
+    color: t.$color-texto;
+    font-size: 1rem;
+    cursor: pointer;
+    appearance: none;
+    // Pide al navegador que pinte el menu desplegable en oscuro.
+    color-scheme: dark;
+    transition: border-color 0.15s ease;
+
+    &:hover {
+      border-color: t.$color-texto-tenue;
+    }
+
+    &:focus-visible {
+      border-color: t.$color-oro;
+      outline: 2px solid t.$color-oro;
+      outline-offset: 1px;
+    }
+
+    // Mientras no elige nada, el texto de ayuda se ve atenuado.
+    &:has(option[value='']:checked) {
+      color: t.$color-texto-suave;
+    }
+
+    option,
+    optgroup {
+      background: t.$color-fondo-alto;
+      color: t.$color-texto;
+    }
+
+    optgroup {
+      color: t.$color-oro-claro;
+      font-style: normal;
+    }
+  }
+}
+
+.campo--invalido select {
+  border-color: t.$color-error;
+}
+
+.campo__error {
+  margin: 0;
+  color: t.$color-error;
+  font-size: 0.8125rem;
+}
+.boton {
+  justify-self: start;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: t.$radio-chip;
+  background: t.$color-marca;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: t.$color-marca-clara;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.indicador {
+  min-height: 3.5rem;
+  margin-top: 1.25rem;
+}
+
+.indicador__resultado {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border: 1px solid;
+  border-radius: t.$radio;
+  background: t.$color-superficie;
+}
+
+.indicador__punto {
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.indicador--si {
+  border-color: $color-ok;
+  color: $color-ok;
+}
+
+.indicador--no,
+.indicador--error {
+  border-color: t.$color-error;
+  color: t.$color-error;
+}

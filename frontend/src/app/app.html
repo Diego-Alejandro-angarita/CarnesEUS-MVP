@@ -1,0 +1,54 @@
+<header class="cabecera">
+  <div class="cabecera__barra">
+    <a class="cabecera__marca" routerLink="/productos">
+      <span class="cabecera__sello" aria-hidden="true">CE</span>
+      CarnesEUs
+    </a>
+    <nav class="cabecera__nav">
+      @if (!auth.verificando()) {
+        @if (auth.usuario(); as usuario) {
+          <span class="cabecera__usuario">
+            <span class="cabecera__sello" aria-hidden="true">{{ usuario.first_name.charAt(0) }}</span>
+            {{ usuario.first_name }}
+          </span>
+          <button type="button" class="cabecera__enlace cabecera__salir" (click)="salir()">
+            Salir
+          </button>
+        } @else {
+          <a class="cabecera__enlace" routerLink="/login">Iniciar sesion</a>
+          <a class="cabecera__enlace" routerLink="/registro">Crear cuenta</a>
+        }
+      }
+      <a routerLink="/cobertura" data-tutorial="cabecera-cobertura">Cobertura</a>
+      <a routerLink="/mis-pedidos" data-tutorial="cabecera-mis-pedidos">Mis pedidos</a>
+      @if (auth.usuario()?.is_staff) {
+        <a routerLink="/admin" data-tutorial="cabecera-administrar">Administrar</a>
+      }
+      <a class="cabecera__carrito" routerLink="/carrito" data-tutorial="cabecera-carrito">
+        Carrito
+        @if (cantidadCarrito() > 0) {
+          <span class="cabecera__contador" aria-label="productos en el carrito">
+            {{ cantidadCarrito() }}
+          </span>
+        }
+      </a>
+    </nav>
+  </div>
+  <p class="cabecera__servicio">
+    <span>Envio en 24 horas</span>
+    <span>Lun&ndash;Sab 8:00&ndash;20:00</span>
+    @if (zona.comuna(); as comuna) {
+      <span class="cabecera__zona" [class.cabecera__zona--sin-cobertura]="zona.cubierta() === false">
+        Entrega en: {{ comuna }}
+        @if (zona.cubierta() === false) {
+          (sin cobertura)
+        }
+        <button type="button" class="cabecera__cambiar" (click)="zona.limpiar()">cambiar</button>
+      </span>
+    }
+  </p>
+</header>
+
+<router-outlet />
+<app-boton-whatsapp />
+<app-tutorial />
