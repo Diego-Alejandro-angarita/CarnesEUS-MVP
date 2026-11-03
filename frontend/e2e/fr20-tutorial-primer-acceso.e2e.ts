@@ -67,12 +67,33 @@ function tarjeta(page: Page) {
   return page.getByRole('dialog');
 }
 
-/** Recorre un tutorial abierto pulsando Siguiente hasta Terminar. */
+/**
+ * Pulsa un boton de la tarjeta que marca tutoriales como vistos y espera a que
+ * el backend lo guarde: la app no espera ese POST, y un goto o reload justo
+ * despues podria cancelarlo.
+ */
+async function pulsarYGuardar(page: Page, boton: string) {
+  const guardado = page.waitForResponse(
+    (r) => r.url().endsWith('/api/auth/tutoriales/vistos/') && r.ok(),
+  );
+  await tarjeta(page).getByRole('button', { name: boton }).click();
+  await guardado;
+}
+
+/**
+ * Recorre un tutorial abierto pulsando Siguiente hasta Terminar. Espera cada
+ * "Paso N de M" antes de pulsar: si preguntara si Siguiente sigue visible, en
+ * el ultimo paso podria verlo justo antes de que cambie a Terminar y quedarse
+ * esperandolo.
+ */
 async function recorrerHastaTerminar(page: Page) {
-  const siguiente = tarjeta(page).getByRole('button', { name: 'Siguiente' });
-  while (await siguiente.isVisible().catch(() => false)) {
-    await siguiente.click();
+  const contador = tarjeta(page).locator('.tutorial__contador');
+  const [actual, total] = ((await contador.textContent()) ?? '').match(/\d+/g)!.map(Number);
+  for (let paso = actual; paso < total; paso++) {
+    await expect(contador).toHaveText(`Paso ${paso} de ${total}`);
+    await tarjeta(page).getByRole('button', { name: 'Siguiente' }).click();
   }
+  await expect(contador).toHaveText(`Paso ${total} de ${total}`);
   await tarjeta(page).getByRole('button', { name: 'Terminar' }).click();
   await expect(tarjeta(page)).toBeHidden();
 }
@@ -112,12 +133,12 @@ test('saltar admin.productos no lo hace reaparecer al recargar', async ({ browse
   await iniciarSesion(pagina, email);
   await expect(pagina).toHaveURL(/\/productos/);
   // Cerrar la bienvenida del catalogo para dejar la pantalla libre.
-  await tarjeta(pagina).getByRole('button', { name: 'Saltar tutorial' }).click();
+  await pulsarYGuardar(pagina, 'Saltar tutorial');
   await expect(tarjeta(pagina)).toBeHidden();
 
   await pagina.goto('/admin/productos');
   await expect(tarjeta(pagina)).toBeVisible();
-  await tarjeta(pagina).getByRole('button', { name: 'Saltar tutorial' }).click();
+  await pulsarYGuardar(pagina, 'Saltar tutorial');
   await expect(tarjeta(pagina)).toBeHidden();
 
   await pagina.reload();
@@ -136,12 +157,12 @@ test('al volver a iniciar sesion no reaparece ningun tutorial ya visto', async (
   await expect(pagina).toHaveURL(/\/productos/);
   // Ver y cerrar la bienvenida; eso la marca como vista en la cuenta.
   await expect(tarjeta(pagina)).toBeVisible();
-  await tarjeta(pagina).getByRole('button', { name: 'Saltar tutorial' }).click();
+  await pulsarYGuardar(pagina, 'Saltar tutorial');
   await expect(tarjeta(pagina)).toBeHidden();
 
   await pagina.goto('/admin');
   await expect(tarjeta(pagina)).toBeVisible();
-  await tarjeta(pagina).getByRole('button', { name: 'Saltar tutorial' }).click();
+  await pulsarYGuardar(pagina, 'Saltar tutorial');
   await expect(tarjeta(pagina)).toBeHidden();
 
   // Cerrar sesion y volver a entrar: nada ya visto reaparece.
@@ -164,12 +185,12 @@ test('No mostrar mas tutoriales en admin.panel apaga el resto del panel', async 
 
   await iniciarSesion(pagina, email);
   await expect(pagina).toHaveURL(/\/productos/);
-  await tarjeta(pagina).getByRole('button', { name: 'Saltar tutorial' }).click();
+  await pulsarYGuardar(pagina, 'Saltar tutorial');
   await expect(tarjeta(pagina)).toBeHidden();
 
   await pagina.goto('/admin');
   await expect(tarjeta(pagina)).toBeVisible();
-  await tarjeta(pagina).getByRole('button', { name: 'No mostrar mas tutoriales' }).click();
+  await pulsarYGuardar(pagina, 'No mostrar mas tutoriales');
   await expect(tarjeta(pagina)).toBeHidden();
 
   // Ninguna otra pantalla del panel muestra ya su tutorial.

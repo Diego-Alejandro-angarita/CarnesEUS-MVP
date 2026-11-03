@@ -1,21 +1,11 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import {
-  Component,
-  Injector,
-  afterNextRender,
-  computed,
-  effect,
-  inject,
-  input,
-  numberAttribute,
-  signal,
-} from '@angular/core';
+import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { EstadoPedido, EtapaPedido, PaginaPedidos } from '../../../../core/models/pedido';
 import { AdminPedidosService, TAMANO_PAGINA_PEDIDOS } from '../../../../core/services/admin-pedidos.service';
-import { TutorialService } from '../../../../core/tutorial/tutorial.service';
+import { iniciarTutorialAlCargar } from '../../../../core/tutorial/tutorial.service';
 import { BotonTutorial } from '../../../../shared/boton-tutorial/boton-tutorial';
 import { ETIQUETAS_ETAPA } from '../../../pedidos/seguimiento-pedido/seguimiento-pedido';
 
@@ -37,8 +27,6 @@ export class ListaPedidos {
   private readonly admin = inject(AdminPedidosService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
-  private readonly tutorial = inject(TutorialService);
-  private readonly injector = inject(Injector);
 
   protected readonly etiquetas = ETIQUETAS_ESTADO;
   protected readonly etiquetasEtapa = ETIQUETAS_ETAPA;
@@ -71,13 +59,7 @@ export class ListaPedidos {
       void this.cargar(this.paginaActual(), this.estadoFiltro(), this.etapaFiltro());
     });
 
-    effect(() => {
-      if (this.estadoPantalla() === 'ok') {
-        afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.pedidos'), {
-          injector: this.injector,
-        });
-      }
-    });
+    iniciarTutorialAlCargar('admin.pedidos', () => this.estadoPantalla() === 'ok');
   }
 
   protected irA(numero: number): void {

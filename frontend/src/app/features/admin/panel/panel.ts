@@ -1,7 +1,7 @@
-import { Component, Injector, afterNextRender, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { TutorialService } from '../../../core/tutorial/tutorial.service';
+import { iniciarTutorialAlCargar } from '../../../core/tutorial/tutorial.service';
 import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 
 interface Seccion {
@@ -45,14 +45,9 @@ const SECCIONES: Seccion[] = [
   styleUrl: './panel.scss',
 })
 export class Panel {
-  private readonly tutorial = inject(TutorialService);
-  private readonly injector = inject(Injector);
-
   protected readonly secciones = SECCIONES;
 
   constructor() {
-    afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.panel'), {
-      injector: this.injector,
-    });
+    iniciarTutorialAlCargar('admin.panel');
   }
 }

@@ -1,19 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  Component,
-  Injector,
-  afterNextRender,
-  computed,
-  effect,
-  inject,
-  input,
-  numberAttribute,
-  signal,
-} from '@angular/core';
+import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { TutorialService } from '../../../core/tutorial/tutorial.service';
+import { iniciarTutorialAlCargar } from '../../../core/tutorial/tutorial.service';
 import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 import {
   AdminProductosService,
@@ -35,8 +25,6 @@ type EstadoPantalla = 'cargando' | 'listo' | 'enviando' | 'guardado' | 'error' |
 })
 export class EditarProducto {
   private readonly admin = inject(AdminProductosService);
-  private readonly tutorial = inject(TutorialService);
-  private readonly injector = inject(Injector);
 
   /** Id del producto, tomado de la ruta /admin/productos/:id/editar. */
   readonly id = input.required({ transform: numberAttribute });
@@ -70,13 +58,7 @@ export class EditarProducto {
   constructor() {
     effect(() => void this.cargar(this.id()));
 
-    effect(() => {
-      if (this.estado() === 'listo') {
-        afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.producto-formulario'), {
-          injector: this.injector,
-        });
-      }
-    });
+    iniciarTutorialAlCargar('admin.producto-formulario', () => this.estado() === 'listo');
   }
 
   protected async guardar(cambios: ProductoNuevo): Promise<void> {

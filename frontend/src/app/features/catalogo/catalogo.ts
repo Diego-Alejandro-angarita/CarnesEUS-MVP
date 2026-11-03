@@ -1,20 +1,10 @@
 import { CurrencyPipe } from '@angular/common';
-import {
-  Component,
-  Injector,
-  afterNextRender,
-  computed,
-  effect,
-  inject,
-  input,
-  numberAttribute,
-  signal,
-} from '@angular/core';
+import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
-import { TutorialService } from '../../core/tutorial/tutorial.service';
+import { iniciarTutorialAlCargar } from '../../core/tutorial/tutorial.service';
 import {
   Categoria,
   CatalogoService,
@@ -45,8 +35,6 @@ export class Catalogo {
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
-  private readonly tutorial = inject(TutorialService);
-  private readonly injector = inject(Injector);
 
   readonly page = input(1, { transform: numberAttribute });
   readonly busqueda = input('');
@@ -95,17 +83,10 @@ export class Catalogo {
       });
     });
 
-    effect(() => {
-      if (this.estado() === 'ok') {
-        afterNextRender(
-          () =>
-            this.tutorial.iniciarSiPendiente(
-              this.auth.usuario()?.is_staff ? 'admin.bienvenida' : 'cliente',
-            ),
-          { injector: this.injector },
-        );
-      }
-    });
+    iniciarTutorialAlCargar(
+      () => (this.auth.usuario()?.is_staff ? 'admin.bienvenida' : 'cliente'),
+      () => this.estado() === 'ok',
+    );
   }
 
   protected irA(numero: number): void {

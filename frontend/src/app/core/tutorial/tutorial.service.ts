@@ -1,5 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import {
+  Injectable,
+  Injector,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../services/auth.service';
@@ -158,4 +166,26 @@ export class TutorialService {
       error: () => undefined,
     });
   }
+}
+
+/**
+ * Abre el tutorial de una pantalla despues del primer render en que `listo()`
+ * es true (sin `listo`, apenas se pinta). Se llama desde el constructor del
+ * componente. `clave` puede ser una funcion si depende del usuario; se evalua
+ * al abrir, no dentro del effect.
+ */
+export function iniciarTutorialAlCargar(
+  clave: ClaveTutorial | (() => ClaveTutorial),
+  listo: () => boolean = () => true,
+): void {
+  const tutorial = inject(TutorialService);
+  const injector = inject(Injector);
+  effect(() => {
+    if (listo()) {
+      afterNextRender(
+        () => tutorial.iniciarSiPendiente(typeof clave === 'function' ? clave() : clave),
+        { injector },
+      );
+    }
+  });
 }

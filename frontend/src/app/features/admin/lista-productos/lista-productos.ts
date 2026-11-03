@@ -1,19 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
-import {
-  Component,
-  Injector,
-  afterNextRender,
-  computed,
-  effect,
-  inject,
-  input,
-  numberAttribute,
-  signal,
-} from '@angular/core';
+import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { TutorialService } from '../../../core/tutorial/tutorial.service';
+import { iniciarTutorialAlCargar } from '../../../core/tutorial/tutorial.service';
 import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 import { CatalogoService, PaginaProductos, TAMANO_PAGINA } from '../../catalogo/catalogo.service';
 import { AdminProductosService } from '../admin-productos.service';
@@ -36,8 +26,6 @@ export class ListaProductos {
   private readonly admin = inject(AdminProductosService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
-  private readonly tutorial = inject(TutorialService);
-  private readonly injector = inject(Injector);
 
   readonly page = input(1, { transform: numberAttribute });
 
@@ -66,13 +54,7 @@ export class ListaProductos {
   constructor() {
     effect(() => void this.cargar(this.paginaActual()));
 
-    effect(() => {
-      if (this.estado() === 'ok') {
-        afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.productos'), {
-          injector: this.injector,
-        });
-      }
-    });
+    iniciarTutorialAlCargar('admin.productos', () => this.estado() === 'ok');
   }
 
   protected irA(numero: number): void {
