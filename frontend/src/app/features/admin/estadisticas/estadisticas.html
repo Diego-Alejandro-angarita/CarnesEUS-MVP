@@ -1,0 +1,123 @@
+<section class="admin admin--ancha">
+  <header class="admin__cabecera admin__cabecera--fila">
+    <div>
+      <p class="admin__kicker">Administracion</p>
+      <h1 class="admin__titulo">Estadisticas de ventas</h1>
+    </div>
+    <div class="rango">
+      <label>Desde <input type="date" [value]="desde()" (change)="desde.set($any($event.target).value)" /></label>
+      <label>Hasta <input type="date" [value]="hasta()" (change)="hasta.set($any($event.target).value)" /></label>
+    </div>
+  </header>
+
+  @switch (estadoPantalla()) {
+    @case ('cargando') { <p class="aviso" role="status">Calculando las estadisticas...</p> }
+    @case ('error') { <p class="aviso aviso--error" role="alert">No pudimos cargar las estadisticas.</p> }
+    @case ('ok') {
+      @if (resumen(); as r) {
+        <ul class="kpis">
+          <li><span>Total vendido</span><strong>{{ r.total_vendido | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong></li>
+          <li><span>Pedidos</span><strong>{{ r.numero_pedidos }}</strong></li>
+          <li><span>Ticket promedio</span><strong>{{ r.ticket_promedio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong></li>
+          <li><span>Clientes unicos</span><strong>{{ r.clientes_unicos }}</strong></li>
+        </ul>
+
+        <h2>Ventas por dia</h2>
+        <ul class="barras">
+          @for (d of r.ventas_por_dia; track d.dia) {
+            <li>
+              <span class="barras__dia">{{ d.dia | date: 'd MMM' }}</span>
+              <span class="barras__barra" [style.width.%]="(d.total / maximoDia()) * 100"></span>
+              <span class="barras__valor">{{ d.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+            </li>
+          } @empty {
+            <li class="aviso">No hay ventas pagadas en ese rango.</li>
+          }
+        </ul>
+      }
+
+      @if (productos(); as p) {
+        <h2>Productos mas vendidos</h2>
+        <table class="tabla">
+          <thead><tr><th>Producto</th><th class="tabla__numero">Unidades</th><th class="tabla__numero">Ingresos</th></tr></thead>
+          <tbody>
+            @for (f of p.mas_vendidos; track f.nombre) {
+              <tr>
+                <td>{{ f.nombre }}</td>
+                <td class="tabla__numero">{{ f.unidades }}</td>
+                <td class="tabla__numero">{{ f.ingresos | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <h2>Ventas por categoria</h2>
+        <table class="tabla">
+          <thead><tr><th>Categoria</th><th class="tabla__numero">Unidades</th><th class="tabla__numero">Ingresos</th></tr></thead>
+          <tbody>
+            @for (f of p.por_categoria; track f.categoria) {
+              <tr>
+                <td>{{ f.categoria }}</td>
+                <td class="tabla__numero">{{ f.unidades }}</td>
+                <td class="tabla__numero">{{ f.ingresos | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <h2>Ventas por barrio</h2>
+        <table class="tabla">
+          <thead><tr><th>Barrio</th><th class="tabla__numero">Pedidos</th><th class="tabla__numero">Total</th></tr></thead>
+          <tbody>
+            @for (f of p.por_barrio; track f.barrio) {
+              <tr>
+                <td>{{ f.barrio }}, {{ f.municipio }}</td>
+                <td class="tabla__numero">{{ f.pedidos }}</td>
+                <td class="tabla__numero">{{ f.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <h2>Ventas por metodo de pago</h2>
+        <table class="tabla">
+          <thead><tr><th>Metodo</th><th class="tabla__numero">Pedidos</th><th class="tabla__numero">Total</th></tr></thead>
+          <tbody>
+            @for (f of p.por_metodo_pago; track f.metodo) {
+              <tr>
+                <td>{{ f.metodo }}</td>
+                <td class="tabla__numero">{{ f.pedidos }}</td>
+                <td class="tabla__numero">{{ f.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      @if (clientes(); as c) {
+        <h2>Clientes</h2>
+        <ul class="kpis">
+          <li><span>Nuevos</span><strong>{{ c.segmentos.nuevo }}</strong></li>
+          <li><span>Recurrentes</span><strong>{{ c.segmentos.recurrente }}</strong></li>
+          <li><span>Inactivos (+30 dias)</span><strong>{{ c.segmentos.inactivo }}</strong></li>
+        </ul>
+      }
+
+      <h2>Sugerencias y campañas</h2>
+      <button type="button" class="boton" (click)="generarSugerencias()" [disabled]="generando()">
+        {{ generando() ? 'Generando...' : 'Generar sugerencias con IA' }}
+      </button>
+      @if (errorIa()) { <p class="aviso aviso--error" role="alert">No se pudieron generar las sugerencias.</p> }
+      @if (sugerencias(); as s) {
+        @if (s.origen === 'reglas') { <p class="aviso">IA no configurada: sugerencias basadas en reglas.</p> }
+        <ul>@for (texto of s.sugerencias; track $index) { <li>{{ texto }}</li> }</ul>
+        @for (c of s.campanas; track c.segmento) {
+          <article class="campana">
+            <h3>Clientes {{ c.segmento }}s · {{ c.destinatarios }} con autorizacion</h3>
+            <p>{{ c.mensaje }}</p>
+          </article>
+        }
+      }
+    }
+  }
+</section>

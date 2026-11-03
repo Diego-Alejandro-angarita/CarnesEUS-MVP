@@ -23,6 +23,11 @@ const SECCIONES: Seccion[] = [
     titulo: 'Usuarios',
     descripcion: 'Ver los clientes registrados y activar o desactivar su cuenta.',
   },
+  {
+    ruta: '/admin/estadisticas',
+    titulo: 'Estadisticas',
+    descripcion: 'Ventas, productos estrella, clientes por segmento y campañas sugeridas con IA.',
+  },
 ];
 
 @Component({

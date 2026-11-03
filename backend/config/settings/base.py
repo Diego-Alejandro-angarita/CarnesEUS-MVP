@@ -64,6 +64,7 @@ LOCAL_APPS = [
     "apps.promotions",
     "apps.cobertura",
     "apps.resenas",
+    "apps.estadisticas",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -218,3 +219,10 @@ DATOS_TRANSFERENCIA = {
     "numero_cuenta": env.str("TRANSFERENCIA_NUMERO_CUENTA", default="000-000000-00"),
     "titular": env.str("TRANSFERENCIA_TITULAR", default="CarnesEUS"),
 }
+
+# --------------------------------------------------------------------------
+# Sugerencias con IA (FR-06)
+# --------------------------------------------------------------------------
+# Sin llave, las sugerencias salen de reglas fijas y la pantalla sigue andando.
+IA_API_KEY = env.str("IA_API_KEY", default="")
+IA_MODELO = env.str("IA_MODELO", default="claude-haiku-4-5-20251001")
