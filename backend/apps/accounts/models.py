@@ -2,6 +2,21 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+# Claves de los tutoriales que existen. El frontend usa las mismas.
+TUTORIALES = (
+    "cliente",
+    "admin.bienvenida",
+    "admin.panel",
+    "admin.productos",
+    "admin.producto-formulario",
+    "admin.promociones",
+    "admin.pedidos",
+    "admin.pedido-detalle",
+    "admin.usuarios",
+    "admin.estadisticas",
+)
+TUTORIALES_ADMIN = tuple(c for c in TUTORIALES if c.startswith("admin."))
+
 
 class UsuarioManager(BaseUserManager):
     """Los usuarios de CarnesEUS inician sesion con correo, no con username."""
@@ -34,6 +49,7 @@ class Usuario(AbstractUser):
     username = None
     email = models.EmailField("correo electronico", unique=True)
     telefono = models.CharField("telefono", max_length=20, blank=True)
+    tutoriales_vistos = models.JSONField("tutoriales vistos", default=list, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

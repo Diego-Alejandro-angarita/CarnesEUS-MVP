@@ -8,6 +8,7 @@ from .models import Usuario
 from .serializers import (
     LoginSerializer,
     RegistroSerializer,
+    TutorialVistoSerializer,
     UsuarioAdminSerializer,
     UsuarioSerializer,
 )
@@ -78,3 +79,19 @@ class UsuarioDetalleView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = UsuarioAdminSerializer
     queryset = Usuario.objects.all()
+
+
+class TutorialVistoView(APIView):
+    """Marca tutoriales como vistos. Idempotente: repetir una clave no la duplica."""
+
+    # IsAuthenticated por defecto.
+
+    def post(self, request):
+        serializer = TutorialVistoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        usuario = request.user
+        vistos = set(usuario.tutoriales_vistos)
+        vistos.update(serializer.validated_data["claves"])
+        usuario.tutoriales_vistos = sorted(vistos)
+        usuario.save(update_fields=["tutoriales_vistos"])
+        return Response(UsuarioSerializer(usuario).data)

@@ -19,6 +19,7 @@ class UsuarioAdmin(UserAdmin):
             {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
         ),
         ("Fechas", {"fields": ("last_login", "date_joined")}),
+        ("Tutoriales", {"fields": ("tutoriales_vistos",)}),
     )
     add_fieldsets = (
         (
