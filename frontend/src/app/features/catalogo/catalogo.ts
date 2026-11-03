@@ -3,6 +3,8 @@ import { Component, computed, effect, inject, input, numberAttribute, signal } f
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { AuthService } from '../../core/services/auth.service';
+import { iniciarTutorialAlCargar } from '../../core/tutorial/tutorial.service';
 import {
   Categoria,
   CatalogoService,
@@ -32,6 +34,7 @@ export class Catalogo {
   private readonly catalogo = inject(CatalogoService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
 
   readonly page = input(1, { transform: numberAttribute });
   readonly busqueda = input('');
@@ -79,6 +82,11 @@ export class Catalogo {
         precioMax: this.precioMax(),
       });
     });
+
+    iniciarTutorialAlCargar(
+      () => (this.auth.usuario()?.is_staff ? 'admin.bienvenida' : 'cliente'),
+      () => this.estado() === 'ok',
+    );
   }
 
   protected irA(numero: number): void {

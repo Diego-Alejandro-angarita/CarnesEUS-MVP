@@ -5,4 +5,5 @@ export interface Usuario {
   email: string;
   telefono: string;
   is_staff: boolean;
+  tutoriales_vistos: string[];
 }

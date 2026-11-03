@@ -10,12 +10,14 @@ import {
   AdminUsuariosService,
   TAMANO_PAGINA_USUARIOS,
 } from '../../../../core/services/admin-usuarios.service';
+import { iniciarTutorialAlCargar } from '../../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../../shared/boton-tutorial/boton-tutorial';
 
 type EstadoPantalla = 'cargando' | 'ok' | 'error';
 
 @Component({
   selector: 'app-lista-usuarios',
-  imports: [DatePipe],
+  imports: [DatePipe, BotonTutorial],
   templateUrl: './lista-usuarios.html',
   styleUrl: './lista-usuarios.scss',
 })
@@ -49,6 +51,8 @@ export class ListaUsuarios {
 
   constructor() {
     effect(() => void this.cargar(this.paginaActual()));
+
+    iniciarTutorialAlCargar('admin.usuarios', () => this.estado() === 'ok');
   }
 
   protected irA(numero: number): void {

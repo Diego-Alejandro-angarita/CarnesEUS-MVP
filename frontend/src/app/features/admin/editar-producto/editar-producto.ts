@@ -3,6 +3,8 @@ import { Component, computed, effect, inject, input, numberAttribute, signal } f
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { iniciarTutorialAlCargar } from '../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 import {
   AdminProductosService,
   Categoria,
@@ -17,7 +19,7 @@ type EstadoPantalla = 'cargando' | 'listo' | 'enviando' | 'guardado' | 'error' |
 
 @Component({
   selector: 'app-editar-producto',
-  imports: [FormularioProducto, RouterLink],
+  imports: [FormularioProducto, RouterLink, BotonTutorial],
   templateUrl: './editar-producto.html',
   styleUrl: './editar-producto.scss',
 })
@@ -55,6 +57,8 @@ export class EditarProducto {
 
   constructor() {
     effect(() => void this.cargar(this.id()));
+
+    iniciarTutorialAlCargar('admin.producto-formulario', () => this.estado() === 'listo');
   }
 
   protected async guardar(cambios: ProductoNuevo): Promise<void> {

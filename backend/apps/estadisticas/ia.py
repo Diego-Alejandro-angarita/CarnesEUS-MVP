@@ -62,16 +62,21 @@ def sugerencias_por_reglas(ctx: dict) -> dict:
 
 
 def sugerencias_con_ia(ctx: dict) -> dict:
-    import anthropic
+    from google import genai
+    from google.genai import types
 
-    cliente = anthropic.Anthropic(api_key=settings.IA_API_KEY)
-    respuesta = cliente.messages.create(
+    cliente = genai.Client(api_key=settings.IA_API_KEY)
+    respuesta = cliente.models.generate_content(
         model=settings.IA_MODELO,
-        max_tokens=1500,
-        system=PROMPT,
-        messages=[{"role": "user", "content": json.dumps(ctx, ensure_ascii=False)}],
+        contents=json.dumps(ctx, ensure_ascii=False),
+        config=types.GenerateContentConfig(
+            system_instruction=PROMPT,
+            response_mime_type="application/json",
+            # Holgado: en los modelos que razonan, el razonamiento tambien gasta tokens.
+            max_output_tokens=4096,
+        ),
     )
-    texto = respuesta.content[0].text
+    texto = respuesta.text
     # A veces el modelo envuelve el JSON en ```: se toma de la primera { a la ultima }.
     datos = json.loads(texto[texto.index("{"): texto.rindex("}") + 1])
     return {"sugerencias": datos["sugerencias"][:5], "campanas": datos["campanas"]}

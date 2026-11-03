@@ -6,6 +6,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { EstadoPedido, EtapaPedido, Pedido } from '../../../../core/models/pedido';
 import { AdminPedidosService } from '../../../../core/services/admin-pedidos.service';
+import { iniciarTutorialAlCargar } from '../../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../../shared/boton-tutorial/boton-tutorial';
 import {
   ETIQUETAS_ETAPA,
   SeguimientoPedido,
@@ -23,7 +25,7 @@ export const AYUDA_ESTADO: Record<EstadoPedido, string> = {
 
 @Component({
   selector: 'app-detalle-pedido',
-  imports: [CurrencyPipe, RouterLink, SeguimientoPedido],
+  imports: [CurrencyPipe, RouterLink, SeguimientoPedido, BotonTutorial],
   templateUrl: './detalle-pedido.html',
   styleUrl: './detalle-pedido.scss',
 })
@@ -56,6 +58,8 @@ export class DetallePedido {
 
   constructor() {
     effect(() => void this.cargar(this.id()));
+
+    iniciarTutorialAlCargar('admin.pedido-detalle', () => this.estado() === 'ok');
   }
 
   protected async cambiarEstado(nuevoEstado: EstadoPedido): Promise<void> {

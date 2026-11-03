@@ -2,6 +2,8 @@ import { execSync } from 'node:child_process';
 
 import { expect, test as setup } from '@playwright/test';
 
+import { ClaveTutorial, TUTORIALES } from '../src/app/core/tutorial/tutoriales';
+
 /**
  * Inicia sesion como personal (FR-19) una sola vez y guarda la sesion para el
  * resto de las pruebas: las pantallas /admin/* y la API de productos la piden.
@@ -44,6 +46,16 @@ setup('sesion de personal', async ({ page }) => {
     data: { email: EMAIL, password: CLAVE },
   });
   expect(respuesta.status(), `No se pudo iniciar sesion como ${EMAIL}`).toBe(200);
+
+  // Esta sesion es de alguien que ya conoce el panel: si los tutoriales de
+  // primer acceso (FR-20) se abrieran, su capa taparia los clics de las demas
+  // pruebas. Las de FR-20 usan sus propias cuentas nuevas.
+  const cookies = await page.context().cookies();
+  const tutoriales = await page.request.post('/api/auth/tutoriales/vistos/', {
+    data: { claves: Object.keys(TUTORIALES) as ClaveTutorial[] },
+    headers: { 'X-CSRFToken': cookies.find((c) => c.name === 'csrftoken')?.value ?? '' },
+  });
+  expect(tutoriales.status(), 'No se pudieron marcar los tutoriales como vistos').toBe(200);
 
   await page.context().storageState({ path: SESION_PERSONAL });
 });

@@ -3,6 +3,7 @@
     <div>
       <p class="admin__kicker">Administracion</p>
       <h1 class="admin__titulo">Estadisticas de ventas</h1>
+      <app-boton-tutorial clave="admin.estadisticas" />
     </div>
     <div class="rango">
       <label>Desde <input type="date" [value]="desde()" (change)="desde.set($any($event.target).value)" /></label>
@@ -22,18 +23,20 @@
           <li><span>Clientes unicos</span><strong>{{ r.clientes_unicos }}</strong></li>
         </ul>
 
-        <h2>Ventas por dia</h2>
-        <ul class="barras">
-          @for (d of r.ventas_por_dia; track d.dia) {
-            <li>
-              <span class="barras__dia">{{ d.dia | date: 'd MMM' }}</span>
-              <span class="barras__barra" [style.width.%]="(d.total / maximoDia()) * 100"></span>
-              <span class="barras__valor">{{ d.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
-            </li>
-          } @empty {
-            <li class="aviso">No hay ventas pagadas en ese rango.</li>
-          }
-        </ul>
+        <div data-tutorial="estadisticas-ventas">
+          <h2>Ventas por dia</h2>
+          <ul class="barras">
+            @for (d of r.ventas_por_dia; track d.dia) {
+              <li>
+                <span class="barras__dia">{{ d.dia | date: 'd MMM' }}</span>
+                <span class="barras__barra" [style.width.%]="(d.total / maximoDia()) * 100"></span>
+                <span class="barras__valor">{{ d.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</span>
+              </li>
+            } @empty {
+              <li class="aviso">No hay ventas pagadas en ese rango.</li>
+            }
+          </ul>
+        </div>
       }
 
       @if (productos(); as p) {
@@ -95,16 +98,18 @@
       }
 
       @if (clientes(); as c) {
-        <h2>Clientes</h2>
-        <ul class="kpis">
-          <li><span>Nuevos</span><strong>{{ c.segmentos.nuevo }}</strong></li>
-          <li><span>Recurrentes</span><strong>{{ c.segmentos.recurrente }}</strong></li>
-          <li><span>Inactivos (+30 dias)</span><strong>{{ c.segmentos.inactivo }}</strong></li>
-        </ul>
+        <div data-tutorial="estadisticas-clientes">
+          <h2>Clientes</h2>
+          <ul class="kpis">
+            <li><span>Nuevos</span><strong>{{ c.segmentos.nuevo }}</strong></li>
+            <li><span>Recurrentes</span><strong>{{ c.segmentos.recurrente }}</strong></li>
+            <li><span>Inactivos (+30 dias)</span><strong>{{ c.segmentos.inactivo }}</strong></li>
+          </ul>
+        </div>
       }
 
       <h2>Sugerencias y campañas</h2>
-      <button type="button" class="boton" (click)="generarSugerencias()" [disabled]="generando()">
+      <button type="button" class="boton" data-tutorial="estadisticas-ia" (click)="generarSugerencias()" [disabled]="generando()">
         {{ generando() ? 'Generando...' : 'Generar sugerencias con IA' }}
       </button>
       @if (errorIa()) { <p class="aviso aviso--error" role="alert">No se pudieron generar las sugerencias.</p> }

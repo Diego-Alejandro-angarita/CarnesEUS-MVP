@@ -41,6 +41,10 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
+# ---- Claude Code ----
+# Ajustes y permisos locales de cada quien; no son del proyecto.
+/.claude/
+
 # ---- Wiki ----
 # Es un clon del repositorio de wiki que GitHub aloja aparte
 # (CarnesEUS-MVP.wiki.git). Anidarlo aqui subiria una referencia rota.

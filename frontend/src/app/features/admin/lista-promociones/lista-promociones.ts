@@ -3,6 +3,8 @@ import { Component, computed, effect, inject, input, numberAttribute, signal } f
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { iniciarTutorialAlCargar } from '../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 import {
   AdminPromocionesService,
   EstadoPromocion,
@@ -24,7 +26,7 @@ const ETIQUETAS: Record<EstadoPromocion, string> = {
 /** Listado de promociones (FR-13): la puerta para crearlas, editarlas y borrarlas. */
 @Component({
   selector: 'app-lista-promociones',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, BotonTutorial],
   templateUrl: './lista-promociones.html',
   styleUrl: './lista-promociones.scss',
 })
@@ -57,6 +59,8 @@ export class ListaPromociones {
 
   constructor() {
     effect(() => void this.cargar(this.paginaActual()));
+
+    iniciarTutorialAlCargar('admin.promociones', () => this.estado() === 'ok');
   }
 
   protected irA(numero: number): void {

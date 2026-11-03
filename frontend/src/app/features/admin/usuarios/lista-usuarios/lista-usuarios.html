@@ -3,6 +3,7 @@
     <p class="admin__kicker">Administracion</p>
     <h1 class="admin__titulo">Usuarios</h1>
     <p class="admin__lead">Clientes registrados. Desactivar una cuenta le impide iniciar sesion.</p>
+    <app-boton-tutorial clave="admin.usuarios" />
   </header>
 
   @switch (estado()) {
@@ -37,7 +38,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (usuario of usuarios(); track usuario.id) {
+              @for (usuario of usuarios(); track usuario.id; let primero = $first) {
                 <tr>
                   <th scope="row" class="tabla__nombre">
                     {{ usuario.first_name }} {{ usuario.last_name }}
@@ -52,6 +53,7 @@
                     <button
                       type="button"
                       class="insignia insignia--boton"
+                      [attr.data-tutorial]="primero ? 'usuarios-activo' : null"
                       [class.insignia--agotado]="!usuario.is_active"
                       [class.insignia--propia]="usuario.id === miId()"
                       [disabled]="cambiando() === usuario.id || usuario.id === miId()"

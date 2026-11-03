@@ -1,0 +1,113 @@
+@use '../../styles/tokens' as t;
+
+.tutorial {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.tutorial__capa {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.tutorial__recuadro {
+  position: fixed;
+  border: 2px solid t.$color-oro;
+  border-radius: t.$radio-chip;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.tutorial__tarjeta {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  width: calc(100% - 2rem);
+  max-width: 24rem;
+  padding: 1.25rem;
+  background: t.$color-superficie;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color: t.$color-texto;
+}
+
+.tutorial__tarjeta:focus {
+  outline: 2px solid t.$color-oro;
+  outline-offset: 2px;
+}
+
+.tutorial__titulo {
+  margin: 0 0 0.5rem;
+  font-family: t.$fuente-display;
+  font-size: 1.25rem;
+}
+
+.tutorial__texto {
+  margin: 0 0 0.75rem;
+  color: t.$color-texto-suave;
+}
+
+.tutorial__contador {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: t.$color-texto-tenue;
+}
+
+.tutorial__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.tutorial__boton {
+  padding: 0.5rem 1rem;
+  border: 1px solid t.$color-borde;
+  border-radius: t.$radio-chip;
+  background: transparent;
+  color: t.$color-texto;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tutorial__boton--principal {
+  background: t.$color-oro;
+  border-color: t.$color-oro;
+  color: t.$color-fondo;
+  font-weight: 600;
+}
+
+.tutorial__boton:focus-visible,
+.tutorial__enlace:focus-visible {
+  outline: 2px solid t.$color-oro;
+  outline-offset: 2px;
+}
+
+.tutorial__secundarias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.tutorial__enlace {
+  padding: 0;
+  border: none;
+  background: none;
+  color: t.$color-texto-suave;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (min-width: 48rem) {
+  .tutorial__tarjeta {
+    left: auto;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    transform: none;
+  }
+}

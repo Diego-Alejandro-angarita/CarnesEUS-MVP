@@ -9,6 +9,8 @@ import {
   VentasProductos,
 } from '../../../core/models/estadisticas';
 import { AdminEstadisticasService } from '../../../core/services/admin-estadisticas.service';
+import { iniciarTutorialAlCargar } from '../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 
 type EstadoPantalla = 'cargando' | 'ok' | 'error';
 
@@ -21,7 +23,7 @@ function haceDias(dias: number): string {
 
 @Component({
   selector: 'app-estadisticas',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [CurrencyPipe, DatePipe, BotonTutorial],
   templateUrl: './estadisticas.html',
   styleUrl: './estadisticas.scss',
 })
@@ -48,6 +50,8 @@ export class Estadisticas {
     effect(() => {
       void this.cargar(this.desde(), this.hasta());
     });
+
+    iniciarTutorialAlCargar('admin.estadisticas', () => this.estadoPantalla() === 'ok');
   }
 
   private async cargar(desde: string, hasta: string): Promise<void> {

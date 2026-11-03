@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, password_validation
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
-from .models import Usuario
+from .models import TUTORIALES, Usuario
 
 
 class UsuarioSerializer(serializers.ModelSerializer):
@@ -10,7 +10,15 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ["id", "first_name", "last_name", "email", "telefono", "is_staff"]
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "telefono",
+            "is_staff",
+            "tutoriales_vistos",
+        ]
         read_only_fields = fields
 
 
@@ -123,3 +131,11 @@ class LoginSerializer(serializers.Serializer):
 
         atributos["usuario"] = usuario
         return atributos
+
+
+class TutorialVistoSerializer(serializers.Serializer):
+    """Una o varias claves de tutorial que el usuario ya vio o salto (FR-20)."""
+
+    claves = serializers.ListField(
+        child=serializers.ChoiceField(choices=TUTORIALES), allow_empty=False
+    )

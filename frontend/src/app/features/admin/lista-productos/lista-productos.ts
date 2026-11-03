@@ -3,6 +3,8 @@ import { Component, computed, effect, inject, input, numberAttribute, signal } f
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { iniciarTutorialAlCargar } from '../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 import { CatalogoService, PaginaProductos, TAMANO_PAGINA } from '../../catalogo/catalogo.service';
 import { AdminProductosService } from '../admin-productos.service';
 
@@ -15,7 +17,7 @@ type EstadoListado = 'cargando' | 'ok' | 'error';
  */
 @Component({
   selector: 'app-lista-productos',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [CurrencyPipe, RouterLink, BotonTutorial],
   templateUrl: './lista-productos.html',
   styleUrl: './lista-productos.scss',
 })
@@ -51,6 +53,8 @@ export class ListaProductos {
 
   constructor() {
     effect(() => void this.cargar(this.paginaActual()));
+
+    iniciarTutorialAlCargar('admin.productos', () => this.estado() === 'ok');
   }
 
   protected irA(numero: number): void {

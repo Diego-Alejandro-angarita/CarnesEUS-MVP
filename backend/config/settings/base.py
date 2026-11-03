@@ -225,4 +225,4 @@ DATOS_TRANSFERENCIA = {
 # --------------------------------------------------------------------------
 # Sin llave, las sugerencias salen de reglas fijas y la pantalla sigue andando.
 IA_API_KEY = env.str("IA_API_KEY", default="")
-IA_MODELO = env.str("IA_MODELO", default="claude-haiku-4-5-20251001")
+IA_MODELO = env.str("IA_MODELO", default="gemini-3.5-flash")

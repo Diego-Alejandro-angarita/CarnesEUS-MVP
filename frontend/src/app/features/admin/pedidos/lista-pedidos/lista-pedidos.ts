@@ -5,6 +5,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { EstadoPedido, EtapaPedido, PaginaPedidos } from '../../../../core/models/pedido';
 import { AdminPedidosService, TAMANO_PAGINA_PEDIDOS } from '../../../../core/services/admin-pedidos.service';
+import { iniciarTutorialAlCargar } from '../../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../../shared/boton-tutorial/boton-tutorial';
 import { ETIQUETAS_ETAPA } from '../../../pedidos/seguimiento-pedido/seguimiento-pedido';
 
 type EstadoPantalla = 'cargando' | 'ok' | 'error';
@@ -17,7 +19,7 @@ export const ETIQUETAS_ESTADO: Record<EstadoPedido, string> = {
 
 @Component({
   selector: 'app-lista-pedidos',
-  imports: [CurrencyPipe, DatePipe, RouterLink],
+  imports: [CurrencyPipe, DatePipe, RouterLink, BotonTutorial],
   templateUrl: './lista-pedidos.html',
   styleUrl: './lista-pedidos.scss',
 })
@@ -56,6 +58,8 @@ export class ListaPedidos {
     effect(() => {
       void this.cargar(this.paginaActual(), this.estadoFiltro(), this.etapaFiltro());
     });
+
+    iniciarTutorialAlCargar('admin.pedidos', () => this.estadoPantalla() === 'ok');
   }
 
   protected irA(numero: number): void {

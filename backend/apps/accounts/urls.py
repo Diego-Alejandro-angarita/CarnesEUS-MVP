@@ -5,6 +5,7 @@ from .views import (
     LogoutView,
     QuienSoyView,
     RegistroView,
+    TutorialVistoView,
     UsuarioDetalleView,
     UsuarioListView,
 )
@@ -16,4 +17,5 @@ urlpatterns = [
     path("quien-soy/", QuienSoyView.as_view(), name="quien-soy"),
     path("usuarios/", UsuarioListView.as_view(), name="usuarios-lista"),
     path("usuarios/<int:pk>/", UsuarioDetalleView.as_view(), name="usuarios-detalle"),
+    path("tutoriales/vistos/", TutorialVistoView.as_view(), name="tutoriales-vistos"),
 ]

@@ -3,6 +3,8 @@ import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { iniciarTutorialAlCargar } from '../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 import {
   AdminProductosService,
   Categoria,
@@ -17,7 +19,7 @@ type EstadoPantalla = 'cargando' | 'listo' | 'enviando' | 'creado' | 'error';
 
 @Component({
   selector: 'app-crear-producto',
-  imports: [FormularioProducto, RouterLink],
+  imports: [FormularioProducto, RouterLink, BotonTutorial],
   templateUrl: './crear-producto.html',
   styleUrl: './crear-producto.scss',
 })
@@ -36,6 +38,11 @@ export class CrearProducto {
 
   constructor() {
     void this.cargarCategorias();
+
+    iniciarTutorialAlCargar(
+      'admin.producto-formulario',
+      () => this.estado() === 'listo' && this.hayCategorias(),
+    );
   }
 
   protected async guardar(producto: ProductoNuevo): Promise<void> {
