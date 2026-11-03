@@ -1,6 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Router, provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 
 import { Usuario } from '../models/usuario';
 import { AuthService } from '../services/auth.service';
@@ -43,7 +45,7 @@ describe('TutorialService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
     servicio = TestBed.inject(TutorialService);
     auth = TestBed.inject(AuthService);
@@ -104,6 +106,26 @@ describe('TutorialService', () => {
       const req = http.expectOne(URL);
       expect(req.request.body).toEqual({ claves: ['cliente'] });
       req.flush(usuario({ tutoriales_vistos: ['cliente'] }));
+    });
+  });
+
+  describe('irAlPanel()', () => {
+    it('marca la clave activa, la envia y navega a /admin', () => {
+      const router = TestBed.inject(Router);
+      const navegar = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+      auth.usuario.set(usuario({ is_staff: true }));
+      anclar('cabecera-administrar');
+      servicio.iniciarSiPendiente('admin.bienvenida');
+      servicio.irAlPanel();
+
+      // El usuario queda con la clave antes de navegar, y el tutorial se cierra.
+      expect(auth.usuario()!.tutoriales_vistos).toContain('admin.bienvenida');
+      expect(servicio.activo()).toBeNull();
+      expect(navegar).toHaveBeenCalledWith('/admin');
+
+      const req = http.expectOne(URL);
+      expect(req.request.body).toEqual({ claves: ['admin.bienvenida'] });
+      req.flush(usuario({ is_staff: true, tutoriales_vistos: ['admin.bienvenida'] }));
     });
   });
 

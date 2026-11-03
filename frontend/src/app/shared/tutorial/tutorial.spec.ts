@@ -1,6 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router, provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 
 import { Usuario } from '../../core/models/usuario';
 import { AuthService } from '../../core/services/auth.service';
@@ -31,7 +33,7 @@ describe('Tutorial', () => {
 
     await TestBed.configureTestingModule({
       imports: [Tutorial],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     tutorial = TestBed.inject(TutorialService);
@@ -136,5 +138,29 @@ describe('Tutorial', () => {
 
     expect(document.activeElement).toBe(previo);
     previo.remove();
+  });
+
+  it('en admin.bienvenida el boton final dice "Ir al panel", marca la clave y navega a /admin', () => {
+    const router = TestBed.inject(Router);
+    const navegar = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+    const http = TestBed.inject(HttpTestingController);
+
+    tutorial.iniciarSiPendiente('admin.bienvenida');
+    fixture.detectChanges();
+
+    const principal = raiz().querySelector<HTMLButtonElement>('.tutorial__boton--principal')!;
+    expect(principal.textContent?.trim()).toBe('Ir al panel');
+
+    principal.click();
+    fixture.detectChanges();
+
+    // Marca la clave (actualiza el usuario en memoria antes de navegar) y cierra.
+    expect(auth.usuario()!.tutoriales_vistos).toContain('admin.bienvenida');
+    expect(raiz().querySelector('.tutorial')).toBeNull();
+    expect(navegar).toHaveBeenCalledWith('/admin');
+
+    const req = http.expectOne('/api/auth/tutoriales/vistos/');
+    expect(req.request.body).toEqual({ claves: ['admin.bienvenida'] });
+    req.flush(usuario({ tutoriales_vistos: ['admin.bienvenida'] }));
   });
 });

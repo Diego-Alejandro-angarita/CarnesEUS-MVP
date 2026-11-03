@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { AuthService } from '../services/auth.service';
 import { ClaveTutorial, PasoTutorial, TUTORIALES } from './tutoriales';
@@ -17,6 +18,7 @@ const CLAVES_ADMIN = (Object.keys(TUTORIALES) as ClaveTutorial[]).filter((c) =>
 export class TutorialService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly activo = signal<ClaveTutorial | null>(null);
   readonly pasos = signal<PasoTutorial[]>([]);
@@ -88,6 +90,16 @@ export class TutorialService {
   /** Cierra el tutorial marcando su clave como vista. */
   saltar(): void {
     this.terminar();
+  }
+
+  /**
+   * Boton final de `admin.bienvenida` (doc 5): marca la clave y navega a
+   * `/admin`, donde arranca `admin.panel`. Marcar actualiza el usuario en
+   * memoria antes de navegar para que el puente no reabra la bienvenida.
+   */
+  irAlPanel(): void {
+    this.terminar();
+    void this.router.navigateByUrl('/admin');
   }
 
   /** Cierra el tutorial actual y marca como vistas todas las claves del panel. */

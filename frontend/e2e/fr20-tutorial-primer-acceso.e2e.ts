@@ -91,11 +91,10 @@ test('personal nuevo: bienvenida resaltada, va al panel y recorre admin.panel', 
   await expect(tarjeta(pagina)).toBeVisible();
   await expect(tarjeta(pagina)).toContainText('Tu cuenta es de personal');
   await expect(pagina.locator('[data-tutorial="cabecera-administrar"]')).toBeVisible();
-  await tarjeta(pagina).getByRole('button', { name: 'Terminar' }).click();
-  await expect(tarjeta(pagina)).toBeHidden();
 
-  // Ir al panel desde Administrar: alli arranca admin.panel.
-  await pagina.locator('[data-tutorial="cabecera-administrar"]').click();
+  // El boton final dice "Ir al panel": marca la clave y navega a /admin, donde
+  // arranca admin.panel (doc seccion 5).
+  await tarjeta(pagina).getByRole('button', { name: 'Ir al panel' }).click();
   await expect(pagina).toHaveURL(/\/admin$/);
   await expect(tarjeta(pagina)).toBeVisible();
   await expect(tarjeta(pagina)).toContainText('Bienvenido al panel');

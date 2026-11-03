@@ -44,6 +44,19 @@ export class Tutorial implements AfterViewChecked {
   protected readonly esPrimero = computed(() => this.indice() === 0);
   protected readonly esPanel = computed(() => this.activo() === 'admin.panel');
 
+  /** Ultimo paso de la bienvenida: el boton lleva al panel (doc 5). */
+  protected readonly vaAlPanel = computed(
+    () => this.activo() === 'admin.bienvenida' && this.esUltimo(),
+  );
+
+  /** Texto del boton principal segun el paso actual. */
+  protected readonly textoPrincipal = computed(() => {
+    if (this.vaAlPanel()) {
+      return 'Ir al panel';
+    }
+    return this.esUltimo() ? 'Terminar' : 'Siguiente';
+  });
+
   /** Recuadro del elemento resaltado, o null si el paso no tiene ancla. */
   protected readonly recuadro = signal<Recuadro | null>(null);
 
@@ -82,6 +95,10 @@ export class Tutorial implements AfterViewChecked {
   }
 
   protected siguiente(): void {
+    if (this.vaAlPanel()) {
+      this.tutorial.irAlPanel();
+      return;
+    }
     this.tutorial.siguiente();
   }
 
