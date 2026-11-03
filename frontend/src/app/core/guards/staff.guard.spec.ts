@@ -16,6 +16,7 @@ function usuario(sobrescribir: Partial<Usuario> = {}): Usuario {
     email: 'ana@example.com',
     telefono: '',
     is_staff: false,
+    tutoriales_vistos: [],
     ...sobrescribir,
   };
 }

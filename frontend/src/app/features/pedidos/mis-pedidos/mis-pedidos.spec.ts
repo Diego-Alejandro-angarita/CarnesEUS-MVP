@@ -76,6 +76,7 @@ const USUARIO = {
   email: 'ana@example.com',
   telefono: '',
   is_staff: false,
+  tutoriales_vistos: [],
 };
 
 describe('MisPedidos', () => {

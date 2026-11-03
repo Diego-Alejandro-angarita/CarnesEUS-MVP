@@ -1,0 +1,48 @@
+@if (paso(); as paso) {
+  <div class="tutorial" (keydown)="alTeclado($event)">
+    <div class="tutorial__capa"></div>
+
+    @if (recuadro(); as r) {
+      <div
+        class="tutorial__recuadro"
+        [style.top.px]="r.top"
+        [style.left.px]="r.left"
+        [style.width.px]="r.width"
+        [style.height.px]="r.height"
+      ></div>
+    }
+
+    <div
+      #tarjeta
+      class="tutorial__tarjeta"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tutorial-titulo"
+      tabindex="-1"
+    >
+      <h2 id="tutorial-titulo" class="tutorial__titulo">{{ paso.titulo }}</h2>
+      <p class="tutorial__texto">{{ paso.texto }}</p>
+      <p class="tutorial__contador" aria-live="polite">
+        Paso {{ indice() + 1 }} de {{ total() }}
+      </p>
+
+      <div class="tutorial__acciones">
+        @if (!esPrimero()) {
+          <button type="button" class="tutorial__boton" (click)="anterior()">Anterior</button>
+        }
+        <button type="button" class="tutorial__boton tutorial__boton--principal" (click)="siguiente()">
+          {{ esUltimo() ? 'Terminar' : 'Siguiente' }}
+        </button>
+      </div>
+
+      <div class="tutorial__secundarias">
+        <button type="button" class="tutorial__enlace" (click)="saltar()">Saltar tutorial</button>
+        @if (esPanel()) {
+          <button type="button" class="tutorial__enlace" (click)="noMostrarMas()">
+            No mostrar mas tutoriales
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

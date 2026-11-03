@@ -135,6 +135,7 @@ describe('ListaUsuarios', () => {
       email: 'staff@carneseus.test',
       telefono: '',
       is_staff: true,
+      tutoriales_vistos: [],
     });
     const { fixture, http } = await conUsuarios([
       usuario({ id: 7, email: 'staff@carneseus.test', is_staff: true }),
