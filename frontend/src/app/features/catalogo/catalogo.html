@@ -21,7 +21,7 @@
   </header>
 
   <div class="controles">
-    <form class="busqueda" (submit)="$event.preventDefault(); buscar(campo.value)">
+    <form class="busqueda" data-tutorial="catalogo-busqueda" (submit)="$event.preventDefault(); buscar(campo.value)">
       <input
         #campo
         type="search"
@@ -36,6 +36,7 @@
     <button
       type="button"
       class="boton-filtros"
+      data-tutorial="catalogo-filtros"
       [class.boton-filtros--activo]="hayFiltrosActivos()"
       [attr.aria-expanded]="filtrosAbiertos()"
       (click)="alternarFiltros()"

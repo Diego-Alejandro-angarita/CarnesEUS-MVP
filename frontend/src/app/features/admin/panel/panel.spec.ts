@@ -1,13 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { TutorialService } from '../../../core/tutorial/tutorial.service';
 import { Panel } from './panel';
 
 describe('Panel', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Panel],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: TutorialService, useValue: { iniciarSiPendiente: () => undefined } },
+      ],
     }).compileComponents();
   });
 

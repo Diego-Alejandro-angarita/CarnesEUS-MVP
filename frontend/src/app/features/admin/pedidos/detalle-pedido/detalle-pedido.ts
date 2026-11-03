@@ -1,11 +1,23 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
+import {
+  Component,
+  Injector,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  input,
+  numberAttribute,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { EstadoPedido, EtapaPedido, Pedido } from '../../../../core/models/pedido';
 import { AdminPedidosService } from '../../../../core/services/admin-pedidos.service';
+import { TutorialService } from '../../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../../shared/boton-tutorial/boton-tutorial';
 import {
   ETIQUETAS_ETAPA,
   SeguimientoPedido,
@@ -23,12 +35,14 @@ export const AYUDA_ESTADO: Record<EstadoPedido, string> = {
 
 @Component({
   selector: 'app-detalle-pedido',
-  imports: [CurrencyPipe, RouterLink, SeguimientoPedido],
+  imports: [CurrencyPipe, RouterLink, SeguimientoPedido, BotonTutorial],
   templateUrl: './detalle-pedido.html',
   styleUrl: './detalle-pedido.scss',
 })
 export class DetallePedido {
   private readonly admin = inject(AdminPedidosService);
+  private readonly tutorial = inject(TutorialService);
+  private readonly injector = inject(Injector);
 
   protected readonly etiquetas = ETIQUETAS_ESTADO;
   protected readonly ayudaEstado = AYUDA_ESTADO;
@@ -56,6 +70,14 @@ export class DetallePedido {
 
   constructor() {
     effect(() => void this.cargar(this.id()));
+
+    effect(() => {
+      if (this.estado() === 'ok') {
+        afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.pedido-detalle'), {
+          injector: this.injector,
+        });
+      }
+    });
   }
 
   protected async cambiarEstado(nuevoEstado: EstadoPedido): Promise<void> {

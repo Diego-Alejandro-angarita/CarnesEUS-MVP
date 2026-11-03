@@ -3,7 +3,7 @@
 }
 
 <form class="formulario" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
-  <div class="campo">
+  <div class="campo" data-tutorial="formulario-categoria">
     <label for="categoria">Categoria</label>
     <select
       id="categoria"
@@ -56,7 +56,7 @@
       }
     </div>
 
-    <div class="campo">
+    <div class="campo" data-tutorial="formulario-precio">
       <label for="precio">Precio (COP)</label>
       <input
         id="precio"
@@ -75,34 +75,36 @@
     </div>
   </div>
 
-  <div class="campo">
-    <label for="descripcion">Descripcion <span class="campo__opcional">opcional</span></label>
-    <textarea
-      id="descripcion"
-      formControlName="descripcion"
-      rows="3"
-      placeholder="Corte magro y suave, ideal para termino medio."
-      [attr.aria-invalid]="errores().descripcion ? 'true' : null"
-      [attr.aria-describedby]="errores().descripcion ? 'error-descripcion' : null"
-    ></textarea>
-    @if (errores().descripcion) {
-      <p class="campo__error" id="error-descripcion">{{ errores().descripcion }}</p>
-    }
-  </div>
+  <div data-tutorial="formulario-opcionales">
+    <div class="campo">
+      <label for="descripcion">Descripcion <span class="campo__opcional">opcional</span></label>
+      <textarea
+        id="descripcion"
+        formControlName="descripcion"
+        rows="3"
+        placeholder="Corte magro y suave, ideal para termino medio."
+        [attr.aria-invalid]="errores().descripcion ? 'true' : null"
+        [attr.aria-describedby]="errores().descripcion ? 'error-descripcion' : null"
+      ></textarea>
+      @if (errores().descripcion) {
+        <p class="campo__error" id="error-descripcion">{{ errores().descripcion }}</p>
+      }
+    </div>
 
-  <div class="campo">
-    <label for="foto_url">Foto <span class="campo__opcional">opcional</span></label>
-    <input
-      id="foto_url"
-      type="url"
-      formControlName="foto_url"
-      placeholder="https://..."
-      [attr.aria-invalid]="errores().foto_url ? 'true' : null"
-      [attr.aria-describedby]="errores().foto_url ? 'error-foto_url' : null"
-    />
-    @if (errores().foto_url) {
-      <p class="campo__error" id="error-foto_url">{{ errores().foto_url }}</p>
-    }
+    <div class="campo">
+      <label for="foto_url">Foto <span class="campo__opcional">opcional</span></label>
+      <input
+        id="foto_url"
+        type="url"
+        formControlName="foto_url"
+        placeholder="https://..."
+        [attr.aria-invalid]="errores().foto_url ? 'true' : null"
+        [attr.aria-describedby]="errores().foto_url ? 'error-foto_url' : null"
+      />
+      @if (errores().foto_url) {
+        <p class="campo__error" id="error-foto_url">{{ errores().foto_url }}</p>
+      }
+    </div>
   </div>
 
   <label class="interruptor">
@@ -111,7 +113,7 @@
   </label>
 
   <div class="formulario__acciones">
-    <button type="submit" class="boton" [disabled]="enviando()">
+    <button type="submit" class="boton" data-tutorial="formulario-guardar" [disabled]="enviando()">
       {{ enviando() ? 'Guardando...' : etiquetaEnvio() }}
     </button>
     <a class="boton boton--secundario" [routerLink]="rutaCancelar()">Cancelar</a>

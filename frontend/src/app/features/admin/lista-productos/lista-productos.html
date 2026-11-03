@@ -4,10 +4,11 @@
       <p class="admin__kicker">Administracion</p>
       <h1 class="admin__titulo">Productos</h1>
       <p class="admin__lead">Elige un producto para modificar sus datos.</p>
+      <app-boton-tutorial clave="admin.productos" />
     </div>
     <div class="admin__acciones">
-      <a class="boton boton--secundario" routerLink="/admin/promociones">Promociones</a>
-      <a class="boton" routerLink="/admin/productos/nuevo">Crear producto</a>
+      <a class="boton boton--secundario" routerLink="/admin/promociones" data-tutorial="productos-promociones">Promociones</a>
+      <a class="boton" routerLink="/admin/productos/nuevo" data-tutorial="productos-crear">Crear producto</a>
     </div>
   </header>
 
@@ -44,7 +45,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (producto of productos(); track producto.id) {
+              @for (producto of productos(); track producto.id; let primero = $first) {
                 <tr>
                   <th scope="row" class="tabla__nombre">{{ producto.nombre }}</th>
                   <td>{{ producto.categoria }}</td>
@@ -56,6 +57,7 @@
                     <button
                       type="button"
                       class="insignia insignia--boton"
+                      [attr.data-tutorial]="primero ? 'productos-disponibilidad' : null"
                       [class.insignia--agotado]="!producto.disponible"
                       [disabled]="cambiando() === producto.id"
                       (click)="alternarDisponibilidad(producto.id, producto.disponible)"
@@ -67,7 +69,7 @@
                       </span>
                     </button>
                   </td>
-                  <td class="tabla__acciones">
+                  <td class="tabla__acciones" [attr.data-tutorial]="primero ? 'productos-acciones' : null">
                     @if (confirmando() === producto.id) {
                       <span class="confirmacion" role="alert">
                         <span class="confirmacion__texto">Eliminar {{ producto.nombre }}?</span>

@@ -1,6 +1,16 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
+import {
+  Component,
+  Injector,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  input,
+  numberAttribute,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -10,12 +20,14 @@ import {
   AdminUsuariosService,
   TAMANO_PAGINA_USUARIOS,
 } from '../../../../core/services/admin-usuarios.service';
+import { TutorialService } from '../../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../../shared/boton-tutorial/boton-tutorial';
 
 type EstadoPantalla = 'cargando' | 'ok' | 'error';
 
 @Component({
   selector: 'app-lista-usuarios',
-  imports: [DatePipe],
+  imports: [DatePipe, BotonTutorial],
   templateUrl: './lista-usuarios.html',
   styleUrl: './lista-usuarios.scss',
 })
@@ -24,6 +36,8 @@ export class ListaUsuarios {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
+  private readonly tutorial = inject(TutorialService);
+  private readonly injector = inject(Injector);
 
   readonly page = input(1, { transform: numberAttribute });
 
@@ -49,6 +63,14 @@ export class ListaUsuarios {
 
   constructor() {
     effect(() => void this.cargar(this.paginaActual()));
+
+    effect(() => {
+      if (this.estado() === 'ok') {
+        afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.usuarios'), {
+          injector: this.injector,
+        });
+      }
+    });
   }
 
   protected irA(numero: number): void {

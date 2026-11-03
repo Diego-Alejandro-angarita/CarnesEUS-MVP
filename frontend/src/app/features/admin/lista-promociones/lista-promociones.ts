@@ -1,8 +1,20 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, effect, inject, input, numberAttribute, signal } from '@angular/core';
+import {
+  Component,
+  Injector,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  input,
+  numberAttribute,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { TutorialService } from '../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 import {
   AdminPromocionesService,
   EstadoPromocion,
@@ -24,7 +36,7 @@ const ETIQUETAS: Record<EstadoPromocion, string> = {
 /** Listado de promociones (FR-13): la puerta para crearlas, editarlas y borrarlas. */
 @Component({
   selector: 'app-lista-promociones',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, BotonTutorial],
   templateUrl: './lista-promociones.html',
   styleUrl: './lista-promociones.scss',
 })
@@ -32,6 +44,8 @@ export class ListaPromociones {
   private readonly admin = inject(AdminPromocionesService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
+  private readonly tutorial = inject(TutorialService);
+  private readonly injector = inject(Injector);
 
   readonly page = input(1, { transform: numberAttribute });
 
@@ -57,6 +71,14 @@ export class ListaPromociones {
 
   constructor() {
     effect(() => void this.cargar(this.paginaActual()));
+
+    effect(() => {
+      if (this.estado() === 'ok') {
+        afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.promociones'), {
+          injector: this.injector,
+        });
+      }
+    });
   }
 
   protected irA(numero: number): void {

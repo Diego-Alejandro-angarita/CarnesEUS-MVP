@@ -19,12 +19,12 @@
           <a class="cabecera__enlace" routerLink="/registro">Crear cuenta</a>
         }
       }
-      <a routerLink="/cobertura">Cobertura</a>
-      <a routerLink="/mis-pedidos">Mis pedidos</a>
+      <a routerLink="/cobertura" data-tutorial="cabecera-cobertura">Cobertura</a>
+      <a routerLink="/mis-pedidos" data-tutorial="cabecera-mis-pedidos">Mis pedidos</a>
       @if (auth.usuario()?.is_staff) {
-        <a routerLink="/admin">Administrar</a>
+        <a routerLink="/admin" data-tutorial="cabecera-administrar">Administrar</a>
       }
-      <a class="cabecera__carrito" routerLink="/carrito">
+      <a class="cabecera__carrito" routerLink="/carrito" data-tutorial="cabecera-carrito">
         Carrito
         @if (cantidadCarrito() > 0) {
           <span class="cabecera__contador" aria-label="productos en el carrito">

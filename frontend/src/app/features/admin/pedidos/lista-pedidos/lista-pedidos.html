@@ -4,8 +4,9 @@
       <p class="admin__kicker">Administracion</p>
       <h1 class="admin__titulo">Pedidos</h1>
       <p class="admin__lead">Revisa los pedidos de los clientes y confirma los que ya se pagaron.</p>
+      <app-boton-tutorial clave="admin.pedidos" />
     </div>
-    <div class="filtros">
+    <div class="filtros" data-tutorial="pedidos-filtros">
       <div class="campo-filtro">
         <label for="filtro-etapa">Etapa</label>
         <select
@@ -69,7 +70,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (pedido of pedidos(); track pedido.id) {
+              @for (pedido of pedidos(); track pedido.id; let primero = $first) {
                 <tr>
                   <th scope="row" class="tabla__nombre">
                     #{{ pedido.id }}
@@ -94,7 +95,11 @@
                     {{ pedido.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}
                   </td>
                   <td class="tabla__acciones">
-                    <a class="boton boton--secundario boton--menudo" [routerLink]="['/admin/pedidos', pedido.id]">
+                    <a
+                      class="boton boton--secundario boton--menudo"
+                      [attr.data-tutorial]="primero ? 'pedidos-ver' : null"
+                      [routerLink]="['/admin/pedidos', pedido.id]"
+                    >
                       Ver<span class="visualmente-oculto"> pedido #{{ pedido.id }}</span>
                     </a>
                   </td>

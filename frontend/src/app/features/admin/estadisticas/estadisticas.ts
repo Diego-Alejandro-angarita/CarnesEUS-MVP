@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, Injector, afterNextRender, computed, effect, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -9,6 +9,8 @@ import {
   VentasProductos,
 } from '../../../core/models/estadisticas';
 import { AdminEstadisticasService } from '../../../core/services/admin-estadisticas.service';
+import { TutorialService } from '../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 
 type EstadoPantalla = 'cargando' | 'ok' | 'error';
 
@@ -21,12 +23,14 @@ function haceDias(dias: number): string {
 
 @Component({
   selector: 'app-estadisticas',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [CurrencyPipe, DatePipe, BotonTutorial],
   templateUrl: './estadisticas.html',
   styleUrl: './estadisticas.scss',
 })
 export class Estadisticas {
   private readonly api = inject(AdminEstadisticasService);
+  private readonly tutorial = inject(TutorialService);
+  private readonly injector = inject(Injector);
 
   protected readonly desde = signal(haceDias(30));
   protected readonly hasta = signal(haceDias(0));
@@ -47,6 +51,14 @@ export class Estadisticas {
   constructor() {
     effect(() => {
       void this.cargar(this.desde(), this.hasta());
+    });
+
+    effect(() => {
+      if (this.estadoPantalla() === 'ok') {
+        afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.estadisticas'), {
+          injector: this.injector,
+        });
+      }
     });
   }
 

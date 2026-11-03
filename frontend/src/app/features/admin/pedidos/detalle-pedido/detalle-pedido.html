@@ -3,6 +3,7 @@
     <p class="admin__kicker">Administracion</p>
     <h1 class="admin__titulo">Pedido #{{ id() }}</h1>
     <a class="admin__lead" routerLink="/admin/pedidos">&larr; Volver al listado</a>
+    <app-boton-tutorial clave="admin.pedido-detalle" />
   </header>
 
   @switch (estado()) {
@@ -73,7 +74,7 @@
             <strong>{{ pedido.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong>
           </p>
 
-          <section class="cambiar-estado" aria-labelledby="titulo-seguimiento">
+          <section class="cambiar-estado" data-tutorial="pedido-seguimiento" aria-labelledby="titulo-seguimiento">
             <h2 class="detalle__subtitulo" id="titulo-seguimiento">Seguimiento del pedido</h2>
             <app-seguimiento-pedido [pedido]="pedido" />
 
@@ -114,6 +115,7 @@
                     <button
                       type="button"
                       class="boton boton--peligro"
+                      data-tutorial="pedido-cancelar"
                       [disabled]="cambiandoEtapa()"
                       (click)="confirmandoCancelar.set(true)"
                     >
@@ -135,7 +137,7 @@
 
           <div class="cambiar-estado">
             <h2 class="detalle__subtitulo">Estado del pago</h2>
-            <div class="estado-opciones" role="radiogroup" aria-label="Estado del pago">
+            <div class="estado-opciones" data-tutorial="pedido-pago" role="radiogroup" aria-label="Estado del pago">
               @for (opcion of ESTADOS; track opcion) {
                 <label class="estado-opcion" [class.estado-opcion--activa]="pedido.estado === opcion">
                   <input

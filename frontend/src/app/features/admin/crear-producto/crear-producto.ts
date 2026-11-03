@@ -1,8 +1,19 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  Injector,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { TutorialService } from '../../../core/tutorial/tutorial.service';
+import { BotonTutorial } from '../../../shared/boton-tutorial/boton-tutorial';
 import {
   AdminProductosService,
   Categoria,
@@ -17,12 +28,14 @@ type EstadoPantalla = 'cargando' | 'listo' | 'enviando' | 'creado' | 'error';
 
 @Component({
   selector: 'app-crear-producto',
-  imports: [FormularioProducto, RouterLink],
+  imports: [FormularioProducto, RouterLink, BotonTutorial],
   templateUrl: './crear-producto.html',
   styleUrl: './crear-producto.scss',
 })
 export class CrearProducto {
   private readonly admin = inject(AdminProductosService);
+  private readonly tutorial = inject(TutorialService);
+  private readonly injector = inject(Injector);
   private readonly formulario = viewChild(FormularioProducto);
 
   protected readonly estado = signal<EstadoPantalla>('cargando');
@@ -36,6 +49,14 @@ export class CrearProducto {
 
   constructor() {
     void this.cargarCategorias();
+
+    effect(() => {
+      if (this.estado() === 'listo' && this.hayCategorias()) {
+        afterNextRender(() => this.tutorial.iniciarSiPendiente('admin.producto-formulario'), {
+          injector: this.injector,
+        });
+      }
+    });
   }
 
   protected async guardar(producto: ProductoNuevo): Promise<void> {
