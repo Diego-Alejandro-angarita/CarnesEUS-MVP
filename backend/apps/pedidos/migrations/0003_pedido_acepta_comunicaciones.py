@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("pedidos", "0001_initial"),
+        ("pedidos", "0002_pedido_etapa_cambioetapa"),
     ]
 
     operations = [
